@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Strain',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
                 ('name', models.CharField(max_length=255)),
                 ('description', models.TextField()),
             ],
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Transcript',
             fields=[
-                ('id', models.CharField(serialize=False, max_length=255, verbose_name='accession number', primary_key=True)),
+                ('id', models.CharField(max_length=255, serialize=False, primary_key=True, verbose_name='accession number')),
                 ('gi_number', models.CharField(max_length=255)),
             ],
             options={
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TranscriptSequence',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
                 ('sequence', models.TextField()),
                 ('strain', models.ForeignKey(to='rnabrowserapp.Strain')),
                 ('transcript', models.ForeignKey(to='rnabrowserapp.Transcript')),

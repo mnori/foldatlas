@@ -13,8 +13,9 @@ function fetch_raw() {
 	base_filename=$2
 	if [ ! -a "$base_filename" ]
 		then
-		curl "$base_sauce_url$base_filename" -o "$base_filename"
+		curl "$base_sauce_url$base_filename" -o "$base_filename" >&/dev/null
 	fi
+	echo "Grabbed [$base_filename]"
 }
 
 # Fetch a .bz2 file and extract it
@@ -23,43 +24,46 @@ function fetch_extract_gff3() {
 	base_filename=$2
 
 	sauce_url="$base_sauce_url$base_filename"
-
-	echo "Fetching [$sauce_url]..."
 	if [ ! -a "$base_filename.gff3" ] # if file does not exist...
 		then
-		curl "$sauce_url.gff3.bz2" -o "$base_filename.gff3.bz2" # fetch compressed file
+		curl "$sauce_url.gff3.bz2" -o "$base_filename.gff3.bz2" >&/dev/null # fetch compressed file
 		bunzip2 "$base_filename.gff3.bz2" # extract the .gff3 file
 	fi
+	echo "Grabbed & extracted [$base_filename.gff3]"
+}
+
+function install() {
+	pretty_print "PROVISIONING"
+	pretty_print "Installing pip"
+	apt-get update
+	apt-get install -y python3-pip
+
+	pretty_print "Installing Django"
+	pip3 install Django
+
+	pretty_print "Installing BioPython"
+	pip3 install biopython
+
+	pretty_print "Installing MySQL"
+	export DEBIAN_FRONTEND=noninteractive
+	apt-get -q -y install mysql-server
+
+	echo "create database rnabrowser" | mysql -u root
+	apt-get install -y git
+	apt-get install -y libmysqlclient-dev
+	pip3 install mysqlclient
+
+	pretty_print "Migrating Database"
+	cd /vagrant/rnabrowser
+	rm rnabrowserapp/migrations/* # otherwise old migrations might bork it
+	python3 manage.py migrate
+	python3 manage.py makemigrations rnabrowserapp
+	python3 manage.py migrate rnabrowserapp
 }
 
 #################################################################################
 
-pretty_print "PROVISIONING"
-pretty_print "Installing pip"
-apt-get update
-apt-get install -y python3-pip
-
-pretty_print "Installing Django"
-pip3 install Django
-
-pretty_print "Installing BioPython"
-pip3 install biopython
-
-pretty_print "Installing MySQL"
-export DEBIAN_FRONTEND=noninteractive
-apt-get -q -y install mysql-server
-
-echo "create database rnabrowser" | mysql -u root
-apt-get install -y git
-apt-get install -y libmysqlclient-dev
-pip3 install mysqlclient
-
-pretty_print "Migrating Database"
-cd /vagrant/rnabrowser
-rm rnabrowserapp/migrations/* # otherwise old migrations might bork it
-python3 manage.py migrate
-python3 manage.py makemigrations rnabrowserapp
-python3 manage.py migrate rnabrowserapp
+install
 
 #################################################################################
 # Download starter data
