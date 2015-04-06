@@ -71,7 +71,7 @@ function install() {
 	pretty_print "Migrating Database"
 	cd /vagrant/rnabrowser
 	rm rnabrowserapp/migrations/* # otherwise old migrations might bork it
-	python3 manage.py migrate
+	python3 manage.py migrate # django setup migration
 	python3 manage.py makemigrations rnabrowserapp
 	python3 manage.py migrate rnabrowserapp
 }

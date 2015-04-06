@@ -11,7 +11,7 @@ class Strain(models.Model):
 
 # A gene is a generalised identifier for a gene sequence - can have multiple sequences
 # associated, one for each strain.
-class Gene(models.Model):
+class Transcript(models.Model):
     # note: this ID is the accession number (accession_number)
     id = models.CharField("TAIR gene ID", max_length=255, primary_key=True) 
     def get_absolute_url(self):
@@ -22,7 +22,7 @@ class Gene(models.Model):
 # of [rna_gene_id, strain_id], but django doesn't support that :(
 class Sequence(models.Model):
     strain = models.ForeignKey(Strain)
-    gene = models.ForeignKey("If null, it's an intergenic sequence.", Gene, null=True)
+    transcript = models.ForeignKey(Transcript, null=True)
     sequence = models.TextField()
     start_ref = models.IntegerField("Start position relative to reference sequence")
     end_ref = models.IntegerField("End position relative to reference sequence")
@@ -34,7 +34,13 @@ class Sequence(models.Model):
 # design / querying etc.
 class SequenceFeature(models.Model):
     sequence = models.ForeignKey(Sequence)
-    type = models.EnumField() ## enter enum values here
+    type = models.CharField(max_length=256, choices=(
+        ("UTR", "Untranslated region"),
+        ("CDS", "Coding sequence"),
+        ("Intron", "Intron")
+    ))
+
+     ## enter enum values here
     start_ref = models.IntegerField("Start position relative to reference sequence")
     end_ref = models.IntegerField("End position relative to reference sequence")
     start_strain = models.IntegerField("Start position relative to specific strain")
