@@ -29,6 +29,9 @@ class Sequence(models.Model):
     start_strain = models.IntegerField("Start position relative to specific strain")
     end_strain = models.IntegerField("End position relative to specific strain")
 
+# note - if a sequence straddles a gene boundary, it will be troublesome
+# but it's best to break it down into Sequence objects, for the sake of database
+# design / querying etc.
 class SequenceFeature(models.Model):
     sequence = models.ForeignKey(Sequence)
     type = models.EnumField() ## enter enum values here
