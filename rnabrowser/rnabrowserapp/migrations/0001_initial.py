@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Sequence',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('sequence', models.TextField()),
                 ('start_ref', models.IntegerField(verbose_name='Start position relative to reference sequence')),
                 ('end_ref', models.IntegerField(verbose_name='End position relative to reference sequence')),
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SequenceFeature',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('type', models.CharField(max_length=256, choices=[('UTR', 'Untranslated region'), ('CDS', 'Coding sequence'), ('Intron', 'Intron')])),
                 ('start_ref', models.IntegerField(verbose_name='Start position relative to reference sequence')),
                 ('end_ref', models.IntegerField(verbose_name='End position relative to reference sequence')),
@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Strain',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=255)),
                 ('description', models.TextField()),
             ],
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Transcript',
             fields=[
-                ('id', models.CharField(primary_key=True, serialize=False, verbose_name='TAIR gene ID', max_length=255)),
+                ('id', models.CharField(verbose_name='TAIR gene ID', primary_key=True, serialize=False, max_length=255)),
             ],
         ),
         migrations.AddField(

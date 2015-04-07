@@ -48,7 +48,11 @@ function fetch_extract_gff3() {
 
 # Installation stuff goes here.
 function install() {
+
 	pretty_print "PROVISIONING"
+
+	cp /vagrant/bootstrap/.bash_aliases ~/.bash_aliases
+
 	pretty_print "Installing pip"
 	apt-get update
 	apt-get install -y python3-pip
