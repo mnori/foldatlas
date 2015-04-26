@@ -73,12 +73,23 @@ function install() {
 	apt-get install -y libmysqlclient-dev
 	pip3 install mysqlclient
 
+	pretty_print "Installing Apache"
+	apt-get install -y apache2
+
+	sudo apt-get install -y libapache2-mod-wsgi
+	sudo a2enmod wsgi
+
+	# using this conf will get the WSGI to play nicely
+	cp bootstrap/000-default.conf /etc/apache2/sites-available/000-default.conf
+	sudo service apache2 restart
+
+	pretty_print "Installing Rnabrowser Project"
 	cd /vagrant/rnabrowser 
 
 	# Install the project and its dependencies
-	python3.3 setup.py develop 
+	python3 setup.py develop 
 
-	# Set up database
+	# Set up database (this runs migrations etc.)
 	initialize_rnabrowser_db development.ini
 
 	# Let's also add phpmyadmin
