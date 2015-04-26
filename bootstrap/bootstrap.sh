@@ -73,9 +73,16 @@ function install() {
 	apt-get install -y libmysqlclient-dev
 	pip3 install mysqlclient
 
-	# Install project
 	cd /vagrant/rnabrowser 
-	python3.3 setup.py develop # install all dependencies
+
+	# Install the project and its dependencies
+	python3.3 setup.py develop 
+
+	# Set up database
+	initialize_rnabrowser_db development.ini
+
+	# Let's also add phpmyadmin
+
 
 	# easy_install-3.4 pyramid waitress
 
