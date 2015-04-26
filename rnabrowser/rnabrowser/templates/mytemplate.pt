@@ -51,6 +51,10 @@
         </div>
         <div class="row">
           <div class="copyright">
+            
+            <b>The data:</b>
+            ${one.id}: ${one.name}<br />
+
             Copyright &copy; Pylons Project
           </div>
         </div>
