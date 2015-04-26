@@ -73,8 +73,13 @@ function install() {
 	apt-get install -y libmysqlclient-dev
 	pip3 install mysqlclient
 
-	# Install pyramid
-	easy_install-3.4 pyramid
+	# Install project
+	cd /vagrant/rnabrowser 
+	python3.3 setup.py develop # install all dependencies
+
+	# easy_install-3.4 pyramid waitress
+
+	#  python3.4 setup.py develop ??
 
 	# Install
 
