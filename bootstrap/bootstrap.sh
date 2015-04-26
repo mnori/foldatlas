@@ -57,8 +57,9 @@ function install() {
 	apt-get update
 	apt-get install -y python3-pip
 
-	pretty_print "Installing Django"
-	pip3 install Django
+	# Django old install
+	# pretty_print "Installing Django"
+	# pip3 install Django
 
 	pretty_print "Installing BioPython"
 	pip3 install biopython
@@ -72,12 +73,18 @@ function install() {
 	apt-get install -y libmysqlclient-dev
 	pip3 install mysqlclient
 
-	pretty_print "Migrating Database"
-	cd /vagrant/rnabrowser
-	rm rnabrowserapp/migrations/* # otherwise old migrations might bork it
-	python3 manage.py migrate # django setup migration
-	python3 manage.py makemigrations rnabrowserapp
-	python3 manage.py migrate rnabrowserapp
+	# Install pyramid
+	easy_install-3.4 pyramid
+
+	# Install
+
+	# Django migrate shiz
+	# pretty_print "Migrating Database"
+	# cd /vagrant/rnabrowser
+	# rm rnabrowserapp/migrations/* # otherwise old migrations might bork it
+	# python3 manage.py migrate # django setup migration
+	# python3 manage.py makemigrations rnabrowserapp
+	# python3 manage.py migrate rnabrowserapp
 }
 
 # Grabs lots of genome data files. These will be parsed and used to seed the SNP database.
@@ -92,12 +99,16 @@ function dl_sauce() {
 
 	# Grab sequence annotation files, relative to both strain-of-interest and reference, for each strain
 	urlbase="http://mus.well.ox.ac.uk/19genomes/annotations/consolidated_annotation_9.4.2011/gene_models/"
+
+	# This is the reference sequence annotation
+	fetch_extract_gff3 $urlbase "consolidated_annotation.Col_0.Col_0"
+	fetch_extract_gff3 $urlbase "consolidated_annotation.Col_0"
+
 	# fetch_extract_gff3 $urlbase "consolidated_annotation.Bur_0.Col_0"
 	# fetch_extract_gff3 $urlbase "consolidated_annotation.Bur_0"
 	# fetch_extract_gff3 $urlbase "consolidated_annotation.Can_0.Col_0"
 	# fetch_extract_gff3 $urlbase "consolidated_annotation.Can_0"
-	fetch_extract_gff3 $urlbase "consolidated_annotation.Col_0.Col_0"
-	fetch_extract_gff3 $urlbase "consolidated_annotation.Col_0"
+	
 	# fetch_extract_gff3 $urlbase "consolidated_annotation.Ct_1.Col_0"
 	# fetch_extract_gff3 $urlbase "consolidated_annotation.Ct_1"
 	# fetch_extract_gff3 $urlbase "consolidated_annotation.Edi_0.Col_0"
