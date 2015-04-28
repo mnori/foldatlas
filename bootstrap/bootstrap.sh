@@ -66,24 +66,20 @@ function install() {
 	apt-get install -y git
 
 	pretty_print "Installing Flask"
+
+	# Install Flask
 	pip3 install Flask
 
-	# install mysql connector
+	# install a Python3-compatible mysql connector
 	pip3 install mysql-connector-python --allow-external mysql-connector-python
 
-	# install SQLAlchemy
-	
+	# install the Flask-SQLAlchemy plugin, for ORM shiz
+	pip3 install Flask-SQLAlchemy
+
 
 	# apt-get install -y libmysqlclient-dev
 	# pip3 install mysqlclient
 
-	pretty_print "Installing Apache"
-	apt-get install -y apache2
-	sudo apt-get install -y libapache2-mod-wsgi
-	# sudo a2enmod wsgi
-	cp /vagrant/bootstrap/000-default.conf /etc/apache2/sites-available/000-default.conf
-	sudo service apache2 restart
-	
 	# Copy handy bash aliases to home folder
 	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrants
 	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
@@ -106,6 +102,15 @@ function install() {
 	# python3 manage.py migrate # django setup migration
 	# python3 manage.py makemigrations rnabrowserapp
 	# python3 manage.py migrate rnabrowserapp
+}
+
+# this is only really useful in the development environment
+function install_apache_wsgi() {
+	pretty_print "Installing Apache WSGI"
+	apt-get install -y apache2
+	sudo apt-get install -y libapache2-mod-wsgi
+	cp /vagrant/bootstrap/000-default.conf /etc/apache2/sites-available/000-default.conf
+	sudo service apache2 restart
 }
 
 # Grabs lots of genome data files. These will be parsed and used to seed the SNP database.

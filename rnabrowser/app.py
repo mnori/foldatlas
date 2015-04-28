@@ -1,22 +1,28 @@
 from flask import Flask
-from flaskext.mysql import MySQL
-
 app = Flask(__name__)
 
-mysql = MySQL()
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = ''
-app.config['MYSQL_DATABASE_DB'] = 'rnabrowser'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-mysql.init_app(app)
+from flask.ext.sqlalchemy import SQLAlchemy
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@127.0.0.1/rnabrowser?charset=utf8&use_unicode=0'
+db = SQLAlchemy(app)
+
+# create a new user class for testing purposes
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+
+    # Constructor
+    def __init__(self, name):
+        self.name = name
+
+    # Return string representing the object
+    def __repr__(self):
+        return '<Test %r>' % self.username
 
 @app.route("/")
 def hello():
-	cursor = mysql.connect().cursor()
-	cursor.execute("SHOW TABLES")
-	data = cursor.fetchone()
+	return "Hello World test"
 
-	return str(data)
-
-if __name__ == "__main__": # if we called the script directly... (run server from command line)
-    app.run(host='0.0.0.0')
+if __name__ == "__main__": 
+	# if we're in here, it means we're running the built in development web server.
+    app.run(host='0.0.0.0', debug=True)
