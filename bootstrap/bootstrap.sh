@@ -49,9 +49,9 @@ function fetch_extract_gff3() {
 # Installation stuff goes here.
 function install() {
 
-	pretty_print "PROVISIONING"
-	
+	DBPASSWD="vagrant"
 
+	pretty_print "PROVISIONING"
 	pretty_print "Installing pip"
 	apt-get update
 	apt-get install -y python3-pip
@@ -59,15 +59,29 @@ function install() {
 	pretty_print "Installing BioPython"
 	pip3 install biopython
 
-	pretty_print "Installing MySQL"
+	pretty_print "Installing apache2" # apache 2 is only needed for phpmyadmin
+	apt-get install -y apache2
+
+	# install phpmyadmin, with some config options preset - otherwise it'll try to run the GUI installer
+	pretty_print "Installing MySQL specific packages and settings"
 	export DEBIAN_FRONTEND=noninteractive
-	apt-get -q -y install mysql-server
-	echo "create database rnabrowser" | mysql -u root
-	apt-get install -y git
 
+	echo "mysql-server mysql-server/root_password password $DBPASSWD" | debconf-set-selections
+	echo "mysql-server mysql-server/root_password_again password $DBPASSWD" | debconf-set-selections
+
+	echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | debconf-set-selections
+	echo "phpmyadmin phpmyadmin/app-password-confirm password $DBPASSWD" | debconf-set-selections
+	echo "phpmyadmin phpmyadmin/mysql/admin-pass password $DBPASSWD" | debconf-set-selections
+	echo "phpmyadmin phpmyadmin/mysql/app-pass password $DBPASSWD" | debconf-set-selections
+	echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect none" | debconf-set-selections
+	apt-get -y install mysql-server phpmyadmin > /dev/null 2>&1
+	echo "create database rnabrowser" | mysql -u root -p$DBPASSWD
+
+	# create symlink so that apache serves up some delicious phpmyadmin
+	ln -s /usr/share/phpmyadmin /var/www/phpmyadmin
+
+	# Install Flask stuff
 	pretty_print "Installing Flask"
-
-	# Install Flask
 	pip3 install Flask
 
 	# install a Python3-compatible mysql connector
@@ -76,18 +90,17 @@ function install() {
 	# install the Flask-SQLAlchemy plugin, for ORM shiz
 	pip3 install Flask-SQLAlchemy
 
-
-	# apt-get install -y libmysqlclient-dev
-	# pip3 install mysqlclient
+	pretty_print "Installing git"
+	apt-get install -y git
 
 	# Copy handy bash aliases to home folder
-	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrants
+	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrant's
 	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
+
+	# OLD STUFF
 
 	# Install the project and its dependencies
 	# python3 setup.py develop 
-	# OLD 
-	
 	# initialize_rnabrowser_db development.ini
 	# Let's also add phpmyadmin
 	# pretty_print "Installing Rnabrowser Project"
