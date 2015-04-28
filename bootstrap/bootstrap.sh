@@ -71,23 +71,20 @@ function install() {
 	# apt-get install -y libmysqlclient-dev
 	# pip3 install mysqlclient
 
-
-
 	pretty_print "Installing Apache"
 	apt-get install -y apache2
 	sudo apt-get install -y libapache2-mod-wsgi
 	# sudo a2enmod wsgi
-	cp bootstrap/000-default.conf /etc/apache2/sites-available/000-default.conf
+	cp /vagrant/bootstrap/000-default.conf /etc/apache2/sites-available/000-default.conf
 	sudo service apache2 restart
 	
-	# Copy handy bash aliases
-	cp /vagrant/bootstrap/.bash_aliases ~/.bash_aliases
+	# Copy handy bash aliases to home folder
+	# Must use explicit home folder path, otherwise it'll copy to super user's path
+	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
 
 	# Install the project and its dependencies
 	# python3 setup.py develop 
-
 	# OLD 
-
 	
 	# initialize_rnabrowser_db development.ini
 	# Let's also add phpmyadmin
