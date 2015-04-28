@@ -50,16 +50,11 @@ function fetch_extract_gff3() {
 function install() {
 
 	pretty_print "PROVISIONING"
-
-	cp /vagrant/bootstrap/.bash_aliases ~/.bash_aliases
+	
 
 	pretty_print "Installing pip"
 	apt-get update
 	apt-get install -y python3-pip
-
-	# Django old install
-	# pretty_print "Installing Django"
-	# pip3 install Django
 
 	pretty_print "Installing BioPython"
 	pip3 install biopython
@@ -67,40 +62,40 @@ function install() {
 	pretty_print "Installing MySQL"
 	export DEBIAN_FRONTEND=noninteractive
 	apt-get -q -y install mysql-server
-
 	echo "create database rnabrowser" | mysql -u root
 	apt-get install -y git
-	apt-get install -y libmysqlclient-dev
-	pip3 install mysqlclient
+
+	pretty_print "Installing Flask"
+	pip3 install Flask
+
+	# apt-get install -y libmysqlclient-dev
+	# pip3 install mysqlclient
+
+
 
 	pretty_print "Installing Apache"
 	apt-get install -y apache2
-
 	sudo apt-get install -y libapache2-mod-wsgi
-	sudo a2enmod wsgi
-
-	# using this conf will get the WSGI to play nicely
+	# sudo a2enmod wsgi
 	cp bootstrap/000-default.conf /etc/apache2/sites-available/000-default.conf
 	sudo service apache2 restart
-
-	pretty_print "Installing Rnabrowser Project"
-	cd /vagrant/rnabrowser 
+	
+	# Copy handy bash aliases
+	cp /vagrant/bootstrap/.bash_aliases ~/.bash_aliases
 
 	# Install the project and its dependencies
-	python3 setup.py develop 
+	# python3 setup.py develop 
 
-	# Set up database (this runs migrations etc.)
-	initialize_rnabrowser_db development.ini
+	# OLD 
 
+	
+	# initialize_rnabrowser_db development.ini
 	# Let's also add phpmyadmin
-
-
+	# pretty_print "Installing Rnabrowser Project"
+	# cd /vagrant/rnabrowser 
 	# easy_install-3.4 pyramid waitress
-
 	#  python3.4 setup.py develop ??
-
 	# Install
-
 	# Django migrate shiz
 	# pretty_print "Migrating Database"
 	# cd /vagrant/rnabrowser
