@@ -68,6 +68,12 @@ function install() {
 	pretty_print "Installing Flask"
 	pip3 install Flask
 
+	# install mysql connector
+	pip3 install mysql-connector-python --allow-external mysql-connector-python
+
+	# install SQLAlchemy
+	
+
 	# apt-get install -y libmysqlclient-dev
 	# pip3 install mysqlclient
 
@@ -79,7 +85,7 @@ function install() {
 	sudo service apache2 restart
 	
 	# Copy handy bash aliases to home folder
-	# Must use explicit home folder path, otherwise it'll copy to super user's path
+	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrants
 	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
 
 	# Install the project and its dependencies
