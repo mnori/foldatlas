@@ -1,50 +1,12 @@
 # Bootstrap for vagrant browser server
 # @author Matthew Norris
 
-# Prints aesthetically pleasing messages into the terminal.
-function pretty_print() {
-	printf "\n-=-=-=-=[ $1 ]=-=-=-=-\n"
-    len=${#1} ch='-'
-    padding=$(printf '%*s' "$len" | tr ' ' "$ch")
-    printf "          $padding\n\n"
+function main() {
+	install
+	dl_sauce
+	pretty_print "Provisioning Complete"
 }
 
-# Fetch a file and save it.
-function fetch_raw() {
-	base_sauce_url=$1
-	base_filename=$2
-	sauce_url="$base_sauce_url$base_filename"
-
-	echo "Processing [$base_filename]..."
-
-	if [ ! -f "$base_filename" ] # if file does not exist...
-		then
-		echo "Fetching..."
-		curl "$sauce_url" -o "$base_filename" >&/dev/null
-		echo "...Done."
-	else
-		echo "...Already exists!"
-	fi
-	
-}
-
-# Fetch a .bz2 file and extract it
-function fetch_extract_gff3() {
-	base_sauce_url=$1
-	base_filename=$2
-	sauce_url="$base_sauce_url$base_filename"
-
-	echo "Processing [$base_filename]..."
-	if [ ! -f "$base_filename.gff3" ]
-		then
-		echo "Fetching..."
-		curl "$sauce_url.gff3.bz2" -o "$base_filename.gff3.bz2" >&/dev/null # fetch compressed file
-		bunzip2 "$base_filename.gff3.bz2" # decompress to get the .gff3 file
-		echo "...Done."
-	else
-		echo "...Already exists!"
-	fi
-}
 
 # Installation stuff goes here.
 function install() {
@@ -117,15 +79,6 @@ function install() {
 	# python3 manage.py migrate rnabrowserapp
 }
 
-# this is only really useful in the development environment
-function install_apache_wsgi() {
-	pretty_print "Installing Apache WSGI"
-	apt-get install -y apache2
-	sudo apt-get install -y libapache2-mod-wsgi
-	cp /vagrant/bootstrap/000-default.conf /etc/apache2/sites-available/000-default.conf
-	sudo service apache2 restart
-}
-
 # Grabs lots of genome data files. These will be parsed and used to seed the SNP database.
 function dl_sauce() {
 	# TODO
@@ -192,6 +145,11 @@ function dl_sauce() {
 	fetch_raw $urlbase "TAIR10_chrC.fas"
 	fetch_raw $urlbase "TAIR10_chrM.fas"
 
+	# Combine all the chromosome files together - this will make the parsing easier
+	cat TAIR10_chr* > TAIR10_combined.fas
+
+	# we need to concatenate each file 
+
 	# Grab chromosomal sequences for each of the 18 other strains
 	# commented out to make it quicker for testing
 
@@ -216,9 +174,60 @@ function dl_sauce() {
 	# fetch_raw $urlbase "zu_0.v7.PR_in_lowercase.fas"
 }
 
+# Prints aesthetically pleasing messages into the terminal.
+function pretty_print() {
+	printf "\n-=-=-=-=[ $1 ]=-=-=-=-\n"
+    len=${#1} ch='-'
+    padding=$(printf '%*s' "$len" | tr ' ' "$ch")
+    printf "          $padding\n\n"
+}
+
+# Fetch a .bz2 file and extract it
+function fetch_extract_gff3() {
+	base_sauce_url=$1
+	base_filename=$2
+	sauce_url="$base_sauce_url$base_filename"
+
+	echo "Processing [$base_filename]..."
+	if [ ! -f "$base_filename.gff3" ]
+		then
+		echo "Fetching..."
+		curl "$sauce_url.gff3.bz2" -o "$base_filename.gff3.bz2" >&/dev/null # fetch compressed file
+		bunzip2 "$base_filename.gff3.bz2" # decompress to get the .gff3 file
+		echo "...Done."
+	else
+		echo "...Already exists!"
+	fi
+}
+
+# Fetch a file and save it.
+function fetch_raw() {
+	base_sauce_url=$1
+	base_filename=$2
+	sauce_url="$base_sauce_url$base_filename"
+
+	echo "Processing [$base_filename]..."
+
+	if [ ! -f "$base_filename" ] # if file does not exist...
+		then
+		echo "Fetching..."
+		curl "$sauce_url" -o "$base_filename" >&/dev/null
+		echo "...Done."
+	else
+		echo "...Already exists!"
+	fi
+	
+}
+
+# this is only really useful in the production environment
+# since we prefer Flask's own web server for development
+function install_apache_wsgi() {
+	pretty_print "Installing Apache WSGI"
+	apt-get install -y apache2
+	sudo apt-get install -y libapache2-mod-wsgi
+	cp /vagrant/bootstrap/000-default.conf /etc/apache2/sites-available/000-default.conf
+	sudo service apache2 restart
+}
+
 # get the party started
-install
-dl_sauce
-
-pretty_print "Provisioning Complete"
-
+main
