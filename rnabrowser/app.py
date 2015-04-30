@@ -9,7 +9,7 @@ def hello():
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`
 
-	if (argv[1] == "resetdb"):
+	if (len(argv) > 1 and argv[1] == "resetdb"):
 		# reset the database
 		from database import reset_db
 		reset_db()

@@ -201,15 +201,16 @@ class DBHydrator():
 
                 transcript_id = self.find_attribs_value("ID=Transcript", attribs)
                 if transcript_id != None: # it's a transcript entry
+                
                     # add the Transcript entry - if it hasn't been already
+                    transcript_id = self.ensure_unique_transcript_id(transcript_id)
+
                     if transcript_id not in self.transcripts_seen: 
                         transcript = Transcript(
                             id=transcript_id, gene_id=gene_id
                         )
                         self.transcripts_to_write.append(transcript)
                         self.transcripts_seen[transcript.id] = transcript
-
-                    transcript_id = self.ensure_unique_transcript_id(transcript_id)
 
                     # add the TranscriptSequence entry
                     transcript_sequence = TranscriptSequence(
