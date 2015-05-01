@@ -1,13 +1,6 @@
 # Bootstrap for vagrant browser server
 # @author Matthew Norris
 
-function main() {
-	install
-	dl_sauce
-	pretty_print "Provisioning Complete"
-}
-
-
 # Installation stuff goes here.
 function install() {
 
@@ -55,6 +48,9 @@ function install() {
 	pretty_print "Installing git"
 	apt-get install -y git
 
+	pretty_print "Grabbing Sauce Data"
+	dl_sauce()
+
 	pretty_print "Hydrating Database"
 	cd /vagrant/rnabrowser
 	python3 app.py resetdb
@@ -62,6 +58,8 @@ function install() {
 	# Copy handy bash aliases to home folder
 	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrant's
 	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
+
+	pretty_print "Provisioning Complete"
 
 	# OLD STUFF
 
@@ -88,9 +86,6 @@ function dl_sauce() {
 	# TODO
 	# grab raw genome data from network if available. 
 	# otherwise, download the data from its origin
-
-	pretty_print "Grabbing Sauce Data"
-
 	cd /vagrant/sauce_data
 
 	# Grab sequence annotation files, relative to both strain-of-interest and reference, for each strain
