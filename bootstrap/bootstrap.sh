@@ -55,14 +55,13 @@ function install() {
 	pretty_print "Installing git"
 	apt-get install -y git
 
-	# Copy handy bash aliases to home folder
-	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrant's
-	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
-
 	pretty_print "Hydrating Database"
 	cd /vagrant/rnabrowser
 	python3 app.py resetdb
 
+	# Copy handy bash aliases to home folder
+	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrant's
+	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
 
 	# OLD STUFF
 

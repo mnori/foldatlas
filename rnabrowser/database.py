@@ -18,6 +18,8 @@ Base.query = db_session.query_property()
 
 import models
 
+from models import Strain, Gene, Transcript, Feature
+
 def reset_db():
     try:
         Base.metadata.drop_all(bind=engine)
@@ -28,47 +30,103 @@ def reset_db():
         print(str(e).replace("\\n", "\n").replace("\\t", "\t"))
         raise e
 
-# Fills the database with sequence data, by parsing genome sequence .fa and annotation .gff files
+# Parses genome sequence .fa and annotation .gff3 files into the database.
 class DBHydrator():
 
     # how many genes to process before committing rows to the database.
-    chunk_size = 2500 
+    gene_chunk_size = 2500 
+
+    # how many bytes of sequence data to use per chromosome writing chunk
+    seq_chunk_size = 8388608 # i.e. 8 MB
 
     genes_to_write = []
     transcripts_to_write = []
-    sequences_to_write = []
-    transcript_sequences_to_write = []
-    transcript_sequence_features_to_write = []
-
-    # for duplicate transcript ID detection
-    transcript_ids_seen_this_strain = set()
+    features_to_write = []
 
     genes_seen = {}
     transcripts_seen = {}
 
+    # for duplicate transcript ID detection
+    transcript_ids_seen_this_strain = set()
+
     sequence_id = 0
+
+    # these guys are just for debugging purposes
     gene_limit = None
+    chr_limit = None
 
     # Use the genome sequence and annotation files to populate the database.
-    def hydrate(self):
+    def hydrate(self):       
         for strain in settings.strains:
             self.hydrate_strain(strain)
 
     def hydrate_strain(self, strain_config):
-        from models import Strain
-
         self.sequences_to_write = []
         self.transcript_sequences_to_write = []
         feature_rows = []
 
-        chr_data = None
-
-        # first, create the strain's entry
+        # add the strain
         strain = Strain(id=strain_config["name"], description=strain_config["description"])
         db_session.add(strain)
         db_session.commit()
 
+        # add the chrosomomes
+        self.hydrate_chrosomomes(strain_config)
+
+        # add genes, transcripts, and feature annotations
+        self.hydrate_genes(strain_config)
+
+    # Adding chromosomes to the DB is a little bit tricky, since the sequences are huge.
+    # Therefore raw SQL statements are used to gradually append chunks of sequence data into the DB fields.
+    def hydrate_chrosomomes(self, strain_config):
+
+        print("Adding chromosomes...")
+        filepath = settings.genomes_sauce_folder+"/"+strain_config["sequence_filename"]
+
+        for record in SeqIO.parse(filepath, "fasta"): # loop through chromosomes
+            chr_id = record.id
+            seq_str = str(record.seq)
+            len_seq_str = self.chr_limit if self.chr_limit != None else len(seq_str)
+
+            print("len_seq_str: "+str(len_seq_str))
+
+            chunk = seq_str[0:self.seq_chunk_size]
+
+            # Insert the Chromosome row
+            engine.execute(
+                "INSERT INTO chromosome SET"
+                "   strain_id = '"+strain_config["name"]+"',"
+                "   chromosome_id = '"+chr_id+"',"
+                "   sequence = '"+chunk+"'"
+            )
+
+            pos = self.seq_chunk_size
+
+            # Append chunks of sequence onto the row's sequence field.
+            while True: 
+                end = pos + self.seq_chunk_size
+                if (end > len_seq_str):
+                    end = len_seq_str
+
+                chunk = seq_str[pos:end]
+
+                engine.execute(
+                    "UPDATE chromosome SET"
+                    "   sequence = CONCAT(sequence, '"+chunk+"') "
+                    "WHERE strain_id = '"+strain_config["name"]+"' "
+                    "AND chromosome_id = '"+chr_id+"'"
+                )
+
+                if end == len_seq_str:
+                    break
+                pos += self.seq_chunk_size
+            print("Added ["+chr_id+"]")
+
+
+    def hydrate_genes(self, strain_config):
         genes_added = 0
+
+        feature_rows = []
 
         # open the annotation file and go through it line by line
         with open(settings.genomes_sauce_folder+"/"+strain_config["annotation_filename"]) as gff_file:
@@ -81,7 +139,7 @@ class DBHydrator():
                 if feature_type == "gene":
                     
                     if len(feature_rows) > 0: # this is needed to stop it going wrong at the beginning
-                        self.hydrate_gene(strain, feature_rows, chr_data)
+                        self.hydrate_gene(feature_rows, strain_config["name"])
                         genes_added += 1
                         feature_rows = []
                         if genes_added % 100 == 0:
@@ -89,40 +147,30 @@ class DBHydrator():
                                 break
                             print (str(genes_added)+" genes processed")
 
-                        if genes_added % self.chunk_size == 0: # commit at regular intervals
+                        if genes_added % self.gene_chunk_size == 0: # commit at regular intervals
                             self.commit_all()
-                    
-                    chr_id_in = bits[0]
-                    if chr_data == None or chr_id_in != chr_data["id"]: # detected a new chromsome - let's commit everything
-                        chr_data = {
-                            "id": chr_id_in,
-                            "seq": self.fetch_chr_seq(strain_config, chr_id_in)
-                        }
 
                 feature_rows.append(bits)
 
         # gotta add that last entry
         if (len(feature_rows) > 0):
-            self.hydrate_gene(strain, feature_rows, chr_data)
-            self.commit_all()
+            self.hydrate_gene(feature_rows, strain_config["name"])
             genes_added += 1
+
+        self.commit_all()
 
         # do the sequences
         print (str(genes_added)+" genes added total")
 
+
     def commit_all(self):
         self.commit_entities_list(self.genes_to_write, "Genes")
         self.commit_entities_list(self.transcripts_to_write, "Transcripts")
-        self.commit_entities_list(self.sequences_to_write, "Sequences")
-        self.commit_entities_list(self.transcript_sequences_to_write, "TranscriptSequences")
-        self.commit_entities_list(self.transcript_sequence_features_to_write, "TranscriptSequenceFeatures")
+        self.commit_entities_list(self.features_to_write, "Features")
 
         self.genes_to_write = []
         self.transcripts_to_write = []
-        self.sequences_to_write = []
-        self.transcript_sequences_to_write = []
-        self.transcript_sequence_features_to_write = []
-
+        self.features_to_write = []
 
     def commit_entities_list(self, entities, label):
         print("Committing "+label+"...")
@@ -131,10 +179,7 @@ class DBHydrator():
         db_session.commit()
         print("...done.")
 
-    def hydrate_gene(self, strain, feature_rows, chr_data):
-
-        from models import Gene, Sequence, Transcript, TranscriptSequence, TranscriptSequenceFeature
-
+    def hydrate_gene(self, feature_rows, strain_id):
         features = {}
         sequence = None
         transcript = None
@@ -142,42 +187,19 @@ class DBHydrator():
         for feature_row in feature_rows: # Loop through annotation rows in the gff file, all related to the current gene
 
             feature_type = feature_row[2]
-            start = int(feature_row[3])
-            end = int(feature_row[4])
             attribs = feature_row[8].strip()
 
             if feature_type == "gene": # Handle gene entries
-
                 gene_id = attribs.split(";")[0].split(":")[1] # grab the gene ID - we'll want this for later
-                chr_id = feature_row[0]
-                
-                sequence = str(chr_data["seq"].seq[start - 1:end])
-
-                # create sequence object with the right coords and metadata.
-                # TODO also create an intergenic sequence, concatenating gene IDs together.
-                # Do that somewhere else - at the end most likely
-
-                self.sequence_id += 1
-                sequence = Sequence(
-                    id=self.sequence_id,
-                    strain_id=strain.id,
-                    gene_id=gene_id,
-                    sequence=sequence,
-                    chromosome=chr_data["id"],
-                    start=start,
-                    end=end
-                )
-                self.sequences_to_write.append(sequence)
 
                 # add the Gene entry - if it hasn't been already
-                if sequence.gene_id not in self.genes_seen: 
-                    gene = Gene(sequence.gene_id)
+                if gene_id not in self.genes_seen: 
+                    gene = Gene(gene_id)
                     self.genes_to_write.append(gene)
                     self.genes_seen[gene_id] = gene
 
             
             else: # Handle transcript entries
-
                 transcript_id = self.find_attribs_value("ID=Transcript", attribs)
                 if transcript_id != None: # it's a transcript entry
 
@@ -191,31 +213,21 @@ class DBHydrator():
                         self.transcripts_to_write.append(transcript)
                         self.transcripts_seen[transcript.id] = transcript
 
-                    # add the TranscriptSequence entry
-                    transcript_sequence = TranscriptSequence(
-                        transcript_id=transcript_id,
-                        sequence_id=self.sequence_id,
-                        start=(start - sequence.start),
-                        end=(end - sequence.start),
-                        direction=("forward" if feature_row[6] == "+" else "reverse")
-                    )
-                    self.transcript_sequences_to_write.append(transcript_sequence)
-
                 else: # Handle transcript feature entries
                     transcript_id = self.find_attribs_value("Parent=Transcript", attribs)
-
                     if transcript_id != None: # it's a transcript feature entry
                         # put a filter here? some elements are not worth storing?
-                        self.transcript_sequence_features_to_write.append(TranscriptSequenceFeature(
-                            sequence_id=sequence.id,
-                            transcript_id=transcript.id,
-                            start=(start - transcript_sequence.start),
-                            end=(end - transcript_sequence.start),
-                            type_id=feature_row[2]
+                        self.features_to_write.append(Feature(
+                            transcript_id=transcript_id,
+                            type_id=feature_row[2],
+                            strain_id=strain_id,
+                            chromosome_id=feature_row[0],
+                            start=feature_row[3],
+                            end=feature_row[4]
                         ))
 
                     else:
-                        pass # this happens for pseudogenes and TEs - do we care about those?
+                        pass # this happens for pseudogenes and TEs - which we aint interested in
 
     def ensure_unique_transcript_id(self, transcript_id):
         version = 1
@@ -243,11 +255,3 @@ class DBHydrator():
             if (entry_bits[0] == key):
                 return ":".join(entry_bits[1:]) # we need all of the bits in the array
         return None
-
-    def fetch_chr_seq(self, strain_config, chr_id):
-        print("Fetching ["+chr_id+"]...")
-        filepath = settings.genomes_sauce_folder+"/"+strain_config["sequence_filename"]
-        for record in SeqIO.parse(filepath, "fasta"):
-            if record.id == chr_id:
-                print("...done.")
-                return record
