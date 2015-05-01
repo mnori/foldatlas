@@ -17,8 +17,8 @@ class Gene(Base):
     def __repr__(self):
         return '<Gene %r>' % (self.id)
 
-# There can be several Transcripts per strain. Each transcript can be associated with multiple strains.
-# Each transcript can also have multiple TranscriptSequenceFeatures associated.
+# A Transcript is effectively an RNA sequence identifier, which can be shared amongst multiple strains.
+# Sequences are mapped to Transcripts via the Feature entity.
 class Transcript(Base):
     __tablename__ = 'transcript'
 
