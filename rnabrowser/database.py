@@ -21,9 +21,12 @@ import models
 from models import Strain, Gene, Transcript, Feature
 
 def reset_db():
+    print("reset_db() invoked")
     try:
+        print("Rebuilding schema...")
         Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(bind=engine)
+        print("...done.")
         DBHydrator().hydrate()
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
@@ -37,7 +40,7 @@ class DBHydrator():
     gene_chunk_size = 2500 
 
     # how many bytes of sequence data to use per chromosome writing chunk
-    seq_chunk_size = 8388608 # i.e. 8 MB
+    seq_chunk_size = 1048576 # i.e. 1 MB
 
     genes_to_write = []
     transcripts_to_write = []
@@ -88,9 +91,7 @@ class DBHydrator():
             seq_str = str(record.seq)
             len_seq_str = self.chr_limit if self.chr_limit != None else len(seq_str)
 
-            print("len_seq_str: "+str(len_seq_str))
-
-            chunk = seq_str[0:self.seq_chunk_size]
+            chunk = seq_str[0:len_seq_str if len_seq_str <= self.seq_chunk_size else self.seq_chunk_size]
 
             # Insert the Chromosome row
             engine.execute(

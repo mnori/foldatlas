@@ -4,6 +4,10 @@
 # Installation stuff goes here.
 function install() {
 
+	# Copy handy bash aliases to home folder
+	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrant's
+	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
+
 	DBPASSWD="vagrant"
 
 	pretty_print "PROVISIONING"
@@ -49,15 +53,11 @@ function install() {
 	apt-get install -y git
 
 	pretty_print "Grabbing Sauce Data"
-	dl_sauce()
+	dl_sauce
 
 	pretty_print "Hydrating Database"
 	cd /vagrant/rnabrowser
 	python3 app.py resetdb
-
-	# Copy handy bash aliases to home folder
-	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrant's
-	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
 
 	pretty_print "Provisioning Complete"
 
@@ -229,4 +229,4 @@ function install_apache_wsgi() {
 }
 
 # get the party started
-main
+install
