@@ -1,5 +1,5 @@
 # RNA Browser
-Matthew Norris
+Matthew Norris <Matthew.Norris@jic.ac.uk>
 
 ## Prerequisites
 
@@ -8,7 +8,7 @@ Matthew Norris
 
 ## Setting up the box
 
-Run `vagrant up` in the same folder as this file. The first `vagrant up` call will install everything and download genome sequence data. If it fails, first check your `vagrant --version`.
+Run `vagrant up` in the same folder as this file. The first `vagrant up` call will install everything and download genome sequence data. If it fails, first check your `vagrant --version`. Failing that, pester the author.
 
 ## Hosts
 
@@ -21,18 +21,18 @@ Optionally add this line to your `hosts` file. If you skip this, you can use `19
     vagrant ssh
     rb-runDevServer
 
-This runs a Flask development web server. Go [here](http://rnabrowser.dev:5000) to see the site running. The server will keep going until you press `CTRL-C` in the terminal.
+This runs a Flask development web server. Go to http://rnabrowser.dev:5000 to see the site running. The server will keep going until you press `CTRL-C` in the terminal.
 
 ## Resetting the database
 
     vagrant ssh
     rb-resetDB
 
-This drops all the database tables, recreates them, and then populates the tables by parsing the *.fa and *.gff3 files downloaded during the `vagrant up` provisioning.
+This drops all the database tables, recreates them, and then populates the tables by parsing the *.fa and *.gff3 files downloaded during the `vagrant up` provisioning. There will soon be lots of delicious metadata attached to each transcript, describing RNA structure predictions, experimental data, etc.
 
 ## Viewing / hacking the database
 
-Go to `rnabrowser.dev/phpmyadmin`
+Go to http://rnabrowser.dev/phpmyadmin
 
     username: root
     password: vagrant

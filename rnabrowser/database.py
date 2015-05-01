@@ -107,26 +107,6 @@ class DBHydrator():
             self.commit_all()
             genes_added += 1
 
-        # self.commit_all()
-
-        # best to commit everything right at the end - it's a lot faster that way
-
-        # first commit the genes
-
-        # for gene_id in self.genes_to_write:
-        #     db_session.add(self.genes_to_write[gene_id])
-        # db_session.commit()
-
-        # # now do the transcripts - we need the genes there already because foreign key constraints
-        # for transcript_id in self.transcripts_to_write:
-        #     db_session.add(self.transcripts_to_write[transcript_id])
-        # db_session.commit()
-
-        # # add strain-specific Sequence objects
-        # for sequence_id in self.sequences_to_write:
-        #     db_session.add(self.sequences_to_write[sequence_id])
-        # db_session.commit()
-
         # do the sequences
         print (str(genes_added)+" genes added total")
 
@@ -159,8 +139,7 @@ class DBHydrator():
         sequence = None
         transcript = None
 
-        # first: try to find CDS related features (UTRs and CDS annotations)
-        for feature_row in feature_rows:
+        for feature_row in feature_rows: # Loop through annotation rows in the gff file, all related to the current gene
 
             feature_type = feature_row[2]
             start = int(feature_row[3])
@@ -201,7 +180,7 @@ class DBHydrator():
 
                 transcript_id = self.find_attribs_value("ID=Transcript", attribs)
                 if transcript_id != None: # it's a transcript entry
-                
+
                     # add the Transcript entry - if it hasn't been already
                     transcript_id = self.ensure_unique_transcript_id(transcript_id)
 
