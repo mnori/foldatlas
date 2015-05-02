@@ -1,25 +1,25 @@
 # Bootstrap for vagrant browser server
 # @author Matthew Norris
 
+DBPASSWD="vagrant"
+
 # Installation stuff goes here.
 function install() {
+
+	pretty_print "PROVISIONING"
 
 	# Copy handy bash aliases to home folder
 	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrant's
 	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
 
-	DBPASSWD="vagrant"
-
-	pretty_print "PROVISIONING"
-	pretty_print "Installing pip"
-	apt-get update
-	apt-get install -y python3-pip
-
-	pretty_print "Installing BioPython"
-	pip3 install biopython
-
-	pretty_print "Installing apache2" # apache 2 is only needed for phpmyadmin
+	pretty_print "Installing apache2" 
 	apt-get install -y apache2
+	a2enmod proxy
+	a2enmod proxy_http 
+
+	mkdir /var/www/static
+	echo "This is where the static files will go" > /var/www/static/index.html
+	cp /vagrant/bootstrap/000-default_vagrant.conf /etc/apache2/sites-available/000-default.conf
 
 	# install phpmyadmin, with some config options preset - otherwise it'll try to run the GUI installer
 	pretty_print "Installing MySQL specific packages and settings"
@@ -34,10 +34,19 @@ function install() {
 	echo "phpmyadmin phpmyadmin/mysql/app-pass password $DBPASSWD" | debconf-set-selections
 	echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect none" | debconf-set-selections
 	apt-get -y install mysql-server phpmyadmin > /dev/null 2>&1
+
+	# switch off the PMA conf - not needed
+	a2disconf phpmyadmin
+	sudo service apache2 restart
+
 	echo "create database rnabrowser" | mysql -u root -p$DBPASSWD
 
-	# create symlink so that apache serves up some delicious phpmyadmin
-	ln -s /usr/share/phpmyadmin /var/www/phpmyadmin
+	pretty_print "Installing pip"
+	apt-get update
+	apt-get install -y python3-pip
+
+	pretty_print "Installing BioPython"
+	pip3 install biopython
 
 	# Install Flask stuff
 	pretty_print "Installing Flask"
@@ -52,33 +61,14 @@ function install() {
 	pretty_print "Installing git"
 	apt-get install -y git
 
-	pretty_print "Grabbing Sauce Data"
+	pretty_print "Grabbing sauce data"
 	dl_sauce
 
-	pretty_print "Hydrating Database"
+	pretty_print "Hydrating database"
 	cd /vagrant/rnabrowser
 	python3 app.py resetdb
 
-	pretty_print "Provisioning Complete"
-
-	# OLD STUFF
-
-	# Install the project and its dependencies
-	# python3 setup.py develop 
-	# initialize_rnabrowser_db development.ini
-	# Let's also add phpmyadmin
-	# pretty_print "Installing Rnabrowser Project"
-	# cd /vagrant/rnabrowser 
-	# easy_install-3.4 pyramid waitress
-	#  python3.4 setup.py develop ??
-	# Install
-	# Django migrate shiz
-	# pretty_print "Migrating Database"
-	# cd /vagrant/rnabrowser
-	# rm rnabrowserapp/migrations/* # otherwise old migrations might bork it
-	# python3 manage.py migrate # django setup migration
-	# python3 manage.py makemigrations rnabrowserapp
-	# python3 manage.py migrate rnabrowserapp
+	pretty_print "Provisioning complete"
 }
 
 # Grabs lots of genome data files. These will be parsed and used to seed the SNP database.

@@ -12,9 +12,11 @@ Run `vagrant up` in the same folder as this file. The first `vagrant up` call wi
 
 ## Hosts
 
-`192.168.50.2	rnabrowser.dev`
+	192.168.50.2	rnabrowser.dev
+	192.168.50.2    static.rnabrowser.dev
+	192.168.50.2    pma.rnabrowser.dev
 
-Optionally add this line to your `hosts` file. If you skip this, you can use `192.168.50.2` instead of `rnabrowser.dev` in your URLs.
+Add these lines to your `hosts` file, typically located in /etc/hosts on *nix based systems.
 
 ## Running the web server
 
@@ -32,7 +34,7 @@ This drops all the database tables, recreates them, and then populates the table
 
 ## Viewing / hacking the database
 
-Go to http://rnabrowser.dev/phpmyadmin
+Go to http://pma.rnabrowser.dev
 
     username: root
     password: vagrant
