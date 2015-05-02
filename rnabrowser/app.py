@@ -1,10 +1,15 @@
 from flask import Flask
+from flask import render_template
 from sys import argv
+
+import settings
+
 app = Flask(__name__)
 
 @app.route("/")
 def hello():
-	return "Hello World test"
+	print(settings.base_path+"/templates/hello.html")
+	return render_template("hello.html", message="Hello world!")
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`

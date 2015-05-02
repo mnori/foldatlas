@@ -4,6 +4,8 @@ database_uri = "mysql+mysqlconnector://root:vagrant@127.0.0.1/rnabrowser?charset
 
 genomes_sauce_folder = "/vagrant/sauce_data"
 
+base_path = "/vagrant/rnabrowser"
+
 # Strain metadata. This is used to parse from sauce files when hydrating the DB.
 strains = [
 	{
