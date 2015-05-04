@@ -45,9 +45,11 @@ function install() {
 	apt-get install -y git
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-	pretty_print "Installing Genoverse"
-	cd /usr/share && git clone https://github.com/wtsi-web/Genoverse.git
-	ln -s /usr/share/Genoverse /var/www/static/Genoverse
+	# actually - use hacked genoverse
+	
+	# pretty_print "Installing Genoverse"
+	# cd /usr/share && git clone https://github.com/wtsi-web/Genoverse.git
+	# ln -s /usr/share/Genoverse /var/www/static/Genoverse
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing pip"
