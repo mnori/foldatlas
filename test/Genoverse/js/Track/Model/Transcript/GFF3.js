@@ -2,6 +2,7 @@
 // See http://www.broadinstitute.org/annotation/gebo/help/gff3.html 
 Genoverse.Track.Model.Transcript.GFF3 = Genoverse.Track.Model.Transcript.extend({
   dataType : 'text',
+  url              : '//rest.ensembl.org/overlap/region/human/__CHR__:__START__-__END__?feature=transcript;feature=exon;feature=cds;content-type=application/json',
   
   // Transcript structure map for column 3 (type) 
   typeMap : {
