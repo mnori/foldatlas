@@ -8,66 +8,72 @@ function install() {
 
 	pretty_print "PROVISIONING"
 
-	# Copy handy bash aliases to home folder
-	# Must use explicit home folder path, otherwise it'll copy to super user's path instead of vagrant's
+	# Copy handy bash aliases to home folder. Must use explicit home folder path, otherwise 
+	# it'll copy to super user's path instead of vagrant's
 	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
 
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing apache2" 
 	apt-get install -y apache2
 	a2enmod proxy
 	a2enmod proxy_http 
 
 	mkdir /var/www/static
-	echo "This is where the static files will go" > /var/www/static/index.html
+	echo "You've reached the static subdomain" > /var/www/static/index.html
 	cp /vagrant/bootstrap/000-default_vagrant.conf /etc/apache2/sites-available/000-default.conf
+	ln -s /vagrant/test /var/www/static/test
 
-	# install phpmyadmin, with some config options preset - otherwise it'll try to run the GUI installer
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing MySQL specific packages and settings"
 	export DEBIAN_FRONTEND=noninteractive
 
+	# this bypasses the crappy GUI-based install
 	echo "mysql-server mysql-server/root_password password $DBPASSWD" | debconf-set-selections
 	echo "mysql-server mysql-server/root_password_again password $DBPASSWD" | debconf-set-selections
-
 	echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | debconf-set-selections
 	echo "phpmyadmin phpmyadmin/app-password-confirm password $DBPASSWD" | debconf-set-selections
 	echo "phpmyadmin phpmyadmin/mysql/admin-pass password $DBPASSWD" | debconf-set-selections
 	echo "phpmyadmin phpmyadmin/mysql/app-pass password $DBPASSWD" | debconf-set-selections
 	echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect none" | debconf-set-selections
 	apt-get -y install mysql-server phpmyadmin > /dev/null 2>&1
-
-	# switch off the PMA conf - not needed
-	a2disconf phpmyadmin
+	a2disconf phpmyadmin # switch off the PMA conf - not needed
 	sudo service apache2 restart
-
 	echo "create database rnabrowser" | mysql -u root -p$DBPASSWD
 
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+	pretty_print "Installing git"
+	apt-get install -y git
+	
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+	pretty_print "Installing Genoverse"
+	cd /usr/share && git clone https://github.com/wtsi-web/Genoverse.git
+	ln -s /usr/share/Genoverse /var/www/static/Genoverse
+	
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing pip"
 	apt-get update
 	apt-get install -y python3-pip
-
+	
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing BioPython"
 	pip3 install biopython
-
-	# Install Flask stuff
+	
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing Flask"
 	pip3 install Flask
-
-	# install a Python3-compatible mysql connector
 	pip3 install mysql-connector-python --allow-external mysql-connector-python
-
-	# install the Flask-SQLAlchemy plugin, for ORM shiz
 	pip3 install Flask-SQLAlchemy
-
-	pretty_print "Installing git"
-	apt-get install -y git
-
-	pretty_print "Grabbing sauce data"
+	
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+	pretty_print "Grabbing sauce Data"
 	dl_sauce
-
+	
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Hydrating database"
 	cd /vagrant/rnabrowser
 	python3 app.py resetdb
 
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Provisioning complete"
 }
 
