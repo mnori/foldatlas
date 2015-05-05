@@ -10,17 +10,11 @@ class GenomeBrowser():
 
     def get_transcripts(self, request):
 
-        print("request")
-        print(request)
-
         out = []
+
         chromosome_id = "Chr"+str(int(request.args.get('chr'))) # SQL-injection safe
         start = int(request.args.get('start'))
         end = int(request.args.get('end'))
-
-        print("chr: "+chromosome_id)
-        print("start: "+str(start))
-        print("end: "+str(end))
 
         sql =   ("SELECT *, MIN(start) min_start, MAX(end) max_end "
                  "FROM feature "
@@ -29,7 +23,6 @@ class GenomeBrowser():
                  "AND end < '"+str(end)+"' "
                  "GROUP BY transcript_id")
 
-        # demonstrates how genes would be done ###########################
         results = database.engine.execute(sql)
         for result in results:
             out.append({
@@ -55,8 +48,42 @@ class GenomeBrowser():
                 "strand": 1, # whether it is + or -??
             })
 
+        buf = json.dumps(out)
+        return buf
+
+    def get_genes(self, request):
+        
+        out = []
+
+        chromosome_id = "Chr"+str(int(request.args.get('chr'))) # SQL-injection safe
+        start = int(request.args.get('start'))
+        end = int(request.args.get('end'))
+
+        sql = ( "SELECT *, MIN(start) min_start, MAX(end) max_end "
+                "FROM feature, transcript "
+                "WHERE feature.transcript_id = transcript.id "
+                "AND chromosome_id = '"+chromosome_id+"' "
+                "AND start > '"+str(start)+"' "
+                "AND end < '"+str(end)+"' "
+                "GROUP BY transcript.gene_id")
+
+        results = database.engine.execute(sql)
+        for result in results:
+            out.append({ 
+                "feature_type": "gene", # without this, it won't draw
+                "logic_name": "who cares?",
+                # this is a hack - just to make it display properly. 
+                # @see Genoverse.Track.View.Gene.Ensembl for colour coding sh
+                "biotype" : "protein coding", 
+                "id": result.gene_id,
+                "start": result.min_start,
+                "end": result.max_end,
+                "strand": 1, # whether it is + or -??
+            })        
 
         buf = json.dumps(out)
         return buf
+
+
 
     

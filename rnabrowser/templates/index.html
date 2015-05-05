@@ -74,6 +74,8 @@
     <!-- bespoke classes go here - order matters! TODO combine into a single file -->
     <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBTranscript.js"></script>
     <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBGene.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBTrack.js"></script>
+
 
     <script>
       var genoverseConfig = {
@@ -87,7 +89,7 @@
         plugins   : [ 'controlPanel', 'karyotype', 'trackControls', 'resizer', 'tooltips', 'fileDrop' ],
         tracks    : [
           Genoverse.Track.Scalebar,
-          Genoverse.Track.DBGene,
+          Genoverse.Track.DBTrack
         ]
       }
 

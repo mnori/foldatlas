@@ -1,47 +1,21 @@
-// Custom gene loading component
-// Talks to RNA browser endpoint to fetch genome data
-// @author Matthew Norris
+// Ensembl REST API Gene model
+Genoverse.Track.Model.Gene.DBGene = Genoverse.Track.Model.Gene.extend({
 
-// TODO rename to GffSQL
-Genoverse.Track.DBGene = Genoverse.Track.extend({
-  id     : 'genes',
-  name   : 'Genes',
-  height : 200,
-
-  populateMenu: function (feature) {
-    // get the transcript ID
-
-    // do something with the transcript ID
-    console.log(feature)
-  },
-
-  // 2000000: { // This one applies when > 2M base-pairs per screen
-  //   labels : false
-  // },
-  // 100000: {
-  //   labels : false,
-  //   model  : Genoverse.Track.Model.Gene.Ensembl,
-  //   view   : Genoverse.Track.View.Gene.Ensembl
-  // },
-  // 1: { // > 1 base-pair, but less then 100K
-  //   labels : true,
-  //   model  : Genoverse.Track.Model.Transcript.GFF3,
-  //   view   : Genoverse.Track.View.Transcript.Ensembl
-  // }
-
-  2000000: { // This one applies when > 2M base-pairs per screen
-    labels : true,
-    model  : Genoverse.Track.Model.Transcript.DBTranscript,
-    view   : Genoverse.Track.View.Transcript.Ensembl
-  },
-  100000: {
-    labels : true,
-    model  : Genoverse.Track.Model.Transcript.DBTranscript,
-    view   : Genoverse.Track.View.Transcript.Ensembl
-  },
-  1: { // > 1 base-pair, but less then 100K
-    labels : true,
-    model  : Genoverse.Track.Model.Transcript.DBTranscript,
-    view   : Genoverse.Track.View.Transcript.Ensembl
+  url: "http://rnabrowser.dev/browser-data/genes?chr=__CHR__&start=__START__&end=__END__",
+  
+  // The url above responds in json format, data is an array
+  // We assume that parents always preceed children in data array, gene -> transcript -> exon
+  // See rest.ensembl.org/documentation/info/feature_region for more details
+  parseData: function (data) {
+    for (var i = 0; i < data.length; i++) {
+      var feature = data[i];
+      
+      if (feature.feature_type === 'gene' && !this.featuresById[feature.id]) {
+        feature.label       = feature.external_name || feature.id;
+        feature.transcripts = [];
+        
+        this.insertFeature(feature);
+      }
+    }
   }
 });

@@ -61,7 +61,6 @@ var Genoverse = Base.extend({
         dataType : 'script',
         context  : this,
         success  : function () {
-          console.log("It worked!")
           try {
             this.genome = eval(genomeName);
           } catch (e) {

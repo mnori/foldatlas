@@ -13,13 +13,18 @@ def after_request(response):
 	return response
 
 @app.route("/")
-def hello():
+def index():
 	return render_template("index.html", settings=settings)
 
 @app.route("/browser-data/transcripts")
-def test():
+def get_transcripts():
 	browser = GenomeBrowser()
 	return browser.get_transcripts(request)
+
+@app.route("/browser-data/genes")
+def get_genes():
+	browser = GenomeBrowser()
+	return browser.get_genes(request)
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`
@@ -30,6 +35,3 @@ if __name__ == "__main__":
 	else:
 		# dev server: get the party started
 		app.run(host='0.0.0.0', debug=True)
-
-
-
