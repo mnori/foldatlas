@@ -7,9 +7,6 @@ Genoverse.Track.View.Transcript = Genoverse.Track.View.extend({
   lineWidth     : 0.5,
   
   drawFeature: function(transcript, featureContext, labelContext, scale) {
-
-    console.log("drawFeature()")
-
     this.setFeatureColor(transcript);
     
     var exons = (transcript.exons || []).sort(function (a, b) { return a.start - b.start; });

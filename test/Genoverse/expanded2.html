@@ -70,7 +70,10 @@
     <script type="text/javascript" src="js/Track/library/Legend.js"></script>
     <script type="text/javascript" src="js/Track/library/Scaleline.js"></script>
     <script type="text/javascript" src="js/Track/library/Scalebar.js"></script>
-    <script type="text/javascript" src="Gene2.js"></script>
+
+    <!-- bespoke classes go here - order matters! TODO combine into a single file -->
+    <script type="text/javascript" src="/test/genoverse-custom/DBTranscript.js"></script>
+    <script type="text/javascript" src="/test/genoverse-custom/DBGene.js"></script>
 
     <script>
       var genoverseConfig = {
@@ -83,7 +86,7 @@
         plugins   : [ 'controlPanel', 'karyotype', 'trackControls', 'resizer', 'tooltips', 'fileDrop' ],
         tracks    : [
           Genoverse.Track.Scalebar,
-          Genoverse.Track.Gene2, // THIS is what we care about
+          Genoverse.Track.DBGene, // THIS is what we care about
         ]
       }
 

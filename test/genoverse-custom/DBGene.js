@@ -3,13 +3,13 @@
 // @author Matthew Norris
 
 // TODO rename to GffSQL
-Genoverse.Track.Gene2 = Genoverse.Track.extend({
+Genoverse.Track.DBGene = Genoverse.Track.extend({
   id     : 'genes',
   name   : 'Genes',
   height : 200,
 
   populateMenu: function (feature) {
-    alert("Fart!")
+    alert("test!")
   },
 
   // 2000000: { // This one applies when > 2M base-pairs per screen
@@ -28,17 +28,17 @@ Genoverse.Track.Gene2 = Genoverse.Track.extend({
 
   2000000: { // This one applies when > 2M base-pairs per screen
     labels : true,
-    model  : Genoverse.Track.Model.Transcript.Ensembl,
+    model  : Genoverse.Track.Model.Transcript.DBTranscript,
     view   : Genoverse.Track.View.Transcript.Ensembl
   },
   100000: {
     labels : true,
-    model  : Genoverse.Track.Model.Transcript.Ensembl,
+    model  : Genoverse.Track.Model.Transcript.DBTranscript,
     view   : Genoverse.Track.View.Transcript.Ensembl
   },
   1: { // > 1 base-pair, but less then 100K
     labels : true,
-    model  : Genoverse.Track.Model.Transcript.Ensembl,
+    model  : Genoverse.Track.Model.Transcript.DBTranscript,
     view   : Genoverse.Track.View.Transcript.Ensembl
   }
 });

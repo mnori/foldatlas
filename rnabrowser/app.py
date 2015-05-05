@@ -19,75 +19,59 @@ def hello():
 
 @app.route("/test")
 def test():
-	from database import Feature, db_session;
+	from database import Feature, Transcript, db_session;
+	from sqlalchemy import and_
 	import json
 
-	results = db_session.query(Feature).limit(1000).all() 
-	
-	# Ensembl ################################
 	out = []
+
+	chromosome_id = "Chr1"
+	start = 0
+	end = 100000
+
+
+	sql = 	("SELECT *, MIN(start) min_start, MAX(end) max_end "
+			 "FROM feature "
+			 "WHERE chromosome_id = '"+chromosome_id+"' "
+			 "AND start > '"+str(start)+"' "
+			 "AND end < '"+str(end)+"' "
+			 "GROUP BY transcript_id")
+
+	# demonstrates how genes would be done ###########################
+	results = database.engine.execute(sql)
 	for result in results:
 		out.append({
 			"Parent": result.transcript_id, # actually use gene ID instead
-			"assembly_name": "GRCh38", # this should actually be strain name
-			"biotype": "protein_coding", # result.type_id, 
-			"description": None,
-			"start": result.start,
-			"end": result.end,
-			"external_name": result.transcript_id, # probs doesn't matter
-			"feature_type": "transcript", # without this, it won't draw the gene
+			"feature_type": "transcript", # without this, it won't draw
+			"logic_name": "ensembl_havana", # does not work without this label
+			"start": result.min_start,
+			"end": result.max_end,
 			"id": result.transcript_id,
-			"logic_name": "ensembl_havana",
-			"seq_region_name": result.chromosome_id,
-			"source": result.strain_id,
 			"strand": 1, # whether it is + or -??
-			"version": 1 # very unlikely to matter
 		})
+
+	
+
+	# /demonstrates how genes would be done ###########################
+
+	results =  db_session.query(Feature).filter(and_(Feature.start >= start, Feature.end <= end)).all() 
+	for feature in results:
+
+		print(feature)
+
+		out.append({
+			"Parent": feature.transcript_id, # actually use gene ID instead
+			"feature_type": feature.type_id, # without this, it won't draw the gene
+			"logic_name": "ensembl_havana", # does not work without this label
+			"start": feature.start,
+			"end": feature.end,
+			"id": feature.transcript_id+"-"+str(feature.id),
+			"strand": 1, # whether it is + or -??
+		})
+
+
 	buf = json.dumps(out)
 	return buf
-	# /Ensembl ###############################
-
-	# convert results into format that the thingy understands
-
-	# buf = ""
-	# for result in results:
-	# 	buf += result.chromosome_id+"\t"
-	# 	buf += ".\t" # source
-	# 	buf += result.type_id+"\t"
-	# 	buf += str(result.start)+"\t"
-	# 	buf += str(result.end)+"\t"
-	# 	buf += "9\t" # score
-	# 	buf += "+\t" # foward or reverse
-	# 	buf += ".\t" # ???
-	# 	buf += "Parent=Transcript:"+result.transcript_id+"\n" # attribs
-
-	# null+"\t"
-	# buf = json.dumps([
-	# 	'foo', {'bar': ('baz', None, 1.0, 2)}])
-
-	# buf = "["
-
-	# for result in results:
-	# 	buf += "{"
-	# 	buf += "id: \""+result.transcript_id+"\", "
-	# 	buf += "}"
-
-	# buf += "]"
-
-	# line = "{"
-	# 	"id: "
-
-	# feature.id     = fields.slice(0, 5).join('|');
- #    feature.start  = parseInt(fields[3], 10);
- #    feature.end    = parseInt(fields[4], 10);
- #    feature.source = fields[1];
- #    feature.type   = fields[2];
- #    feature.score  = fields[5];
- #    feature.strand = fields[6] + '1';
-
-
-	return buf
-
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`
@@ -99,5 +83,6 @@ if __name__ == "__main__":
 	else:
 		# dev server: get the party started
 		app.run(host='0.0.0.0', debug=True)
+
 
 
