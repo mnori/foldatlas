@@ -50,14 +50,10 @@ def test():
 			"strand": 1, # whether it is + or -??
 		})
 
-	
-
-	# /demonstrates how genes would be done ###########################
-
-	results =  db_session.query(Feature).filter(and_(Feature.start >= start, Feature.end <= end)).all() 
+	results =  db_session.query(Feature).filter(and_(Feature.start >= start, Feature.end <= end, Feature.chromosome_id == chromosome_id)).all() 
 	for feature in results:
-
-		print(feature)
+		
+		out
 
 		out.append({
 			"Parent": feature.transcript_id, # actually use gene ID instead

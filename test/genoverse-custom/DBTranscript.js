@@ -22,7 +22,7 @@ Genoverse.Track.Model.Transcript.DBTranscript = Genoverse.Track.Model.Transcript
           this.featuresById[feature.Parent].exons.push(feature);
           this.featuresById[feature.Parent].exons[feature.id] = feature;
         }
-      } else if (feature.feature_type === 'cds' && this.featuresById[feature.Parent]) {
+      } else if (feature.feature_type === 'CDS' && this.featuresById[feature.Parent]) {
         feature.id = feature.start + '-' + feature.end;
         
         if (!this.featuresById[feature.Parent].cds[feature.id]) {
