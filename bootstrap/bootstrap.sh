@@ -18,10 +18,14 @@ function install() {
 	a2enmod proxy
 	a2enmod proxy_http 
 
-	mkdir /var/www/static
-	echo "You've reached the static subdomain" > /var/www/static/index.html
+	# copy apache config file
 	cp /vagrant/bootstrap/000-default_vagrant.conf /etc/apache2/sites-available/000-default.conf
-	ln -s /vagrant/test /var/www/static/test
+
+	# setup static folder
+	ln -s /vagrant/static /var/www/static
+
+	# echo "You've reached the static subdomain" > /var/www/static/index.html
+	# ln -s /vagrant/test /var/www/static/test
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing MySQL specific packages and settings"

@@ -6,6 +6,9 @@ genomes_sauce_folder = "/vagrant/sauce_data"
 
 base_path = "/vagrant/rnabrowser"
 
+static_base = "http://static.rnabrowser.dev"
+genoverse_base = static_base+"/genoverse"
+
 # Strain metadata. This is used to parse from sauce files when hydrating the DB.
 strains = [
 	{

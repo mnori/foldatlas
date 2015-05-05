@@ -23,7 +23,7 @@ Add these lines to your `hosts` file, typically located in /etc/hosts on *nix ba
     vagrant ssh
     rb-runDevServer
 
-This runs a Flask development web server. Go to http://rnabrowser.dev:5000 to see the site running. The server will keep going until you press `CTRL-C` in the terminal.
+This runs a Flask development web server. Go to http://rnabrowser.dev to see the site running. The server will keep going until you press `CTRL-C` in the terminal.
 
 ## Resetting the database
 
