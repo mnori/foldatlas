@@ -35,9 +35,9 @@ function install() {
 	echo "phpmyadmin phpmyadmin/mysql/admin-pass password $DBPASSWD" | debconf-set-selections
 	echo "phpmyadmin phpmyadmin/mysql/app-pass password $DBPASSWD" | debconf-set-selections
 	echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect none" | debconf-set-selections
-	apt-get -y install mysql-server phpmyadmin > /dev/null 2>&1
+	apt-get -y install mysql-server phpmyadmin > /dev/null
 	a2disconf phpmyadmin # switch off the PMA conf - not needed
-	sudo service apache2 restart
+	service apache2 restart
 	echo "create database rnabrowser" | mysql -u root -p$DBPASSWD
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -67,7 +67,7 @@ function install() {
 	pip3 install Flask-SQLAlchemy
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-	pretty_print "Grabbing sauce Data"
+	pretty_print "Grabbing sauce data"
 	dl_sauce
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -221,9 +221,9 @@ function fetch_raw() {
 function install_apache_wsgi() {
 	pretty_print "Installing Apache WSGI"
 	apt-get install -y apache2
-	sudo apt-get install -y libapache2-mod-wsgi
+	apt-get install -y libapache2-mod-wsgi
 	cp /vagrant/bootstrap/000-default.conf /etc/apache2/sites-available/000-default.conf
-	sudo service apache2 restart
+	service apache2 restart
 }
 
 # get the party started
