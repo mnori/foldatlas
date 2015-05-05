@@ -9,7 +9,10 @@ Genoverse.Track.DBGene = Genoverse.Track.extend({
   height : 200,
 
   populateMenu: function (feature) {
-    alert("test!")
+    // get the transcript ID
+
+    // do something with the transcript ID
+    console.log(feature)
   },
 
   // 2000000: { // This one applies when > 2M base-pairs per screen

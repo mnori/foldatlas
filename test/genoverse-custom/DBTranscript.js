@@ -1,8 +1,10 @@
 // Ensembl REST API Transcript model
 
 Genoverse.Track.Model.Transcript.DBTranscript = Genoverse.Track.Model.Transcript.extend({
-  url      : 'http://rnabrowser.dev/test',
-  // url              : '//rest.ensembl.org/overlap/region/human/__CHR__:__START__-__END__?feature=transcript;feature=exon;feature=cds;content-type=application/json',
+
+  // TODO pull this from config
+  // url      : 'http://rnabrowser.dev/test',
+  url: "http://rnabrowser.dev/test?chr=__CHR__&start=__START__&end=__END__",
   // dataRequestLimit : 5000000, // As per e! REST API restrictions
   
   // The url above responds in json format, data is an array

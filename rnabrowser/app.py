@@ -1,5 +1,4 @@
-from flask import Flask
-from flask import render_template
+from flask import Flask, render_template, request
 from sys import argv
 
 import settings
@@ -23,12 +22,17 @@ def test():
 	from sqlalchemy import and_
 	import json
 
+	# print(request.form)
+
 	out = []
 
-	chromosome_id = "Chr1"
-	start = 0
-	end = 100000
+	chromosome_id = "Chr"+str(int(request.args.get('chr'))) # SQL-injection safe
+	start = int(request.args.get('start'))
+	end = int(request.args.get('end'))
 
+	print("chr: "+chromosome_id)
+	print("start: "+str(start))
+	print("end: "+str(end))
 
 	sql = 	("SELECT *, MIN(start) min_start, MAX(end) max_end "
 			 "FROM feature "
