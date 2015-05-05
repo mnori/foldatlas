@@ -33,7 +33,5 @@ Genoverse.Track.Model.Transcript.DBTranscript = Genoverse.Track.Model.Transcript
         }
       }
     }
-    console.log(this.featuresById);
-
   }
 });

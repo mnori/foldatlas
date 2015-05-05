@@ -65,7 +65,10 @@ Genoverse.Track.Controller = Base.extend({
     this.menus            = $();
     this.container        = $('<div class="gv-track-container">').appendTo(this.browser.wrapper);
     this.scrollContainer  = $('<div class="gv-scroll-container">').appendTo(this.container);
-    this.imgContainer     = $('<div class="gv-image-container">').width(this.width);
+
+    // edited to get rid of scrolling bug
+    this.imgContainer     = $('<div class="gv-image-container">').width(Math.round(this.width));
+    
     this.messageContainer = $('<div class="gv-message-container"><div class="gv-messages"></div><span class="gv-control gv-collapse">&laquo;</span><span class="gv-control gv-expand">&raquo;</span></div>').appendTo(this.container);
     this.label            = $('<li>').appendTo(this.browser.labelContainer).height(this.prop('height')).data('track', this.track);
     this.context          = $('<canvas>')[0].getContext('2d');
@@ -274,7 +277,6 @@ Genoverse.Track.Controller = Base.extend({
 
   setWidth: function (width) {
     var track = this.track;
-
     $.each([ this, track, track.model, track.view ], function () {
       this.width = width;
     });
