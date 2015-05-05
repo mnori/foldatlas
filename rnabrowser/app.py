@@ -57,8 +57,6 @@ def test():
 	results =  db_session.query(Feature).filter(and_(Feature.start >= start, Feature.end <= end, Feature.chromosome_id == chromosome_id)).all() 
 	for feature in results:
 		
-		out
-
 		out.append({
 			"Parent": feature.transcript_id, # actually use gene ID instead
 			"feature_type": feature.type_id, # without this, it won't draw the gene

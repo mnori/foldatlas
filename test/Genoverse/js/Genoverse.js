@@ -55,11 +55,13 @@ var Genoverse = Base.extend({
     if (typeof this.genome === 'string') {
       var genomeName = this.genome;
 
+      console.log("Getting: ["+this.origin + 'js/genomes/' + genomeName + '.js]')
       return $.ajax({
         url      : this.origin + 'js/genomes/' + genomeName + '.js',
         dataType : 'script',
         context  : this,
         success  : function () {
+          console.log("It worked!")
           try {
             this.genome = eval(genomeName);
           } catch (e) {

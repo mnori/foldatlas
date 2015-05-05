@@ -79,14 +79,15 @@
       var genoverseConfig = {
         container : '#genoverse',
         width     : 800,
-        genome    : 'grch38',
+        // genome    : "grch38",
+        genome    : "db",
         chr       : 1,
-        start     : 32889611,
-        end       : 32973805,
+        start     : 1,
+        end       : 50000,
         plugins   : [ 'controlPanel', 'karyotype', 'trackControls', 'resizer', 'tooltips', 'fileDrop' ],
         tracks    : [
           Genoverse.Track.Scalebar,
-          Genoverse.Track.DBGene, // THIS is what we care about
+          Genoverse.Track.DBGene,
         ]
       }
 
