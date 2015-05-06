@@ -24,9 +24,6 @@ function install() {
 	# setup static folder
 	ln -s /vagrant/static /var/www/static
 
-	# echo "You've reached the static subdomain" > /var/www/static/index.html
-	# ln -s /vagrant/test /var/www/static/test
-
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing MySQL specific packages and settings"
 	export DEBIAN_FRONTEND=noninteractive
@@ -47,13 +44,6 @@ function install() {
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing git"
 	apt-get install -y git
-	
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-	# actually - use hacked genoverse
-	
-	# pretty_print "Installing Genoverse"
-	# cd /usr/share && git clone https://github.com/wtsi-web/Genoverse.git
-	# ln -s /usr/share/Genoverse /var/www/static/Genoverse
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing pip"
@@ -143,8 +133,8 @@ function dl_sauce() {
 	fetch_raw $urlbase "TAIR10_chr3.fas"
 	fetch_raw $urlbase "TAIR10_chr4.fas"
 	fetch_raw $urlbase "TAIR10_chr5.fas"
-	fetch_raw $urlbase "TAIR10_chrC.fas"
-	fetch_raw $urlbase "TAIR10_chrM.fas"
+	# fetch_raw $urlbase "TAIR10_chrC.fas" # DLing chloroplast and mitochondrial genomes is pointless.
+	# fetch_raw $urlbase "TAIR10_chrM.fas"
 
 	# Combine all the chromosome files together - this will make the parsing easier
 	cat TAIR10_chr* > TAIR10_combined.fas

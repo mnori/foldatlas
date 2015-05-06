@@ -9,10 +9,13 @@ base_path = "/vagrant/rnabrowser"
 static_base = "http://static.rnabrowser.dev"
 genoverse_base = static_base+"/genoverse"
 
+# this is the one that will be displayed by the genome browser.
+reference_strain_id = "Col_0"
+
 # Strain metadata. This is used to parse from sauce files when hydrating the DB.
 strains = [
 	{
-		"name": "Col-0",
+		"name": "Col_0",
 		"description": "TAIR 10 Columbia reference ecotype",
 		"sequence_filename": "TAIR10_combined.fas",
 		"annotation_filename": "consolidated_annotation.Col_0.gff3"

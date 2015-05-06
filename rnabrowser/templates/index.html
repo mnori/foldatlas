@@ -10,6 +10,16 @@
     <link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/tooltips.css" />
   </head>
   <body>
+
+    
+        
+    Select your chromosome:     
+    <select id="chromosome-selector">
+    {% for chromosome in chromosomes %}
+        <option value="{{ chromosome.chromosome_id }}">{{ chromosome.chromosome_id }}</option>
+    {% endfor %}
+    </select><br /><br />
+
     <div id="genoverse"></div>
 
     <script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery.js"></script>
@@ -76,24 +86,37 @@
     <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBGene.js"></script>
     <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBTrack.js"></script>
 
+    <script type="text/javascript">
+        window.genoverseConfig = {
+            container : '#genoverse',
+            width     : 800,
+            genome    : {
 
-    <script>
-      var genoverseConfig = {
-        container : '#genoverse',
-        width     : 800,
-        // genome    : "grch38",
-        genome    : "db",
-        chr       : 1,
-        start     : 1,
-        end       : 50000,
-        plugins   : [ 'controlPanel', 'karyotype', 'trackControls', 'resizer', 'tooltips', 'fileDrop' ],
-        tracks    : [
-          Genoverse.Track.Scalebar,
-          Genoverse.Track.DBTrack
-        ]
-      }
+            {% for chromosome in chromosomes %}
+                {{ chromosome.int_id }}: {
+                    "size": {{ chromosome.length }},
+                    "bands": [
+                        {
+                            "id": "{{ chromosome.chromosome_id }}",
+                            "start": 1,
+                            "end": {{ chromosome.length }},
+                            "type": "gpos50"
+                        }
+                    ]
+                },
+            {% endfor %}
 
-      $(document).ready(function () { window.genoverse = new Genoverse(genoverseConfig); });
+            },
+            chr       : 1,
+            start     : 1,
+            end       : 50000,
+            plugins   : [ 'controlPanel', 'karyotype', 'trackControls', 'resizer', 'tooltips', 'fileDrop' ],
+            tracks    : [
+                Genoverse.Track.Scalebar,
+                Genoverse.Track.DBTrack
+            ]
+        }
     </script>
+    <script type="text/javascript" src="{{ settings.static_base }}/rnabrowser/genome-browser.js"></script>
   </body>
 </html>

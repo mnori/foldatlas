@@ -1,7 +1,6 @@
 from database import Feature, Transcript, db_session;
 from sqlalchemy import and_
-import json
-import database
+import json, database, settings
 
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
@@ -48,8 +47,7 @@ class GenomeBrowser():
                 "strand": 1, # whether it is + or -??
             })
 
-        buf = json.dumps(out)
-        return buf
+        return json.dumps(out)
 
     def get_genes(self, request):
         
@@ -72,18 +70,36 @@ class GenomeBrowser():
             out.append({ 
                 "feature_type": "gene", # without this, it won't draw
                 "logic_name": "who cares?",
+
                 # this is a hack - just to make it display properly. 
-                # @see Genoverse.Track.View.Gene.Ensembl for colour coding sh
+                # @see Genoverse.Track.View.Gene.Ensembl for colour coding shiz
                 "biotype" : "protein coding", 
                 "id": result.gene_id,
                 "start": result.min_start,
                 "end": result.max_end,
-                "strand": 1, # whether it is + or -??
+                "strand": 1, # whether it is + or -?? this isn't actually used by the looks of things
             })        
 
-        buf = json.dumps(out)
-        return buf
+        return json.dumps(out)
 
+    # Fetch chromosome IDs and their lengths. Used for chromosome menu and 
+    # also Genoverse's chromosome scrollbar display
+    def get_chromosomes(self):
 
+        sql = ( "SELECT chromosome_id, CHAR_LENGTH(sequence) length FROM chromosome "
+                "WHERE strain_id = '"+settings.reference_strain_id+"' "
+                "ORDER BY chromosome_id ASC")
+
+        results = database.engine.execute(sql)
+
+        out = []
+        for result in results:
+            out.append({
+                "chromosome_id": result.chromosome_id,
+                "length": result.length,
+                "int_id": int(result.chromosome_id[3])
+            })
+
+        return out
 
     

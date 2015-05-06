@@ -125,8 +125,16 @@ Genoverse.Track.Controller = Base.extend({
     var f = this[e.target.className === 'gv-labels' ? 'labelPositions' : 'featurePositions'].search({ x: x, y: y, w: 1, h: 1 }).sort(function (a, b) { return a.sort - b.sort; })[0];
 
     if (f) {
-      this.browser.makeMenu(f, e, this.track);
+      this.onFeatureClick(f)
     }
+  },
+
+  // f is the feature 
+  onFeatureClick: function(feature) {
+    // it might be a gene or a feature.
+    // if it's a gene, zoom to encapsulate all the gene of interest's transcripts.
+    // if it's a transcript, call RnaBrowser.loadTranscript()
+    alert("feature: ["+feature.id+"]")
   },
 
   // FIXME: messages are now hidden/shown instead of removed/added. This will cause a problem if a new message arrives with the same code as one that already exists.
