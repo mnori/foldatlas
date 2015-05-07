@@ -22,11 +22,11 @@ Genoverse.Track.DBTrack = Genoverse.Track.extend({
   100000: { // mid range zoom - show genes as bars
     labels : false,
     model  : Genoverse.Track.Model.Gene.DBGene,
-    view   : Genoverse.Track.View.Gene.Ensembl
+    view   : Genoverse.Track.View.Gene.DBGene
   },
   1: { // > 1 base-pair, but less then 100K
     labels : true,
     model  : Genoverse.Track.Model.Transcript.DBTranscript,
-    view   : Genoverse.Track.View.Transcript.Ensembl
+    view   : Genoverse.Track.View.Transcript.DBTranscript
   }
 });

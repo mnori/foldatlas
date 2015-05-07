@@ -22,29 +22,30 @@ class GenomeBrowser():
                  "AND end < '"+str(end)+"' "
                  "GROUP BY transcript_id")
 
+        # Add the transcript rows to the output
         results = database.engine.execute(sql)
         for result in results:
             out.append({
-                "Parent": result.transcript_id, # actually use gene ID instead
+                "Parent": result.transcript_id,
                 "feature_type": "transcript", # without this, it won't draw
-                "logic_name": "ensembl_havana", # does not work without this label
+                "direction": result.direction,
                 "start": result.min_start,
                 "end": result.max_end,
-                "id": result.transcript_id,
-                "strand": 1, # whether it is + or -??
+                "id": result.transcript_id
             })
 
-        results =  db_session.query(Feature).filter(and_(Feature.start >= start, Feature.end <= end, Feature.chromosome_id == chromosome_id)).all() 
+        # Use the ORM to get feature details
+        results = db_session.query(Feature).filter(and_(Feature.start >= start, Feature.end <= end, Feature.chromosome_id == chromosome_id)).all() 
+
+        # Add transcript feature rows to the output
         for feature in results:
-            
             out.append({
-                "Parent": feature.transcript_id, # actually use gene ID instead
-                "feature_type": feature.type_id, # without this, it won't draw the gene
-                "logic_name": "ensembl_havana", # does not work without this label
+                "Parent": feature.transcript_id,
+                "feature_type": feature.type_id,
+                "direction": result.direction,
                 "start": feature.start,
                 "end": feature.end,
-                "id": feature.transcript_id+"-"+str(feature.id),
-                "strand": 1, # whether it is + or -??
+                "id": feature.transcript_id+"-"+str(feature.id)
             })
 
         return json.dumps(out)
@@ -65,15 +66,12 @@ class GenomeBrowser():
                 "AND end < '"+str(end)+"' "
                 "GROUP BY transcript.gene_id")
 
+        # Add gene rows to the output
         results = database.engine.execute(sql)
         for result in results:
             out.append({ 
                 "feature_type": "gene", # without this, it won't draw
-                "logic_name": "who cares?",
-
-                # this is a hack - just to make it display properly. 
-                # @see Genoverse.Track.View.Gene.Ensembl for colour coding shiz
-                "biotype" : "protein coding", 
+                "direction": result.direction,
                 "id": result.gene_id,
                 "start": result.min_start,
                 "end": result.max_end,
@@ -82,8 +80,7 @@ class GenomeBrowser():
 
         return json.dumps(out)
 
-    # Fetch chromosome IDs and their lengths. Used for chromosome menu and 
-    # also Genoverse's chromosome scrollbar display
+    # Fetch chromosome IDs and their lengths. Used for chromosome menu and also initialising the genome browser.
     def get_chromosomes(self):
 
         sql = ( "SELECT chromosome_id, CHAR_LENGTH(sequence) length FROM chromosome "

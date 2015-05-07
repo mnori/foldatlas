@@ -131,10 +131,7 @@ Genoverse.Track.Controller = Base.extend({
 
   // f is the feature 
   onFeatureClick: function(feature) {
-    // it might be a gene or a feature.
-    // if it's a gene, zoom to encapsulate all the gene of interest's transcripts.
-    // if it's a transcript, call RnaBrowser.loadTranscript()
-    alert("feature: ["+feature.id+"]")
+    window.browserController.selectTranscript(feature.id)
   },
 
   // FIXME: messages are now hidden/shown instead of removed/added. This will cause a problem if a new message arrives with the same code as one that already exists.

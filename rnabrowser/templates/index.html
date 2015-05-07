@@ -21,6 +21,7 @@
     </select><br /><br />
 
     <div id="genoverse"></div>
+    <div id="transcript-data"></div>
 
     <script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery.js"></script>
     <script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery-ui.js"></script>
@@ -84,8 +85,9 @@
     <!-- bespoke classes go here - order matters! TODO combine into a single file -->
     <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBTranscript.js"></script>
     <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBGene.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBGeneView.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBTranscriptView.js"></script>
     <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBTrack.js"></script>
-
     <script type="text/javascript">
         window.genoverseConfig = {
             container : '#genoverse',
@@ -116,7 +118,14 @@
                 Genoverse.Track.DBTrack
             ]
         }
+
+        window.browserControllerConfig = {
+            staticBase: "{{ settings.static_base }}"
+        }
+
     </script>
-    <script type="text/javascript" src="{{ settings.static_base }}/rnabrowser/genome-browser.js"></script>
+
+    <script type="text/javascript" src="{{ settings.genoverse_base }}/jquery-2.1.4.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base }}/rnabrowser/main.js"></script>
   </body>
 </html>

@@ -224,7 +224,8 @@ class DBHydrator():
                             strain_id=strain_id,
                             chromosome_id=feature_row[0],
                             start=feature_row[3],
-                            end=feature_row[4]
+                            end=feature_row[4],
+                            direction="forward" if feature_row[6] == "+" else "reverse"
                         ))
 
                     else:

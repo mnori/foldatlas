@@ -18,15 +18,21 @@ def index():
 	chromosomes = browser.get_chromosomes()
 	return render_template("index.html", settings=settings, chromosomes=chromosomes)
 
-@app.route("/browser-data/genes")
+@app.route("/ajax/genome_browser/genes")
 def get_genes():
 	browser = GenomeBrowser()
 	return browser.get_genes(request)
 
-@app.route("/browser-data/transcripts")
+@app.route("/ajax/genome-browser/transcripts")
 def get_transcripts():
 	browser = GenomeBrowser()
 	return browser.get_transcripts(request)
+
+@app.route("/ajax/transcript/<transcript_id>") # add transcript ID to the URL
+def get_transcript(transcript_id):
+	buf = "transcript_id: ["+transcript_id+"]"
+	return buf
+	
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`

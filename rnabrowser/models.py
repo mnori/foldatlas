@@ -92,14 +92,16 @@ class Feature(Base):
     chromosome_id = Column(String(256), nullable=False)
     start = Column(Integer, nullable=False)
     end = Column(Integer, nullable=False)
+    direction = Column(Enum("forward", "reverse"), nullable=False)
 
-    def __init__(self, transcript_id=None, type_id=None, strain_id=None, chromosome_id=None, start=None, end=None):
+    def __init__(self, transcript_id=None, type_id=None, strain_id=None, chromosome_id=None, start=None, end=None, direction=None):
         self.transcript_id = transcript_id
         self.type_id = type_id
         self.strain_id = strain_id
         self.chromosome_id = chromosome_id
         self.start = start
         self.end = end
+        self.direction = direction
 
     def __repr__(self):
         return '<Feature %r>' % (self.id)
