@@ -1,10 +1,13 @@
 # Define some shorthand aliases to make life easier
 # @author Matthew Norris <Matthew.Norris@jic.ac.uk>
 
-bash /vagrant/bootstrap/functions.sh
+. /vagrant/bootstrap/functions.sh
 
 # Tail apache error log
 alias rb-tail='sudo tail -f /var/log/apache2/error.log'
+
+# DL sauce
+alias rb-dlSauce='dl_sauce'
 
 # Hydrate database
 alias rb-hydrateDB='hydrate_db'

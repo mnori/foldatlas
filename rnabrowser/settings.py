@@ -19,5 +19,12 @@ strains = [
 		"description": "TAIR 10 Columbia reference ecotype",
 		"sequence_filename": "TAIR10_combined.fas",
 		"annotation_filename": "consolidated_annotation.Col_0.gff3"
+	}, {
+		"name": "Bur_0",
+		"description": "Burren strain, sequenced by the 19 Genomes project",
+		"sequence_filename": "bur_0.v7.PR_in_lowercase.fas",
+		"annotation_filename": "consolidated_annotation.Bur_0.gff3"
 	}
 ]
+
+ignored_chromosomes = set(["chloroplast", "mitochondria"])

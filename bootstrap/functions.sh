@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function hydrate_db() {
 	pretty_print "Hydrating database"
 	cd /vagrant/rnabrowser
@@ -34,8 +36,8 @@ function dl_sauce() {
 	fetch_extract_gff3 $urlbase "consolidated_annotation.Col_0.Col_0"
 	fetch_extract_gff3 $urlbase "consolidated_annotation.Col_0"
 
-	# fetch_extract_gff3 $urlbase "consolidated_annotation.Bur_0.Col_0"
-	# fetch_extract_gff3 $urlbase "consolidated_annotation.Bur_0"
+	fetch_extract_gff3 $urlbase "consolidated_annotation.Bur_0.Col_0"
+	fetch_extract_gff3 $urlbase "consolidated_annotation.Bur_0"
 	# fetch_extract_gff3 $urlbase "consolidated_annotation.Can_0.Col_0"
 	# fetch_extract_gff3 $urlbase "consolidated_annotation.Can_0"
 	
@@ -86,13 +88,10 @@ function dl_sauce() {
 	# Combine all the chromosome files together - this will make the parsing easier
 	cat TAIR10_chr* > TAIR10_combined.fas
 
-	# we need to concatenate each file 
-
 	# Grab chromosomal sequences for each of the 18 other strains
-	# commented out to make it quicker for testing
+	urlbase="http://mus.well.ox.ac.uk/19genomes/fasta/MASKED/"
 
-	# urlbase="http://mus.well.ox.ac.uk/19genomes/fasta/MASKED/"
-	# fetch_raw $urlbase "bur_0.v7.PR_in_lowercase.fas"
+	fetch_raw $urlbase "bur_0.v7.PR_in_lowercase.fas"
 	# fetch_raw $urlbase "can_0.v7.PR_in_lowercase.fas"
 	# fetch_raw $urlbase "ct_1.v7.PR_in_lowercase.fas"
 	# fetch_raw $urlbase "edi_0.v7.PR_in_lowercase.fas"

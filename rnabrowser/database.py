@@ -21,7 +21,6 @@ import models
 from models import Strain, Gene, Transcript, Feature
 
 def reset_db():
-    print("reset_db() invoked")
     try:
         print("Rebuilding schema...")
         Base.metadata.drop_all(bind=engine)
@@ -54,9 +53,9 @@ class DBHydrator():
 
     sequence_id = 0
 
-    # these guys are just for debugging purposes
-    gene_limit = None
-    chr_limit = None
+    # these are just for debugging purposes
+    gene_limit = 100
+    chr_limit = 1
 
     # Use the genome sequence and annotation files to populate the database.
     def hydrate(self):       
@@ -66,7 +65,10 @@ class DBHydrator():
     def hydrate_strain(self, strain_config):
         self.sequences_to_write = []
         self.transcript_sequences_to_write = []
-        feature_rows = []
+        # feature_rows = []
+        self.transcript_ids_seen_this_strain = set()
+
+        print("Hydrating strain ["+strain_config["name"]+"]")
 
         # add the strain
         strain = Strain(id=strain_config["name"], description=strain_config["description"])
@@ -88,6 +90,10 @@ class DBHydrator():
 
         for record in SeqIO.parse(filepath, "fasta"): # loop through chromosomes
             chr_id = record.id
+            
+            if (chr_id in settings.ignored_chromosomes):
+                continue
+
             seq_str = str(record.seq)
             len_seq_str = self.chr_limit if self.chr_limit != None else len(seq_str)
 

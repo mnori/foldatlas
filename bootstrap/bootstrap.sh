@@ -1,9 +1,10 @@
+#!/bin/bash
 # Bootstrap for vagrant browser server
 # @author Matthew Norris
 
 DBPASSWD="vagrant"
 
-bash /vagrant/bootstrap/functions.sh
+. /vagrant/bootstrap/functions.sh
 
 # Installation stuff goes here.
 function install() {
