@@ -3,7 +3,7 @@
 function hydrate_db() {
 	pretty_print "Hydrating database"
 	cd /vagrant/rnabrowser
-	python3 app.py resetdb
+	python3 app.py hydratedb
 }
 
 function export_db() {

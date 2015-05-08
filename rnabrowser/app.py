@@ -36,9 +36,9 @@ def get_transcript(transcript_id):
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`
-	if (len(argv) > 1 and argv[1] == "resetdb"):
+	if (len(argv) > 1 and argv[1] == "hydratedb"):
 		# reset the database
-		database.reset_db()
+		database.hydrate_db()
 		
 	else:
 		# dev server: get the party started

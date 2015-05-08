@@ -4,11 +4,11 @@
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:vagrant@127.0.0.1/rnabrowser?charset=utf8&use_unicode=0'
 # db = SQLAlchemy(app)
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from Bio import SeqIO
-
+from Bio.Seq import Seq
 import settings
 
 engine = create_engine(settings.database_uri, convert_unicode=True)
@@ -20,20 +20,21 @@ import models
 
 from models import Strain, Gene, Transcript, Feature
 
-def reset_db():
+def hydrate_db():
     try:
         print("Rebuilding schema...")
         Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(bind=engine)
         print("...done.")
-        DBHydrator().hydrate()
+        SequenceHydrator().hydrate() # add the annotations
+        TranscriptAligner().align() # make the alignments
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
         print(str(e).replace("\\n", "\n").replace("\\t", "\t"))
         raise e
 
 # Parses genome sequence .fa and annotation .gff3 files into the database.
-class DBHydrator():
+class SequenceHydrator():
 
     # how many genes to process before committing rows to the database.
     gene_chunk_size = 2500 
@@ -53,19 +54,18 @@ class DBHydrator():
 
     sequence_id = 0
 
-    # these are just for debugging purposes
+    # how many genes to process
     gene_limit = 100
-    chr_limit = 1
+
+    # how much chromosome sequence to add, in bp
+    bp_limit = None
 
     # Use the genome sequence and annotation files to populate the database.
-    def hydrate(self):       
+    def hydrate(self):
         for strain in settings.strains:
             self.hydrate_strain(strain)
 
     def hydrate_strain(self, strain_config):
-        self.sequences_to_write = []
-        self.transcript_sequences_to_write = []
-        # feature_rows = []
         self.transcript_ids_seen_this_strain = set()
 
         print("Hydrating strain ["+strain_config["name"]+"]")
@@ -85,27 +85,31 @@ class DBHydrator():
     # Therefore raw SQL statements are used to gradually append chunks of sequence data into the DB fields.
     def hydrate_chrosomomes(self, strain_config):
 
+        total_test = ""
+
         print("Adding chromosomes...")
         filepath = settings.genomes_sauce_folder+"/"+strain_config["sequence_filename"]
 
         for record in SeqIO.parse(filepath, "fasta"): # loop through chromosomes
             chr_id = record.id
-            
+
             if (chr_id in settings.ignored_chromosomes):
                 continue
 
             seq_str = str(record.seq)
-            len_seq_str = self.chr_limit if self.chr_limit != None else len(seq_str)
+            len_seq_str = self.bp_limit if self.bp_limit != None else len(seq_str)
 
             chunk = seq_str[0:len_seq_str if len_seq_str <= self.seq_chunk_size else self.seq_chunk_size]
 
             # Insert the Chromosome row
-            engine.execute(
+            db_session.execute(
                 "INSERT INTO chromosome SET"
                 "   strain_id = '"+strain_config["name"]+"',"
                 "   chromosome_id = '"+chr_id+"',"
                 "   sequence = '"+chunk+"'"
             )
+            db_session.commit()
+            total_test += chunk
 
             pos = self.seq_chunk_size
 
@@ -117,18 +121,37 @@ class DBHydrator():
 
                 chunk = seq_str[pos:end]
 
-                engine.execute(
+                db_session.execute(
                     "UPDATE chromosome SET"
                     "   sequence = CONCAT(sequence, '"+chunk+"') "
                     "WHERE strain_id = '"+strain_config["name"]+"' "
                     "AND chromosome_id = '"+chr_id+"'"
                 )
+                db_session.commit()
+                total_test += chunk
 
                 if end == len_seq_str:
                     break
                 pos += self.seq_chunk_size
-            print("Added ["+chr_id+"]")
 
+            db_session.commit()
+
+            print("Added ["+chr_id+"]")
+            
+            
+            # f = open("test.fa", "w")
+            # f.write(total_test)
+            # f.close()
+
+            exit()
+
+
+            # exit()
+
+
+
+        print("Finished adding chromosomes to ["+strain_config["name"]+"]")
+        # exit()
 
     def hydrate_genes(self, strain_config):
         genes_added = 0
@@ -263,3 +286,73 @@ class DBHydrator():
             if (entry_bits[0] == key):
                 return ":".join(entry_bits[1:]) # we need all of the bits in the array
         return None
+
+# Class for doing alignments, one run per transcript.
+class TranscriptAligner():
+
+    def align(self):
+        transcript_ids = self.fetch_transcript_ids()
+        for transcript_id in transcript_ids:
+            self.process_transcript_id(transcript_id)
+
+
+    def process_transcript_id(self, transcript_id):
+        # given the transcript ID, fetch the feature sequences in the correct order.
+        sql = """
+            SELECT 
+                feature.strain_id, 
+                SUBSTR(chromosome.sequence, feature.start, feature.end - feature.start) seq
+            FROM chromosome, feature
+            WHERE 
+                feature.strain_id = chromosome.strain_id AND
+                feature.chromosome_id = chromosome.chromosome_id AND
+                feature.type_id = 'exon' AND
+                feature.transcript_id = '{0}'
+            ORDER BY feature.strain_id, start
+        """
+        sql = sql.format(transcript_id)
+
+        # print(sql)
+        # exit()
+
+        results = engine.execute(sql)
+
+        # let's create BioPython sequence objects here
+        transcript_seqs = {}
+        for row in results:
+            strain_id = row["strain_id"]
+            if strain_id  not in transcript_seqs:
+                transcript_seqs[strain_id] = Seq("")
+
+            transcript_seqs[strain_id] += row["seq"]
+
+        # Does 
+        # if strain_id != "Col_0":
+
+        # if (transcript_id == "AT1G01010"):
+        for strain_id in transcript_seqs:
+            print("transcript_id: ["+transcript_id+"]")
+            print("strain_id: ["+strain_id+"]")
+            print("seq: ["+transcript_seqs[strain_id]+"]")
+        
+
+        exit()
+
+        # concatenate the feature sequences together
+
+
+        # if direction is reverse, do reverse-complement
+
+
+    # Fetch all the transcript IDs from the database.
+    def fetch_transcript_ids(self):
+        transcript_ids = set()
+        sql = "SELECT id FROM transcript"
+        rows = engine.execute(sql)
+        for row in rows:
+            transcript_ids.add(row["id"])
+
+        return transcript_ids
+
+
+        
