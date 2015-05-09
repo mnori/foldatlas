@@ -9,7 +9,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from Bio import SeqIO
 from Bio.Seq import Seq
-import settings
+import settings, os
 
 engine = create_engine(settings.database_uri, convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
@@ -82,73 +82,88 @@ class SequenceHydrator():
         self.hydrate_genes(strain_config)
 
     # Adding chromosomes to the DB is a little bit tricky, since the sequences are huge.
-    # Therefore raw SQL statements are used to gradually append chunks of sequence data into the DB fields.
+    # Therefore a LOAD DATA INFILE strategy is used.
     def hydrate_chrosomomes(self, strain_config):
-
-        total_test = ""
 
         print("Adding chromosomes...")
         filepath = settings.genomes_sauce_folder+"/"+strain_config["sequence_filename"]
 
         for record in SeqIO.parse(filepath, "fasta"): # loop through chromosomes
+
+            # Save the chromosome data to a text file
             chr_id = record.id
 
             if (chr_id in settings.ignored_chromosomes):
                 continue
 
             seq_str = str(record.seq)
-            len_seq_str = self.bp_limit if self.bp_limit != None else len(seq_str)
+            temp_file = open(settings.temp_db_file, "w")
+            temp_file.write(strain_config["name"]+"\t"+chr_id+"\t"+seq_str)
+            temp_file.close()
 
-            chunk = seq_str[0:len_seq_str if len_seq_str <= self.seq_chunk_size else self.seq_chunk_size]
-
-            # Insert the Chromosome row
-            db_session.execute(
-                "INSERT INTO chromosome SET"
-                "   strain_id = '"+strain_config["name"]+"',"
-                "   chromosome_id = '"+chr_id+"',"
-                "   sequence = '"+chunk+"'"
-            )
+            # Load the file into the DB
+            sql = """
+                LOAD DATA LOCAL INFILE '/tmp/tmp.txt'
+                REPLACE INTO TABLE chromosome
+            """
+            db_session.execute(sql)
             db_session.commit()
-            total_test += chunk
 
-            pos = self.seq_chunk_size
-
-            # Append chunks of sequence onto the row's sequence field.
-            while True: 
-                end = pos + self.seq_chunk_size
-                if (end > len_seq_str):
-                    end = len_seq_str
-
-                chunk = seq_str[pos:end]
-
-                db_session.execute(
-                    "UPDATE chromosome SET"
-                    "   sequence = CONCAT(sequence, '"+chunk+"') "
-                    "WHERE strain_id = '"+strain_config["name"]+"' "
-                    "AND chromosome_id = '"+chr_id+"'"
-                )
-                db_session.commit()
-                total_test += chunk
-
-                if end == len_seq_str:
-                    break
-                pos += self.seq_chunk_size
-
-            db_session.commit()
+            # Delete the file
+            os.remove(settings.temp_db_file)
 
             print("Added ["+chr_id+"]")
-            
-            
-            # f = open("test.fa", "w")
-            # f.write(total_test)
-            # f.close()
 
-            exit()
 
+            # chr_id = record.id
+
+            
+
+            # seq_str = str(record.seq)
+            # len_seq_str = self.bp_limit if self.bp_limit != None else len(seq_str)
+
+            # chunk = seq_str[0:len_seq_str if len_seq_str <= self.seq_chunk_size else self.seq_chunk_size]
+
+            # # Insert the Chromosome row
+            # db_session.execute(
+            #     "INSERT INTO chromosome SET"
+            #     "   strain_id = '"+strain_config["name"]+"',"
+            #     "   chromosome_id = '"+chr_id+"',"
+            #     "   sequence = '"+chunk+"'"
+            # )
+            # total_test += chunk
+
+            # pos = self.seq_chunk_size
+
+            # # Append chunks of sequence onto the row's sequence field.
+            # while True: 
+            #     end = pos + self.seq_chunk_size
+            #     if (end > len_seq_str):
+            #         end = len_seq_str
+
+            #     chunk = seq_str[pos:end]
+
+            #     db_session.execute(
+            #         "UPDATE chromosome SET"
+            #         "   sequence = CONCAT(sequence, '"+chunk+"') "
+            #         "WHERE strain_id = '"+strain_config["name"]+"' "
+            #         "AND chromosome_id = '"+chr_id+"'"
+            #     )
+            #     total_test += chunk
+
+            #     if end == len_seq_str:
+            #         break
+            #     pos += self.seq_chunk_size
+
+            # db_session.commit()
+
+            # print("Added ["+chr_id+"]")
+
+            # # f = open("test.fa", "w")
+            # # f.write(total_test)
+            # # f.close()
 
             # exit()
-
-
 
         print("Finished adding chromosomes to ["+strain_config["name"]+"]")
         # exit()
