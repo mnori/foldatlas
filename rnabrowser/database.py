@@ -9,6 +9,8 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from Bio import SeqIO
 from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Align.Applications import ClustalwCommandline
 import settings, os
 
 engine = create_engine(settings.database_uri, convert_unicode=True)
@@ -22,11 +24,11 @@ from models import Strain, Gene, Transcript, Feature
 
 def hydrate_db():
     try:
-        print("Rebuilding schema...")
-        Base.metadata.drop_all(bind=engine)
-        Base.metadata.create_all(bind=engine)
-        print("...done.")
-        SequenceHydrator().hydrate() # add the annotations
+        # print("Rebuilding schema...")
+        # Base.metadata.drop_all(bind=engine)
+        # Base.metadata.create_all(bind=engine)
+        # print("...done.")
+        # SequenceHydrator().hydrate() # add the annotations
         TranscriptAligner().align() # make the alignments
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
@@ -82,7 +84,7 @@ class SequenceHydrator():
         self.hydrate_genes(strain_config)
 
     # Adding chromosomes to the DB is a little bit tricky, since the sequences are huge.
-    # Therefore a LOAD DATA INFILE strategy is used.
+    # Therefore a LOAD DATA INFILE strategy is used to import the data.
     def hydrate_chrosomomes(self, strain_config):
 
         print("Adding chromosomes...")
@@ -90,18 +92,18 @@ class SequenceHydrator():
 
         for record in SeqIO.parse(filepath, "fasta"): # loop through chromosomes
 
-            # Save the chromosome data to a text file
             chr_id = record.id
-
             if (chr_id in settings.ignored_chromosomes):
                 continue
 
             seq_str = str(record.seq)
+
+            # Save a row of chromosome data to a text file
             temp_file = open(settings.temp_db_file, "w")
             temp_file.write(strain_config["name"]+"\t"+chr_id+"\t"+seq_str)
             temp_file.close()
 
-            # Load the file into the DB
+            # Import file into the DB
             sql = """
                 LOAD DATA LOCAL INFILE '/tmp/tmp.txt'
                 REPLACE INTO TABLE chromosome
@@ -114,59 +116,7 @@ class SequenceHydrator():
 
             print("Added ["+chr_id+"]")
 
-
-            # chr_id = record.id
-
-            
-
-            # seq_str = str(record.seq)
-            # len_seq_str = self.bp_limit if self.bp_limit != None else len(seq_str)
-
-            # chunk = seq_str[0:len_seq_str if len_seq_str <= self.seq_chunk_size else self.seq_chunk_size]
-
-            # # Insert the Chromosome row
-            # db_session.execute(
-            #     "INSERT INTO chromosome SET"
-            #     "   strain_id = '"+strain_config["name"]+"',"
-            #     "   chromosome_id = '"+chr_id+"',"
-            #     "   sequence = '"+chunk+"'"
-            # )
-            # total_test += chunk
-
-            # pos = self.seq_chunk_size
-
-            # # Append chunks of sequence onto the row's sequence field.
-            # while True: 
-            #     end = pos + self.seq_chunk_size
-            #     if (end > len_seq_str):
-            #         end = len_seq_str
-
-            #     chunk = seq_str[pos:end]
-
-            #     db_session.execute(
-            #         "UPDATE chromosome SET"
-            #         "   sequence = CONCAT(sequence, '"+chunk+"') "
-            #         "WHERE strain_id = '"+strain_config["name"]+"' "
-            #         "AND chromosome_id = '"+chr_id+"'"
-            #     )
-            #     total_test += chunk
-
-            #     if end == len_seq_str:
-            #         break
-            #     pos += self.seq_chunk_size
-
-            # db_session.commit()
-
-            # print("Added ["+chr_id+"]")
-
-            # # f = open("test.fa", "w")
-            # # f.write(total_test)
-            # # f.close()
-
-            # exit()
-
         print("Finished adding chromosomes to ["+strain_config["name"]+"]")
-        # exit()
 
     def hydrate_genes(self, strain_config):
         genes_added = 0
@@ -310,13 +260,19 @@ class TranscriptAligner():
         for transcript_id in transcript_ids:
             self.process_transcript_id(transcript_id)
 
-
+            # if (transcript_id == "AT1G01100.3"):
+            
     def process_transcript_id(self, transcript_id):
+
         # given the transcript ID, fetch the feature sequences in the correct order.
         sql = """
             SELECT 
                 feature.strain_id, 
-                SUBSTR(chromosome.sequence, feature.start, feature.end - feature.start) seq
+                feature.direction,
+                SUBSTR(
+                    chromosome.sequence, 
+                    feature.start, feature.end - feature.start + 1
+                ) seq
             FROM chromosome, feature
             WHERE 
                 feature.strain_id = chromosome.strain_id AND
@@ -326,37 +282,49 @@ class TranscriptAligner():
             ORDER BY feature.strain_id, start
         """
         sql = sql.format(transcript_id)
+        results = db_session.execute(sql)
 
-        # print(sql)
-        # exit()
-
-        results = engine.execute(sql)
-
-        # let's create BioPython sequence objects here
+        # collect data about the sequences
         transcript_seqs = {}
         for row in results:
             strain_id = row["strain_id"]
             if strain_id  not in transcript_seqs:
-                transcript_seqs[strain_id] = Seq("")
+                transcript_seqs[strain_id] = {} 
+                transcript_seqs[strain_id]["seq"] = Seq("")
 
-            transcript_seqs[strain_id] += row["seq"]
+            transcript_seqs[strain_id]["seq"] += row["seq"]
+            transcript_seqs[strain_id]["direction"] = row["direction"]
 
-        # Does 
-        # if strain_id != "Col_0":
-
-        # if (transcript_id == "AT1G01010"):
+        # make collection of SeqRecord objects. 
+        seqs_to_align = []
         for strain_id in transcript_seqs:
-            print("transcript_id: ["+transcript_id+"]")
-            print("strain_id: ["+strain_id+"]")
-            print("seq: ["+transcript_seqs[strain_id]+"]")
-        
+            seq = transcript_seqs[strain_id]["seq"]
+
+            # if direction is reverse, do reverse complement
+            if transcript_seqs[strain_id]["direction"] == "reverse":
+                seq.reverse_complement()
+            seqs_to_align.append(SeqRecord(seq, id=strain_id, description=""))
+
+        # output to a fasta file for clustalw alignment
+        output_handle = open(settings.temp_fa_file, "w")
+        SeqIO.write(seqs_to_align, output_handle, "fasta")
+        output_handle.close()
+
+        # run the clustalw alignment
+        clustalw_cline = ClustalwCommandline("clustalw2", infile=settings.temp_fa_file)
+        results = clustalw_cline()
 
         exit()
+        print(results)
+
+        # for strain_id in transcript_seqs:
+        #     print("transcript_id: ["+transcript_id+"]")
+        #     print("strain_id: ["+strain_id+"]")
+        #     print("seq: ["+transcript_seqs[strain_id]+"]")
+        # exit()
 
         # concatenate the feature sequences together
 
-
-        # if direction is reverse, do reverse-complement
 
 
     # Fetch all the transcript IDs from the database.

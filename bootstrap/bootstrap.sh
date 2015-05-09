@@ -9,8 +9,6 @@ DBPASSWD="vagrant"
 # Installation stuff goes here.
 function install() {
 
-
-
 	pretty_print "PROVISIONING"
 
 	# Copy handy bash aliases to home folder. Must use explicit home folder path, otherwise 
@@ -46,6 +44,9 @@ function install() {
 	service apache2 restart
 	echo "create database rnabrowser" | mysql -u root -p$DBPASSWD
 
+	# custom config - needed for DB export to work properly
+	cp /vagrant/bootstrap/ /etc/mysql/my.cnf 
+
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing git"
 	apt-get install -y git
@@ -64,13 +65,22 @@ function install() {
 	pip3 install Flask
 	pip3 install mysql-connector-python --allow-external mysql-connector-python
 	pip3 install Flask-SQLAlchemy
-	
+
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+	pretty_print "Installing Clustalw2"
+	cd /tmp/
+	wget http://www.clustal.org/download/current/clustalw-2.1-linux-x86_64-libcppstatic.tar.gz >&/dev/null
+	tar xvzf clustalw-2.1-linux-x86_64-libcppstatic.tar.gz
+	cd clustalw-2.1-linux-x86_64-libcppstatic/
+	cp clustalw2 /usr/local/bin/clustalw2
+
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 	if [ ! -f "/vagrant/sauce_data/rnabrowser.sql.tar.gz" ]
 		then
-		pretty_print "Grabbing sauce data"
 		dl_sauce
 		hydrate_db # create the DB from the raw data
-		dump_db # export the database so it can be quickly imported again
+		export_db # export the database so it can be quickly imported again
 
 	else
 		import_db # DB was previous exported. Import it since this is way quicker.

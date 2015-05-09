@@ -24,6 +24,7 @@ function import_db() {
 
 # Grabs lots of genome data files. These will be parsed and used to seed the SNP database.
 function dl_sauce() {
+	pretty_print "Grabbing sauce data"
 	# TODO
 	# grab raw genome data from network if available. 
 	# otherwise, download the data from its origin

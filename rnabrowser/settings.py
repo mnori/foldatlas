@@ -15,6 +15,9 @@ reference_strain_id = "Col_0"
 # path of temporary file for loading chromosome data into the DB
 temp_db_file = "/tmp/tmp.txt"
 
+# temp fasta file for doing alignments
+temp_fa_file = "/tmp/tmp.fa"
+
 # Strain metadata. This is used to parse from sauce files when hydrating the DB.
 strains = [
 	{
