@@ -44,9 +44,6 @@ class SequenceHydrator():
     # how many genes to process before committing rows to the database.
     gene_chunk_size = 2500 
 
-    # how many bytes of sequence data to use per chromosome writing chunk
-    seq_chunk_size = 1048576 # i.e. 1 MB
-
     genes_to_write = []
     transcripts_to_write = []
     features_to_write = []
@@ -59,10 +56,10 @@ class SequenceHydrator():
 
     sequence_id = 0
 
-    # how many genes to process
-    gene_limit = 100
+    # limit on genes to process
+    gene_limit = None
 
-    # how much chromosome sequence to add, in bp
+    # limit on chromosome sequence to add, in bp
     bp_limit = None
 
     # Use the genome sequence and annotation files to populate the database.
@@ -222,8 +219,6 @@ class SequenceHydrator():
 
                     transcript_id = self.find_attribs_value("Parent=Transcript", attribs)
 
-                    # print("Added ["+strain_id+"] ["+transcript_id+"]")
-
                     if transcript_id != None: # it's a transcript feature entry
                         # put a filter here? some elements are not worth storing?
                         self.features_to_write.append(Feature(
@@ -273,8 +268,6 @@ class TranscriptAligner():
         transcript_ids = self.fetch_transcript_ids()
         for transcript_id in transcript_ids:
             self.process_transcript_id(transcript_id)
-
-            # if (transcript_id == "AT1G01100.3"):
             
     def process_transcript_id(self, transcript_id):
 
