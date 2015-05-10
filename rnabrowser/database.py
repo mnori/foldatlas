@@ -11,7 +11,10 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Align.Applications import ClustalwCommandline
+from Bio import AlignIO
+
 import settings, os
+import sys
 
 engine = create_engine(settings.database_uri, convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
@@ -20,15 +23,15 @@ Base.query = db_session.query_property()
 
 import models
 
-from models import Strain, Gene, Transcript, Feature
+from models import Strain, Gene, Transcript, Feature, AlignmentEntry
 
 def hydrate_db():
     try:
-        # print("Rebuilding schema...")
-        # Base.metadata.drop_all(bind=engine)
-        # Base.metadata.create_all(bind=engine)
-        # print("...done.")
-        # SequenceHydrator().hydrate() # add the annotations
+        print("Rebuilding schema...")
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+        print("...done.")
+        SequenceHydrator().hydrate() # add the annotations
         TranscriptAligner().align() # make the alignments
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
@@ -67,6 +70,8 @@ class SequenceHydrator():
         for strain in settings.strains:
             self.hydrate_strain(strain)
 
+        db_session.commit() # does this do anything?
+
     def hydrate_strain(self, strain_config):
         self.transcript_ids_seen_this_strain = set()
 
@@ -98,21 +103,23 @@ class SequenceHydrator():
 
             seq_str = str(record.seq)
 
+            temp_filepath = settings.temp_folder+"/tmp.fa"
+
             # Save a row of chromosome data to a text file
-            temp_file = open(settings.temp_db_file, "w")
+            temp_file = open(temp_filepath, "w")
             temp_file.write(strain_config["name"]+"\t"+chr_id+"\t"+seq_str)
             temp_file.close()
 
             # Import file into the DB
             sql = """
-                LOAD DATA LOCAL INFILE '/tmp/tmp.txt'
+                LOAD DATA LOCAL INFILE '/tmp/tmp.fa'
                 REPLACE INTO TABLE chromosome
             """
             db_session.execute(sql)
             db_session.commit()
 
             # Delete the file
-            os.remove(settings.temp_db_file)
+            os.remove(temp_filepath)
 
             print("Added ["+chr_id+"]")
 
@@ -194,7 +201,7 @@ class SequenceHydrator():
                     self.genes_seen[gene_id] = gene
 
             
-            else: # Handle transcript entries
+            else: # Handle transcript entries - only add new ones
                 transcript_id = self.find_attribs_value("ID=Transcript", attribs)
                 if transcript_id != None: # it's a transcript entry
 
@@ -209,7 +216,14 @@ class SequenceHydrator():
                         self.transcripts_seen[transcript.id] = transcript
 
                 else: # Handle transcript feature entries
+
+                    # for some reason, features for a given strain/transcript 
+                    # combination are not always added
+
                     transcript_id = self.find_attribs_value("Parent=Transcript", attribs)
+
+                    # print("Added ["+strain_id+"] ["+transcript_id+"]")
+
                     if transcript_id != None: # it's a transcript feature entry
                         # put a filter here? some elements are not worth storing?
                         self.features_to_write.append(Feature(
@@ -264,6 +278,9 @@ class TranscriptAligner():
             
     def process_transcript_id(self, transcript_id):
 
+        print("Aligning ["+transcript_id+"]...", end="")
+        sys.stdout.flush()
+
         # given the transcript ID, fetch the feature sequences in the correct order.
         sql = """
             SELECT 
@@ -288,12 +305,17 @@ class TranscriptAligner():
         transcript_seqs = {}
         for row in results:
             strain_id = row["strain_id"]
+            # print("Found ["+strain_id+"]")
             if strain_id  not in transcript_seqs:
                 transcript_seqs[strain_id] = {} 
                 transcript_seqs[strain_id]["seq"] = Seq("")
 
             transcript_seqs[strain_id]["seq"] += row["seq"]
             transcript_seqs[strain_id]["direction"] = row["direction"]
+
+        if len(transcript_seqs) <= 1:
+            print("Warning - not enough sequences to proceed with alignment")
+            return
 
         # make collection of SeqRecord objects. 
         seqs_to_align = []
@@ -305,35 +327,36 @@ class TranscriptAligner():
                 seq.reverse_complement()
             seqs_to_align.append(SeqRecord(seq, id=strain_id, description=""))
 
+            # print("Appended ["+strain_id+"]")
+
+        temp_filepath = settings.temp_folder+"/tmp.fa"
+
         # output to a fasta file for clustalw alignment
-        output_handle = open(settings.temp_fa_file, "w")
+        output_handle = open(temp_filepath, "w")
         SeqIO.write(seqs_to_align, output_handle, "fasta")
         output_handle.close()
 
         # run the clustalw alignment
-        clustalw_cline = ClustalwCommandline("clustalw2", infile=settings.temp_fa_file)
+        clustalw_cline = ClustalwCommandline("clustalw2", infile=temp_filepath)
         results = clustalw_cline()
 
-        exit()
-        print(results)
+        # parse the results into the database
+        entries = AlignIO.read(settings.temp_folder+"/tmp.aln", "clustal")
+        for entry in entries:
+            obj = AlignmentEntry(transcript_id, entry.id, str(entry.seq))
+            db_session.add(obj)
+            
+        db_session.commit()
 
-        # for strain_id in transcript_seqs:
-        #     print("transcript_id: ["+transcript_id+"]")
-        #     print("strain_id: ["+strain_id+"]")
-        #     print("seq: ["+transcript_seqs[strain_id]+"]")
-        # exit()
+        print("Aligned")
 
-        # concatenate the feature sequences together
-
-
-
-    # Fetch all the transcript IDs from the database.
+    # Fetch all the transcript IDs from the database. Order them for consistency
     def fetch_transcript_ids(self):
-        transcript_ids = set()
-        sql = "SELECT id FROM transcript"
+        transcript_ids = []
+        sql = "SELECT id FROM transcript ORDER BY id ASC"
         rows = engine.execute(sql)
         for row in rows:
-            transcript_ids.add(row["id"])
+            transcript_ids.append(row["id"])
 
         return transcript_ids
 

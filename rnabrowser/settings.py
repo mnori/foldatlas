@@ -12,11 +12,8 @@ genoverse_base = static_base+"/genoverse"
 # this is the one that will be displayed by the genome browser.
 reference_strain_id = "Col_0"
 
-# path of temporary file for loading chromosome data into the DB
-temp_db_file = "/tmp/tmp.txt"
-
-# temp fasta file for doing alignments
-temp_fa_file = "/tmp/tmp.fa"
+# path of folder for temporary files
+temp_folder = "/tmp"
 
 # Strain metadata. This is used to parse from sauce files when hydrating the DB.
 strains = [
