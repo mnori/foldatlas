@@ -24,10 +24,12 @@ strains = [
 		"annotation_filename": "consolidated_annotation.Col_0.gff3"
 	}, {
 		"name": "Bur_0",
-		"description": "Burren strain, sequenced by the 19 Genomes project",
+		"description": "Bur_0 strain, sequenced by the 19 Genomes project",
 		"sequence_filename": "bur_0.v7.PR_in_lowercase.fas",
 		"annotation_filename": "consolidated_annotation.Bur_0.gff3"
 	}
+
+	# .. add the other 17 strains metadata here.
 ]
 
 ignored_chromosomes = set(["chloroplast", "mitochondria"])

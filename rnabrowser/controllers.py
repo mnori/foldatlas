@@ -35,7 +35,11 @@ class GenomeBrowser():
             })
 
         # Use the ORM to get feature details
-        results = db_session.query(Feature).filter(and_(Feature.start >= start, Feature.end <= end, Feature.chromosome_id == chromosome_id)).all() 
+        results = db_session \
+            .query(Feature) \
+            .filter(and_( \
+                Feature.start >= start, Feature.end <= end, Feature.chromosome_id == chromosome_id)) \
+            .all() 
 
         # Add transcript feature rows to the output
         for feature in results:
@@ -99,4 +103,18 @@ class GenomeBrowser():
 
         return out
 
-    
+class AlignmentViewer():
+
+    def get_alignment_entries(self, transcript_id):
+
+        # fetch the alignment rows from the DB, using the ORM
+        alignment_entries = db_session \
+            .query(AlignmentEntry) \
+            .filter(transcript_id=transcript_id) \
+            .all() 
+
+        alignments = {}
+        for alignment_entry in alignment_entries:
+            alignments[alignment_entry] = alignment_entry
+
+        return alignments

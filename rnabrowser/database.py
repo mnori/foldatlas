@@ -31,8 +31,10 @@ def hydrate_db():
         Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(bind=engine)
         print("...done.")
-        SequenceHydrator().hydrate() # add the annotations
-        TranscriptAligner().align() # make the alignments
+
+        # these two steps take rather a long time.
+        # SequenceHydrator().hydrate() # add the annotations
+        # TranscriptAligner().align() # make the alignments
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
         print(str(e).replace("\\n", "\n").replace("\\t", "\t"))
@@ -54,12 +56,10 @@ class SequenceHydrator():
     # for duplicate transcript ID detection
     transcript_ids_seen_this_strain = set()
 
-    sequence_id = 0
+    # limit on genes to process - for testing purposes
+    gene_limit = 100
 
-    # limit on genes to process
-    gene_limit = None
-
-    # limit on chromosome sequence to add, in bp
+    # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
 
     # Use the genome sequence and annotation files to populate the database.
@@ -275,6 +275,7 @@ class TranscriptAligner():
         sys.stdout.flush()
 
         # given the transcript ID, fetch the feature sequences in the correct order.
+        # TODO wrap this up - have a Transcript.get_sequences() method
         sql = """
             SELECT 
                 feature.strain_id, 

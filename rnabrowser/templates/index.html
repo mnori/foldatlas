@@ -11,14 +11,13 @@
   </head>
   <body>
 
-    
-        
+    <!-- TODO make this reload the page. Dynamically changing the chromosome is not supported. -->    
     Select your chromosome:     
     <select id="chromosome-selector">
     {% for chromosome in chromosomes %}
         <option value="{{ chromosome.chromosome_id }}">{{ chromosome.chromosome_id }}</option>
     {% endfor %}
-    </select><br /><br />
+   </select><br /><br />
 
     <div id="genoverse"></div>
     <div id="transcript-data"></div>

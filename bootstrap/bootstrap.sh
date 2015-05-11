@@ -45,7 +45,7 @@ function install() {
 	echo "create database rnabrowser" | mysql -u root -p$DBPASSWD
 
 	# custom config - needed for DB export to work properly
-	cp /vagrant/bootstrap/ /etc/mysql/my.cnf 
+	cp /vagrant/bootstrap/my.cnf /etc/mysql/my.cnf 
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing git"
