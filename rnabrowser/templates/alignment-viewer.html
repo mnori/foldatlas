@@ -7,7 +7,7 @@
 {% for row in viewer.alignment_rows %}
 	<div>
 	{% for strain_id in row["strains"] %}
-		{{ strain_id }}:&nbsp;
+		{{ strain_id.rjust(10).replace(" ", "&nbsp;") | safe }}&nbsp;
 		{%- for n in range(row["strains"][strain_id]|length) -%}
 			{%- if row["diff"][n] == "*" -%}
 				{{- row["strains"][strain_id][n] -}}

@@ -27,13 +27,13 @@ from models import Strain, Gene, Transcript, Feature, AlignmentEntry
 
 def hydrate_db():
     try:
-        print("Rebuilding schema...")
-        Base.metadata.drop_all(bind=engine)
-        Base.metadata.create_all(bind=engine)
-        print("...done.")
+        # print("Rebuilding schema...")
+        # Base.metadata.drop_all(bind=engine)
+        # Base.metadata.create_all(bind=engine)
+        # print("...done.")
 
         # these two steps take rather a long time.
-        SequenceHydrator().hydrate() # add the annotations
+        # SequenceHydrator().hydrate() # add the annotations
         TranscriptAligner().align() # make the alignments
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
@@ -331,7 +331,7 @@ class TranscriptAligner():
         output_handle.close()
 
         # run the clustalw alignment
-        clustalw_cline = ClustalwCommandline("clustalw2", infile=temp_filepath)
+        clustalw_cline = ClustalwCommandline("clustalw2", infile=temp_filepath, quicktree=True)
         results = clustalw_cline()
 
         # parse the results into the database

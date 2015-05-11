@@ -128,12 +128,11 @@ class AlignmentViewer():
             return # not enough transcripts to align
 
         seq_len = len(alignment_entries[0].sequence)
-
         row_n = 0
-
         reached_end = False
 
-        while(True):
+        while(True): # Each iteration builds 1 row of alignment data
+
             start = row_n * self.alignment_line_length
             end = start + self.alignment_line_length
 
@@ -152,8 +151,8 @@ class AlignmentViewer():
             for alignment_entry in alignment_entries:
                 self.alignment_rows[row_n]["strains"][alignment_entry.strain_id] = list(alignment_entry.sequence[start : end])
 
-            # self.diff = list("*" * seq_len)
-
+            # Loop through each nucleotide in the sequence. Determine any differences between the 
+            # strains at the position of interest.
             for n in range(start, end):
                 different = False
                 old_nuc = None
@@ -169,6 +168,4 @@ class AlignmentViewer():
             if reached_end:
                 break
 
-            # if (row_n > 2):
-            #     break
             row_n += 1
