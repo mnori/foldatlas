@@ -31,8 +31,8 @@ def get_transcripts():
 @app.route("/ajax/transcript/<transcript_id>")
 def get_transcript(transcript_id):
 	viewer = AlignmentViewer()
-	entries = viewer.get_alignment_entries
-	return render_template("alignment-viewer.html", entries=entries)
+	viewer.build_alignment_entries(transcript_id)
+	return render_template("alignment-viewer.html", viewer=viewer)
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`

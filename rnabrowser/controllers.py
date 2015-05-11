@@ -1,6 +1,8 @@
-from database import Feature, Transcript, db_session;
+from database import db_session;
 from sqlalchemy import and_
+
 import json, database, settings
+from models import Feature, Transcript, AlignmentEntry
 
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
@@ -105,16 +107,68 @@ class GenomeBrowser():
 
 class AlignmentViewer():
 
-    def get_alignment_entries(self, transcript_id):
+    alignment_line_length = 60
+    alignment_rows = []
+
+    transcript_id = None
+
+
+    def build_alignment_entries(self, transcript_id):
+
+        self.transcript_id = transcript_id
+        self.alignment_rows = []
 
         # fetch the alignment rows from the DB, using the ORM
         alignment_entries = db_session \
             .query(AlignmentEntry) \
-            .filter(transcript_id=transcript_id) \
-            .all() 
+            .filter(AlignmentEntry.transcript_id==transcript_id) \
+            .all()
 
-        alignments = {}
-        for alignment_entry in alignment_entries:
-            alignments[alignment_entry] = alignment_entry
+        if (len(alignment_entries) == 0):
+            return # not enough transcripts to align
 
-        return alignments
+        seq_len = len(alignment_entries[0].sequence)
+
+        row_n = 0
+
+        reached_end = False
+
+        while(True):
+            start = row_n * self.alignment_line_length
+            end = start + self.alignment_line_length
+
+            if seq_len < end:
+                reached_end = True
+                end = seq_len
+
+            self.alignment_rows.append({
+                "strains": {},
+                "diff": list("*" * (end - start)),
+                "end": end
+            })
+
+            # create diff - as "*" - then change to "." when a difference is encountered
+            # create alignment entries data structure, for showing the sequences        
+            for alignment_entry in alignment_entries:
+                self.alignment_rows[row_n]["strains"][alignment_entry.strain_id] = list(alignment_entry.sequence[start : end])
+
+            # self.diff = list("*" * seq_len)
+
+            for n in range(start, end):
+                different = False
+                old_nuc = None
+                for alignment_entry in alignment_entries:
+                    new_nuc = alignment_entry.sequence[n]
+                    if old_nuc != None and new_nuc != old_nuc:
+                        self.alignment_rows[row_n]["diff"][n - start] = "."
+                    old_nuc = new_nuc
+
+            if end == 1140:
+                print(self.alignment_rows[row_n]["strains"][alignment_entry.strain_id])
+
+            if reached_end:
+                break
+
+            # if (row_n > 2):
+            #     break
+            row_n += 1

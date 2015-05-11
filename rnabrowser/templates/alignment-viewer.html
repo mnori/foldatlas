@@ -1,9 +1,25 @@
+<h1>{{ viewer.transcript_id }}</h1>
 
-<pre>
-
+<div style="font-family: Courier New, monospace;">
 <!-- need a nicer way for displaying this stuff. -->
 
-{% for entry in entries %}
-	{{ entry.strain_id }}: {{ entry.sequence }}
+<div>
+{% for row in viewer.alignment_rows %}
+	<div>
+	{% for strain_id in row["strains"] %}
+		{{ strain_id }}:&nbsp;
+		{%- for n in range(row["strains"][strain_id]|length) -%}
+			{%- if row["diff"][n] == "*" -%}
+				{{- row["strains"][strain_id][n] -}}
+			{%- else -%}
+				<b style="background-color: #ddd;">{{- row["strains"][strain_id][n] -}}</b>
+			{%- endif %}
+		{%- endfor %} {{ row["end"] }}
+		<br />
+	{% endfor %}
+	</div><br />
 {% endfor %}
-</pre>
+</div>
+</div>
+
+

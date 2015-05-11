@@ -33,8 +33,8 @@ def hydrate_db():
         print("...done.")
 
         # these two steps take rather a long time.
-        # SequenceHydrator().hydrate() # add the annotations
-        # TranscriptAligner().align() # make the alignments
+        SequenceHydrator().hydrate() # add the annotations
+        TranscriptAligner().align() # make the alignments
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
         print(str(e).replace("\\n", "\n").replace("\\t", "\t"))
