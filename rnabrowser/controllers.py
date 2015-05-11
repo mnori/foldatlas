@@ -162,9 +162,6 @@ class AlignmentViewer():
                         self.alignment_rows[row_n]["diff"][n - start] = "."
                     old_nuc = new_nuc
 
-            if end == 1140:
-                print(self.alignment_rows[row_n]["strains"][alignment_entry.strain_id])
-
             if reached_end:
                 break
 

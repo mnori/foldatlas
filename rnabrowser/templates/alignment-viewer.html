@@ -1,6 +1,6 @@
 <h1>{{ viewer.transcript_id }}</h1>
 
-<div style="font-family: Courier New, monospace;">
+<div class="alignment-container">
 <!-- need a nicer way for displaying this stuff. -->
 
 <div>
@@ -12,7 +12,8 @@
 			{%- if row["diff"][n] == "*" -%}
 				{{- row["strains"][strain_id][n] -}}
 			{%- else -%}
-				<b style="background-color: #ddd;">{{- row["strains"][strain_id][n] -}}</b>
+				{%- set nuc = row["strains"][strain_id][n] -%}
+				<span class="snp {{ nuc.lower() }}">{{- nuc -}}</span></b>
 			{%- endif %}
 		{%- endfor %} {{ row["end"] }}
 		<br />
