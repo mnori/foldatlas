@@ -18,7 +18,7 @@ def index():
 	chromosomes = browser.get_chromosomes()
 	return render_template("index.html", settings=settings, chromosomes=chromosomes)
 
-@app.route("/ajax/genome_browser/genes")
+@app.route("/ajax/genome-browser/genes")
 def get_genes():
 	browser = GenomeBrowser()
 	return browser.get_genes(request)

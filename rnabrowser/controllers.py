@@ -19,7 +19,8 @@ class GenomeBrowser():
 
         sql =   ("SELECT *, MIN(start) min_start, MAX(end) max_end "
                  "FROM feature "
-                 "WHERE chromosome_id = '"+chromosome_id+"' "
+                 "WHERE strain_id = '"+settings.reference_strain_id+"'"
+                 "AND chromosome_id = '"+chromosome_id+"' "
                  "AND start > '"+str(start)+"' "
                  "AND end < '"+str(end)+"' "
                  "GROUP BY transcript_id")
@@ -40,7 +41,11 @@ class GenomeBrowser():
         results = db_session \
             .query(Feature) \
             .filter(and_( \
-                Feature.start >= start, Feature.end <= end, Feature.chromosome_id == chromosome_id)) \
+                Feature.chromosome_id == chromosome_id,
+                Feature.strain_id == settings.reference_strain_id,
+                Feature.start >= start, \
+                Feature.end <= end, \
+                )) \
             .all() 
 
         # Add transcript feature rows to the output
@@ -67,6 +72,7 @@ class GenomeBrowser():
         sql = ( "SELECT *, MIN(start) min_start, MAX(end) max_end "
                 "FROM feature, transcript "
                 "WHERE feature.transcript_id = transcript.id "
+                "AND feature.strain_id = '"+settings.reference_strain_id+"'"
                 "AND chromosome_id = '"+chromosome_id+"' "
                 "AND start > '"+str(start)+"' "
                 "AND end < '"+str(end)+"' "
