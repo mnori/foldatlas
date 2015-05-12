@@ -42,7 +42,7 @@ function install() {
 	apt-get -y install mysql-server phpmyadmin > /dev/null
 	a2disconf phpmyadmin # switch off the PMA conf - not needed
 	service apache2 restart
-	echo "create database rnabrowser" | mysql -u root -p$DBPASSWD
+	echo "create database foldatlas" | mysql -u root -p$DBPASSWD
 
 	# custom config - needed for DB export to work properly
 	cp /vagrant/bootstrap/my.cnf /etc/mysql/my.cnf 
@@ -76,7 +76,7 @@ function install() {
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-	if [ ! -f "/vagrant/sauce_data/rnabrowser.sql.tar.gz" ]
+	if [ ! -f "/vagrant/sauce_data/foldatlas.sql.tar.gz" ]
 		then
 		dl_sauce
 		hydrate_db # create the DB from the raw data

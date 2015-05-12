@@ -1,9 +1,5 @@
 # from app import db
 
-# from flask.ext.sqlalchemy import SQLAlchemy
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:vagrant@127.0.0.1/rnabrowser?charset=utf8&use_unicode=0'
-# db = SQLAlchemy(app)
-
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -27,13 +23,13 @@ from models import Strain, Gene, Transcript, Feature, AlignmentEntry
 
 def hydrate_db():
     try:
-        # print("Rebuilding schema...")
-        # Base.metadata.drop_all(bind=engine)
-        # Base.metadata.create_all(bind=engine)
-        # print("...done.")
+        print("Rebuilding schema...")
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+        print("...done.")
 
         # these two steps take rather a long time.
-        # SequenceHydrator().hydrate() # add the annotations
+        SequenceHydrator().hydrate() # add the annotations
         TranscriptAligner().align() # make the alignments
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message

@@ -3,7 +3,7 @@
 # Flask's built in web server for that.
 
 import sys
-sys.path.insert(0, '/vagrant/rnabrowser')
+sys.path.insert(0, '/vagrant/foldatlas')
 
 # now do the import
 from app import app as application

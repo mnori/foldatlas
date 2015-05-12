@@ -1,4 +1,4 @@
-# RNA Browser
+# FoldAtlas
 Matthew Norris <Matthew.Norris@jic.ac.uk>
 
 ## Prerequisites
@@ -12,9 +12,9 @@ Run `vagrant up` in the same folder as this file. The first `vagrant up` call wi
 
 ## Hosts
 
-	192.168.50.2	rnabrowser.dev
-	192.168.50.2    static.rnabrowser.dev
-	192.168.50.2    pma.rnabrowser.dev
+	192.168.50.2	foldatlas.dev
+	192.168.50.2    static.foldatlas.dev
+	192.168.50.2    pma.foldatlas.dev
 
 Add these lines to your `hosts` file, typically located in /etc/hosts on *nix based systems.
 
@@ -23,7 +23,7 @@ Add these lines to your `hosts` file, typically located in /etc/hosts on *nix ba
     vagrant ssh
     rb-runDevServer
 
-This runs a Flask development web server. Go to http://rnabrowser.dev to see the site running. The server will keep going until you press `CTRL-C` in the terminal.
+This runs a Flask development web server. Go to http://foldatlas.dev to see the site running. The server will keep going until you press `CTRL-C` in the terminal.
 
 ## Resetting the database
 
@@ -34,7 +34,7 @@ This drops all the database tables, recreates them, and then populates the table
 
 ## Viewing / hacking the database
 
-Go to http://pma.rnabrowser.dev
+Go to http://pma.foldatlas.dev
 
     username: root
     password: vagrant

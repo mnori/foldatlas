@@ -1,12 +1,12 @@
 
 # This defines hostname, database name, username and password for connecting to the DB.
-database_uri = "mysql+mysqlconnector://root:vagrant@127.0.0.1/rnabrowser?charset=utf8&use_unicode=0"
+database_uri = "mysql+mysqlconnector://root:vagrant@127.0.0.1/foldatlas?charset=utf8&use_unicode=0"
 
 genomes_sauce_folder = "/vagrant/sauce_data"
 
-base_path = "/vagrant/rnabrowser"
+base_path = "/vagrant/foldatlas"
 
-static_base = "http://static.rnabrowser.dev"
+static_base = "http://static.foldatlas.dev"
 genoverse_base = static_base+"/genoverse"
 
 # this is the one that will be displayed by the genome browser.

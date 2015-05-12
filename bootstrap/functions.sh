@@ -2,24 +2,24 @@
 
 function hydrate_db() {
 	pretty_print "Hydrating database"
-	cd /vagrant/rnabrowser
+	cd /vagrant/foldatlas
 	python3 app.py hydratedb
 }
 
 function export_db() {
 	pretty_print "Dumping database"
 	cd /vagrant/sauce_data/
-	mysqldump -uroot -pvagrant --add-drop-database rnabrowser > rnabrowser.sql
-	tar -czpf rnabrowser.sql.tar.gz rnabrowser.sql 
-	rm rnabrowser.sql
+	mysqldump -uroot -pvagrant --add-drop-database foldatlas > foldatlas.sql
+	tar -czpf foldatlas.sql.tar.gz foldatlas.sql 
+	rm foldatlas.sql
 }
 
 function import_db() {
 	pretty_print "Importing database"
 	cd /vagrant/sauce_data/
-	tar xvzf rnabrowser.sql.tar.gz
-	mysql -uroot -pvagrant rnabrowser < rnabrowser.sql
-	rm rnabrowser.sql
+	tar xvzf foldatlas.sql.tar.gz
+	mysql -uroot -pvagrant foldatlas < foldatlas.sql
+	rm foldatlas.sql
 }
 
 # Grabs lots of genome data files. These will be parsed and used to seed the SNP database.
