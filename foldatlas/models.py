@@ -1,7 +1,7 @@
 # Schema definitions for RNA browser database.
 # @author Matthew Norris <matthew.norris@jic.ac.uk
 
-from sqlalchemy import Column, Integer, String, Text, Enum, ForeignKey, ForeignKeyConstraint
+from sqlalchemy import Column, Integer, String, Text, Enum, Float, ForeignKey, ForeignKeyConstraint
 from database import Base
 
 # A Gene describes a locus identifier for a gene, plus any metadata associated with the locus.
@@ -125,18 +125,33 @@ class AlignmentEntry(Base):
         return "<AlignmentEntry %r-%r>" % (self.transcript_id, self.strain_id)
 
 # Represents one reactivity measurement, at a particular nucleotide position.
-class ReactivityEntry(Base):
-    __tablename__ = "alignment_entry"
+class ReactivityMeasurement(Base):
+    __tablename__ = "reactivity_measurement"
 
-    transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
     strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
-    sequence = Column(Text, nullable=False)
+    transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
+    position = Column(Integer, autoincrement=False, primary_key=True) # if there's no reactivity at a position, there is no corresponding row.
+    reactivity = Column(Float, nullable=False) 
 
-    def __init__(self, transcript_id=None, strain_id=None, sequence=None):
-        self.transcript_id = transcript_id
+    def __init__(self, strain_id=None, transcript_id=None, position=None, reactivity=None):
+
         self.strain_id = strain_id
-        self.sequence = sequence
+        self.transcript_id = transcript_id
+        self.position = position
+        self.reactivity = reactivity
 
     def __repr__(self):
-        return "<AlignmentEntry %r-%r>" % (self.transcript_id, self.strain_id)
+        return "<ReactivityMeasurement %r-%r-%r>" % (self.strain_id, self.transcript_id, self.position)
+
+    # 
+    # strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
+    # sequence = Column(Text, nullable=False)
+
+    # def __init__(self, transcript_id=None, strain_id=None, sequence=None):
+    #     self.transcript_id = transcript_id
+    #     self.strain_id = strain_id
+    #     self.sequence = sequence
+
+    # def __repr__(self):
+    #     return "<AlignmentEntry %r-%r>" % (self.transcript_id, self.strain_id)
 

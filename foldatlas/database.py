@@ -19,13 +19,18 @@ Base.query = db_session.query_property()
 
 import models
 
-from models import Strain, Gene, Transcript, Feature, AlignmentEntry
+from models import Strain, Gene, Transcript, Feature, AlignmentEntry, ReactivityMeasurement
 
 def hydrate_db():
     try:
         # print("Rebuilding schema...")
         # Base.metadata.drop_all(bind=engine)
         # Base.metadata.create_all(bind=engine)
+
+
+        ReactivityMeasurement.__table__.create(engine)
+
+
         # print("...done.")
 
         # these two steps take rather a long time.
@@ -352,35 +357,49 @@ class TranscriptAligner():
 
         return transcript_ids
 
-
+# Inserts DMS reactivities into the DB.
 class DmsReactivityHydrator():
 
     def hydrate(self):
 
-        # fetch all of the transcript IDs from the database, store them in a set.
+        # fetch all of the transcript IDs from the database, store them in a set to check against.
         sql = ("SELECT id FROM transcript ORDER BY id ASC")
         results = engine.execute(sql)
         transcript_ids = set()
         for result in results:
             transcript_ids.add(result["id"])
 
+        # Open the DMS reactivities file. These are normalised already.
         input_file = open(settings.dms_reactivities_filepath, "r")
+        line = input_file.readline()
         while(True):
-            line = input_file.readline()
-            if (line == ""): # reached end of input file
+            transcript_id = line.strip()
+            line = input_file.readline().strip()
+
+            if line[:2] == "AT": # another transcript id
+                continue;
+
+            if line == "": # if empty, it means end of file was reached
                 break
-            line = line.strip()
 
-            if (line[:2] == "AT"): # found a gene identifier
-                transcript_id = line.strip()
+            # got this far? assume it's reactivities
+            if transcript_id not in transcript_ids:
+                continue;
 
-                # print("locus_str: ["+locus_str+"]")
-                # print("locus_ids: "+str(locus_ids))
+            count_strs = line.split("\t")
 
-                if transcript_id in transcript_ids:
-                    counts = input_file.readline().strip().pslit("\t")
-                    
-                    # now insert the counts data into the DB
-
+            # go through reactivity entries, adding each to the database.
+            position = 0;
+            for count_str in count_strs:
+                position += 1
+                if (count_str != "NA"): # skip adding "NA" entries.
+                    obj = ReactivityMeasurement(
+                        strain_id=settings.reference_strain_id, 
+                        transcript_id=transcript_id, 
+                        position=position, 
+                        reactivity=float(count_str))
+                    db_session.add(obj)        
+            db_session.commit() # insert all the reactivity measurement rows into the DB
+            print("Added ["+transcript_id+"] ("+str(position)+" positions)")
 
         input_file.close()

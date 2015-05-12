@@ -43,9 +43,9 @@ class GenomeBrowser():
             .filter(and_( \
                 Feature.chromosome_id == chromosome_id,
                 Feature.strain_id == settings.reference_strain_id,
-                Feature.start >= start, \
-                Feature.end <= end, \
-                )) \
+                Feature.start >= start,
+                Feature.end <= end
+            )) \
             .all() 
 
         # Add transcript feature rows to the output
@@ -118,7 +118,6 @@ class AlignmentViewer():
 
     transcript_id = None
 
-
     def build_alignment_entries(self, transcript_id):
 
         self.transcript_id = transcript_id
@@ -133,40 +132,56 @@ class AlignmentViewer():
         if (len(alignment_entries) == 0):
             return # not enough transcripts to align
 
-        seq_len = len(alignment_entries[0].sequence)
+        aln_len = len(alignment_entries[0].sequence) # length of alignment, including gaps
         row_n = 0
         reached_end = False
+        seq_len_processed = 0
+
+        # initialise tot_nucs counters. these are for showing nuc counts at the ends of each alignment row.
+        nuc_counts = {}
+        for alignment_entry in alignment_entries:
+            nuc_counts[alignment_entry.strain_id] = 0
 
         while(True): # Each iteration builds 1 row of alignment data
 
             start = row_n * self.alignment_line_length
             end = start + self.alignment_line_length
 
-            if seq_len < end:
+            if aln_len < end:
                 reached_end = True
-                end = seq_len
+                end = aln_len
 
             self.alignment_rows.append({
-                "strains": {},
-                "diff": list("*" * (end - start)),
-                "end": end
+                "strain_data": {},
+                "diff": list("*" * (end - start))
             })
 
             # create diff - as "*" - then change to "." when a difference is encountered
             # create alignment entries data structure, for showing the sequences        
             for alignment_entry in alignment_entries:
-                self.alignment_rows[row_n]["strains"][alignment_entry.strain_id] = list(alignment_entry.sequence[start : end])
+                self.alignment_rows[row_n]["strain_data"][alignment_entry.strain_id] = {
+                    "nuc_count": 0, # TODO fill this shiz out
+                    "sequence": list(alignment_entry.sequence[start : end])
+                }
 
             # Loop through each nucleotide in the sequence. Determine any differences between the 
-            # strains at the position of interest.
+            # strains at the position of interest. Store in "diff" variable
             for n in range(start, end):
                 different = False
                 old_nuc = None
                 for alignment_entry in alignment_entries:
                     new_nuc = alignment_entry.sequence[n]
+
+                    if new_nuc != "-": # keep track of nucleotide counts, for showing on the end
+                        nuc_counts[alignment_entry.strain_id] += 1
+
                     if old_nuc != None and new_nuc != old_nuc:
                         self.alignment_rows[row_n]["diff"][n - start] = "."
                     old_nuc = new_nuc
+
+            # add nucleotide counts to the ends of the sequence alignment.
+            for alignment_entry in alignment_entries:
+                self.alignment_rows[row_n]["strain_data"][alignment_entry.strain_id]["nuc_count"] = nuc_counts[alignment_entry.strain_id]
 
             if reached_end:
                 break
