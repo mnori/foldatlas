@@ -1,7 +1,7 @@
 // Ensembl REST API Gene model
 Genoverse.Track.Model.Gene.DBGene = Genoverse.Track.Model.Gene.extend({
 
-  url: "http://rnabrowser.dev/ajax/genome-browser/genes?chr=__CHR__&start=__START__&end=__END__",
+  url: window.foldatlasConfig.appBaseUrl+"/ajax/genome-browser/genes?chr=__CHR__&start=__START__&end=__END__",
   
   // The url above responds in json format, data is an array
   // We assume that parents always preceed children in data array, gene -> transcript -> exon

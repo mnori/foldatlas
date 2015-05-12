@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/resizer.css" />
     <link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/tooltips.css" />
 
-    <link rel="stylesheet" type="text/css" href="{{ settings.static_base }}/foldatlas/style.css" />    
+    <link rel="stylesheet" type="text/css" href="{{ settings.static_base_url }}/foldatlas/style.css" />    
 
   </head>
   <body>
@@ -24,6 +24,13 @@
 
     <div id="genoverse"></div>
     <div id="transcript-data"></div>
+
+    <script type="text/javascript">
+        window.foldatlasConfig = {
+            staticBaseUrl: "{{ settings.static_base_url }}",
+            appBaseUrl: "{{ settings.app_base_url }}"
+        }
+    </script>
 
     <script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery.js"></script>
     <script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery-ui.js"></script>
@@ -85,12 +92,14 @@
     <script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/Scalebar.js"></script>
 
     <!-- bespoke classes go here - order matters! TODO combine into a single file -->
-    <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBTranscript.js"></script>
-    <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBGene.js"></script>
-    <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBGeneView.js"></script>
-    <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBTranscriptView.js"></script>
-    <script type="text/javascript" src="{{ settings.static_base }}/genoverse-custom/DBTrack.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBTranscript.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBGene.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBGeneView.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBTranscriptView.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBTrack.js"></script>
     <script type="text/javascript">
+
+        // must define this config after all the foldatlas scripts are loaded
         window.genoverseConfig = {
             container : '#genoverse',
             width     : 800,
@@ -120,14 +129,8 @@
                 Genoverse.Track.DBTrack
             ]
         }
-
-        window.browserControllerConfig = {
-            staticBase: "{{ settings.static_base }}"
-        }
-
     </script>
 
-    <script type="text/javascript" src="{{ settings.genoverse_base }}/jquery-2.1.4.js"></script>
-    <script type="text/javascript" src="{{ settings.static_base }}/foldatlas/main.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base_url }}/foldatlas/main.js"></script>
   </body>
 </html>

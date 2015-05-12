@@ -6,8 +6,10 @@ genomes_sauce_folder = "/vagrant/sauce_data"
 
 base_path = "/vagrant/foldatlas"
 
-static_base = "http://static.foldatlas.dev"
-genoverse_base = static_base+"/genoverse"
+static_base_url = "http://static.foldatlas.dev"
+app_base_url = "http://foldatlas.dev"
+
+genoverse_base = static_base_url+"/genoverse"
 
 # this is the one that will be displayed by the genome browser.
 reference_strain_id = "Col_0"

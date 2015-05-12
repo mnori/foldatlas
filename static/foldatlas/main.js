@@ -2,7 +2,7 @@
 // Define the website's controller. All page changes must go through this badboy
 function BrowserController(config) {
 
-	this.staticBase = config.staticBase;
+	this.staticBase = config.staticBaseUrl;
 
 	// initialise: function(config) {
 	// 	this.staticBase = window.browserControllerConfig;
@@ -29,20 +29,10 @@ function BrowserController(config) {
 
 $(document).ready(function () { 
     window.genoverse = new Genoverse(window.genoverseConfig); 
-    window.browserController = new BrowserController(window.browserControllerConfig)
+    window.browserController = new BrowserController(window.foldatlasConfig)
 });
 
 $("#chromosome-selector").change(function() {
-	// TODO reload the page
-
-	// window.genoverse.resetConfig()
-	// window.genoverse.loadGenome()
-	// window.genoverse.loadPlugins()
-	// window.genoverse.addTracks()
-	// window.genoverse.destroy()
-	// window.genoverse.init()
-
-	delete(window.genoverse)
-	window.genoverse = new Genoverse(window.genoverseConfig); 
-	// window.genoverse.reload(window.genoverseConfig)
+	// TODO reload the page .. difficult / impossible to change the chromosome
+	// ... 
 });

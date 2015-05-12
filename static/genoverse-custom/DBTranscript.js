@@ -4,7 +4,7 @@ Genoverse.Track.Model.Transcript.DBTranscript = Genoverse.Track.Model.Transcript
 
   // TODO pull this from config
   // url      : 'http://rnabrowser.dev/test',
-  url: "http://rnabrowser.dev/ajax/genome-browser/transcripts?chr=__CHR__&start=__START__&end=__END__",
+  url: window.foldatlasConfig.appBaseUrl+"/ajax/genome-browser/transcripts?chr=__CHR__&start=__START__&end=__END__",
   // dataRequestLimit : 5000000, // As per e! REST API restrictions
   
   // The url above responds in json format, data is an array
