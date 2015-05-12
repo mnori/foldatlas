@@ -11,20 +11,6 @@
 
     <link rel="stylesheet" type="text/css" href="{{ settings.static_base_url }}/foldatlas/style.css" />    
 
-  </head>
-  <body>
-
-    <!-- TODO make this reload the page. Dynamically changing the chromosome is not supported. -->    
-    Select your chromosome:     
-    <select id="chromosome-selector">
-    {% for chromosome in chromosomes %}
-        <option value="{{ chromosome.chromosome_id }}">{{ chromosome.chromosome_id }}</option>
-    {% endfor %}
-   </select><br /><br />
-
-    <div id="genoverse"></div>
-    <div id="transcript-data"></div>
-
     <script type="text/javascript">
         window.foldatlasConfig = {
             staticBaseUrl: "{{ settings.static_base_url }}",
@@ -102,7 +88,7 @@
         // must define this config after all the foldatlas scripts are loaded
         window.genoverseConfig = {
             container : '#genoverse',
-            width     : 800,
+            width     : 900,
             genome    : {
 
             {% for chromosome in chromosomes %}
@@ -132,5 +118,24 @@
     </script>
 
     <script type="text/javascript" src="{{ settings.static_base_url }}/foldatlas/main.js"></script>
+
+  </head>
+  <body>
+
+    <div id="header">
+        FoldAtlas
+    </div>
+
+    <div id="content">
+        <!-- TODO make this reload the page. Dynamically changing the chromosome is not supported. -->    
+        Select your chromosome:     
+        <select id="chromosome-selector">
+            {% for chromosome in chromosomes %}
+                <option value="{{ chromosome.chromosome_id }}">{{ chromosome.chromosome_id }}</option>
+            {% endfor %}
+        </select><br /><br />
+        <div id="genoverse"></div>
+        <div id="transcript-data"></div>
+    </div>
   </body>
 </html>
