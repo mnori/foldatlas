@@ -123,3 +123,20 @@ class AlignmentEntry(Base):
 
     def __repr__(self):
         return "<AlignmentEntry %r-%r>" % (self.transcript_id, self.strain_id)
+
+# Represents one reactivity measurement, at a particular nucleotide position.
+class ReactivityEntry(Base):
+    __tablename__ = "alignment_entry"
+
+    transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
+    strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
+    sequence = Column(Text, nullable=False)
+
+    def __init__(self, transcript_id=None, strain_id=None, sequence=None):
+        self.transcript_id = transcript_id
+        self.strain_id = strain_id
+        self.sequence = sequence
+
+    def __repr__(self):
+        return "<AlignmentEntry %r-%r>" % (self.transcript_id, self.strain_id)
+

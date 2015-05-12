@@ -113,7 +113,7 @@ class GenomeBrowser():
 
 class AlignmentViewer():
 
-    alignment_line_length = 60
+    alignment_line_length = 80
     alignment_rows = []
 
     transcript_id = None

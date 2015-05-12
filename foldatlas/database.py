@@ -23,14 +23,16 @@ from models import Strain, Gene, Transcript, Feature, AlignmentEntry
 
 def hydrate_db():
     try:
-        print("Rebuilding schema...")
-        Base.metadata.drop_all(bind=engine)
-        Base.metadata.create_all(bind=engine)
-        print("...done.")
+        # print("Rebuilding schema...")
+        # Base.metadata.drop_all(bind=engine)
+        # Base.metadata.create_all(bind=engine)
+        # print("...done.")
 
         # these two steps take rather a long time.
-        SequenceHydrator().hydrate() # add the annotations
-        TranscriptAligner().align() # make the alignments
+        # SequenceHydrator().hydrate() # add the annotations
+        # TranscriptAligner().align() # make the alignments
+
+        DmsReactivityHydrator().hydrate()
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
         print(str(e).replace("\\n", "\n").replace("\\t", "\t"))
@@ -351,4 +353,34 @@ class TranscriptAligner():
         return transcript_ids
 
 
-        
+class DmsReactivityHydrator():
+
+    def hydrate(self):
+
+        # fetch all of the transcript IDs from the database, store them in a set.
+        sql = ("SELECT id FROM transcript ORDER BY id ASC")
+        results = engine.execute(sql)
+        transcript_ids = set()
+        for result in results:
+            transcript_ids.add(result["id"])
+
+        input_file = open(settings.dms_reactivities_filepath, "r")
+        while(True):
+            line = input_file.readline()
+            if (line == ""): # reached end of input file
+                break
+            line = line.strip()
+
+            if (line[:2] == "AT"): # found a gene identifier
+                transcript_id = line.strip()
+
+                # print("locus_str: ["+locus_str+"]")
+                # print("locus_ids: "+str(locus_ids))
+
+                if transcript_id in transcript_ids:
+                    counts = input_file.readline().strip().pslit("\t")
+                    
+                    # now insert the counts data into the DB
+
+
+        input_file.close()

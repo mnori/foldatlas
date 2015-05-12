@@ -3,6 +3,7 @@
 database_uri = "mysql+mysqlconnector://root:vagrant@127.0.0.1/foldatlas?charset=utf8&use_unicode=0"
 
 genomes_sauce_folder = "/vagrant/sauce_data"
+dms_reactivities_filepath = "/vagrant/sauce_data/log_react_f_N1A_cdna_n_before.txt"
 
 base_path = "/vagrant/foldatlas"
 
