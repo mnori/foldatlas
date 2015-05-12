@@ -403,3 +403,15 @@ class DmsReactivityHydrator():
             print("Added ["+transcript_id+"] ("+str(position)+" positions)")
 
         input_file.close()
+
+# experiment
+#     id 
+#     description
+
+# experiment_transcript 
+#     experiment_id
+#     strain_id
+#     transcript_id
+
+# experiment_transcript_reactivity
+#     - basically the current table
