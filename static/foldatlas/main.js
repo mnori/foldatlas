@@ -9,9 +9,12 @@ function BrowserController(config) {
 	// },
 
 	this.selectTranscript = function(transcriptID) {
+		$("#transcript-loading").show()
+		$("#transcript-data").empty()
 		this.changeUrl(transcriptID, "/transcript/"+transcriptID)
-		$("#transcript-data").html("Loading...")
-		$("#transcript-data").load("/ajax/transcript/"+transcriptID)
+		$("#transcript-data").load("/ajax/transcript/"+transcriptID, function() {
+			$("#transcript-loading").hide()
+		})
 	}
 
 	this.changeUrl = function(title, url) {

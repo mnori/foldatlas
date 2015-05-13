@@ -145,6 +145,12 @@
         <!-- this empty div will be filled by Genoverse -->
         <div id="genoverse"></div>
 
+        <!-- Loading indicator - TODO use a CSS one instead -->
+        <div id="transcript-loading" style="display: none;">
+            <img src="{{ settings.static_base_url}}/assets/spinner.gif" />
+        </div>
+
+        <!-- Transcript data is added here -->
         <div id="transcript-data">
             {% if transcript_view is defined %}{% include "transcript-view.html" %}{% endif %}
         </div>
