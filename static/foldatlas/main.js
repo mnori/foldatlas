@@ -9,22 +9,9 @@ function BrowserController(config) {
 	// },
 
 	this.selectTranscript = function(transcriptID) {
-
 		this.changeUrl(transcriptID, "/transcript/"+transcriptID)
-
-		// console.log(transcriptID)
 		$("#transcript-data").html("Loading...")
-
-		var ajaxUrl = "/ajax/transcript/"+transcriptID;
-		$("#transcript-data").load(ajaxUrl)
-
-		// // alert("ajaxUrl: "+ajaxUrl)
-		// $.ajax({
-		// 	url: ajaxUrl
-		// }).done(function() {
-		// 	alert("It worked!")
-		// })
-		// .. fire off ajax request
+		$("#transcript-data").load("/ajax/transcript/"+transcriptID)
 	}
 
 	this.changeUrl = function(title, url) {

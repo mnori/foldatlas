@@ -111,7 +111,23 @@ class GenomeBrowser():
 
         return out
 
-class AlignmentViewer():
+class TranscriptView():
+
+    def __init__(self, transcript_id):
+        self.transcript_id = transcript_id
+        self.reactivities_view = ReactivitiesView(self.transcript_id)
+        self.alignment_view = AlignmentView(self.transcript_id)
+
+class ReactivitiesView():
+
+    def __init__(self, transcript_id):
+        self.transcript_id = transcript_id
+        self.build_reactivity_entries()
+
+    def build_reactivity_entries(self):
+        pass
+
+class AlignmentView():
 
     alignment_line_length = 80
     alignment_rows = []

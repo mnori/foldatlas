@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from sys import argv
-from controllers import GenomeBrowser, AlignmentViewer
+from controllers import GenomeBrowser, TranscriptView
 
 import settings
 import database
@@ -22,13 +22,12 @@ def index():
 # Transcript - initialise the genome browser with custom parameters to center on the gene of interest.
 # Also show the transcript's details
 @app.route("/transcript/<transcript_id>")
-def get_transcript(transcript_id):
-	genome_browser = GenomeBrowser()
+def view_transcript(transcript_id):
 	return render_template(
 		"index.html", 
 		settings=settings, 
 		genome_browser=GenomeBrowser(), 
-		alignment_viewer=AlignmentViewer(transcript_id))
+		transcript_view=TranscriptView(transcript_id))
 
 @app.route("/ajax/genome-browser/genes")
 def get_genes_ajax():
@@ -39,8 +38,10 @@ def get_transcripts_ajax():
 	return GenomeBrowser().get_transcripts(request)
 
 @app.route("/ajax/transcript/<transcript_id>")
-def get_transcript_ajax(transcript_id):
-	return render_template("alignment-viewer.html", alignment_viewer=AlignmentViewer(transcript_id))
+def view_transcript_ajax(transcript_id):
+	return render_template("transcript-view.html", transcript_view=TranscriptView(transcript_id))
+
+	# return render_template("alignment-viewer.html", alignment_viewer=AlignmentViewer(transcript_id))
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`

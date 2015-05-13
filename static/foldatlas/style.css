@@ -20,14 +20,34 @@ body {
 #content {
 	font-size: 16px;
 	font-family: Ubuntu;
-
-	background-color: #eee;
+	background-color: #e0e0e0;
 	width: 900px;
 	margin: 0 auto;
 	padding: 30px;
 	border-radius: 10px;
 	border: 2px solid #fff;
 	box-shadow: 0px 0px 10px #000;
+}
+
+h1 {
+	font-size: 30px;
+	text-align: center;
+}
+
+h2 {
+
+	margin-left: -32px;
+	margin-right: -32px;
+	padding-left: 30px;
+	text-shadow: 0px 0px 10px #000;
+
+	color: #fff;
+	background-color: #666;
+	border-left: 2px solid #777;
+	border-right: 2px solid #777;
+	line-height: 50px;
+	font-size: 20px;
+	/*border-bottom: 2px solid #aaa;*/
 }
 
 .alignment-container {
