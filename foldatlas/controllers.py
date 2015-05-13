@@ -2,7 +2,7 @@ from database import db_session;
 from sqlalchemy import and_
 
 import json, database, settings
-from models import Feature, Transcript, AlignmentEntry
+from models import Feature, Transcript, AlignmentEntry, ReactivityMeasurement
 
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
@@ -115,22 +115,40 @@ class TranscriptView():
 
     def __init__(self, transcript_id):
         self.transcript_id = transcript_id
-        self.reactivities_view = ReactivitiesView(self.transcript_id)
+        self.reactivities_view = ReactivitiesView(self.transcript_id, settings.reference_strain_id)
         self.alignment_view = AlignmentView(self.transcript_id)
 
 class ReactivitiesView():
 
-    def __init__(self, transcript_id):
+    def __init__(self, transcript_id, strain_id):
         self.transcript_id = transcript_id
+        self.strain_id = strain_id
         self.build_reactivity_entries()
 
     def build_reactivity_entries(self):
-        pass
+        seq_str = str(Transcript(self.transcript_id).get_sequence(self.strain_id).seq)
+        reactivities = db_session \
+            .query(ReactivityMeasurement) \
+            .filter(
+                ReactivityMeasurement.strain_id==self.strain_id,
+                ReactivityMeasurement.transcript_id==self.transcript_id
+            ) \
+            .all()
 
+        self.reactivity_data = []
+        for n in range(len(seq_str)): # initialise the array
+            self.reactivity_data.append({
+                "position": n,
+                "nuc": seq_str[n],
+                "reactivity": None
+            })
+
+        for reactivity in reactivities: # add values where present
+            self.reactivity_data[reactivity.position - 1]["reactivity"] = reactivity.reactivity
+        
 class AlignmentView():
 
     alignment_line_length = 80
-    alignment_rows = []
 
     def __init__(self, transcript_id):
         self.transcript_id = transcript_id

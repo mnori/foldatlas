@@ -1,3 +1,7 @@
 <h2>Reactivities</h2>
 
-[ reactivity-view here ]
+{% if reactivities_view.reactivity_data|length == 0 %}
+	<i>No reactivity data available.</i>
+{% else %}
+	{{ reactivities_view.reactivity_data }}
+{% endif %}

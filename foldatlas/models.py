@@ -3,6 +3,9 @@
 
 from sqlalchemy import Column, Integer, String, Text, Enum, Float, ForeignKey, ForeignKeyConstraint
 from database import Base
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+import database
 
 # A Gene describes a locus identifier for a gene, plus any metadata associated with the locus.
 # Genes are generic - they can be associated with multiple strains.
@@ -31,6 +34,71 @@ class Transcript(Base):
 
     def __repr__(self):
         return "<Transcript %r>" % (self.id)
+
+    def get_sequences(self, strain_id=None):
+
+        if strain_id != None:
+            strain_sql = "AND feature.strain_id = :strain_id"
+        else:
+            strain_sql = ""
+
+
+        # given the transcript ID, fetch the feature sequences in the correct order.
+        # TODO wrap this up - have a Transcript.get_sequences() method
+        sql = """
+            SELECT 
+                feature.strain_id, 
+                feature.direction,
+                SUBSTR(
+                    chromosome.sequence, 
+                    feature.start,
+                    feature.end - feature.start + 1
+                ) seq
+            FROM chromosome, feature
+            WHERE 
+                feature.strain_id = chromosome.strain_id AND
+                feature.chromosome_id = chromosome.chromosome_id AND
+                feature.type_id = 'exon' 
+                AND feature.transcript_id = :transcript_id
+                {0}
+            ORDER BY feature.strain_id, start
+        """
+        sql = sql.format(strain_sql)
+
+        sql_params = {"transcript_id": str(self.id)}
+        if strain_id != None:
+            sql_params["strain_id"] = strain_id
+
+        results = database.db_session.execute(sql, sql_params)
+
+        # collect data about the sequences
+        transcript_seqs = {}
+        for row in results:
+            strain_id = row["strain_id"]
+            # print("Found ["+strain_id+"]")
+            if strain_id  not in transcript_seqs:
+                transcript_seqs[strain_id] = {} 
+                transcript_seqs[strain_id]["seq"] = Seq("")
+
+            transcript_seqs[strain_id]["seq"] += row["seq"]
+            transcript_seqs[strain_id]["direction"] = row["direction"]
+
+        # make collection of SeqRecord objects.
+        seqs_out = {}
+        for strain_id in transcript_seqs:
+            seq = transcript_seqs[strain_id]["seq"]
+
+            # if direction is reverse, do reverse complement
+            if transcript_seqs[strain_id]["direction"] == "reverse":
+                seq.reverse_complement()
+
+            seqs_out[strain_id] = SeqRecord(seq, id=strain_id, description="")
+
+        return seqs_out
+
+    # convenience method to fetch a single SeqRecord.
+    def get_sequence(self, strain_id):
+        return list(self.get_sequences(strain_id).values())[0]
 
 # Describes a strain.
 class Strain(Base):

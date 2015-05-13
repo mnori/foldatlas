@@ -23,14 +23,19 @@ from models import Strain, Gene, Transcript, Feature, AlignmentEntry, Reactivity
 
 def hydrate_db():
     try:
-
         print("Rebuilding schema...")
         Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(bind=engine)
 
-        SequenceHydrator().hydrate() # add the annotations
-        TranscriptAligner().align() # make the alignments
-        DmsReactivityHydrator().hydrate()
+        # Add the annotations
+        SequenceHydrator().hydrate() 
+
+        # Add DMS reactivities
+        DmsReactivityHydrator().hydrate() 
+
+        # Do alignments so we can see polymorphism
+        # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
+        TranscriptAligner().align() 
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
         print(str(e).replace("\\n", "\n").replace("\\t", "\t"))
@@ -53,7 +58,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = 100
+    gene_limit = 10
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -270,54 +275,11 @@ class TranscriptAligner():
         print("Aligning ["+transcript_id+"]...", end="")
         sys.stdout.flush()
 
-        # given the transcript ID, fetch the feature sequences in the correct order.
-        # TODO wrap this up - have a Transcript.get_sequences() method
-        sql = """
-            SELECT 
-                feature.strain_id, 
-                feature.direction,
-                SUBSTR(
-                    chromosome.sequence, 
-                    feature.start, feature.end - feature.start + 1
-                ) seq
-            FROM chromosome, feature
-            WHERE 
-                feature.strain_id = chromosome.strain_id AND
-                feature.chromosome_id = chromosome.chromosome_id AND
-                feature.type_id = 'exon' AND
-                feature.transcript_id = '{0}'
-            ORDER BY feature.strain_id, start
-        """
-        sql = sql.format(transcript_id)
-        results = db_session.execute(sql)
+        seqs_to_align = list(Transcript(transcript_id).get_sequences().values())
 
-        # collect data about the sequences
-        transcript_seqs = {}
-        for row in results:
-            strain_id = row["strain_id"]
-            # print("Found ["+strain_id+"]")
-            if strain_id  not in transcript_seqs:
-                transcript_seqs[strain_id] = {} 
-                transcript_seqs[strain_id]["seq"] = Seq("")
-
-            transcript_seqs[strain_id]["seq"] += row["seq"]
-            transcript_seqs[strain_id]["direction"] = row["direction"]
-
-        if len(transcript_seqs) <= 1:
+        if len(seqs_to_align) <= 1:
             print("Warning - not enough sequences to proceed with alignment")
             return
-
-        # make collection of SeqRecord objects. 
-        seqs_to_align = []
-        for strain_id in transcript_seqs:
-            seq = transcript_seqs[strain_id]["seq"]
-
-            # if direction is reverse, do reverse complement
-            if transcript_seqs[strain_id]["direction"] == "reverse":
-                seq.reverse_complement()
-            seqs_to_align.append(SeqRecord(seq, id=strain_id, description=""))
-
-            # print("Appended ["+strain_id+"]")
 
         temp_filepath = settings.temp_folder+"/tmp.fa"
 
