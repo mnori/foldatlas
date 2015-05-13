@@ -1,0 +1,23 @@
+<h2>Polymorphism</h2>
+
+<div class="alignment-container">
+<!-- This is where we echo out all the HTML describing the alignment. -->
+{% for row in alignment_view.alignment_rows %}
+	<div class="alignment-row">
+	{% for strain_id in row["strain_data"] %}
+		{{ strain_id.rjust(10).replace(" ", "&nbsp;") | safe }}&nbsp;
+		{%- for n in range(row["strain_data"][strain_id]["sequence"]|length) -%}
+			{%- if row["diff"][n] == "*" -%}
+				{{- row["strain_data"][strain_id]["sequence"][n] -}}
+			{%- else -%}
+				{%- set nuc = row["strain_data"][strain_id]["sequence"][n] -%}
+				<span class="snp {{ nuc.lower() }}">{{- nuc -}}</span></b>
+			{%- endif %}
+		{%- endfor %} {{ row["strain_data"][strain_id]["nuc_count"] }}
+		<br />
+	{% endfor %}
+	</div>
+{% endfor %}
+</div>
+
+

@@ -1,0 +1,7 @@
+<h1>{{ transcript_view.transcript_id }}</h1>
+
+{% set alignment_view = transcript_view.reactivity_view %}
+{% include "reactivity-view.html" %}
+
+{% set alignment_view = transcript_view.alignment_view %}
+{% include "alignment-view.html" %}
