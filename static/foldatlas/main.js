@@ -10,13 +10,14 @@ function BrowserController(config) {
 
 	this.selectTranscript = function(transcriptID) {
 
+		this.changeUrl(transcriptID, "/transcript/"+transcriptID)
+
 		// console.log(transcriptID)
 		$("#transcript-data").html("Loading...")
 
 		var ajaxUrl = "/ajax/transcript/"+transcriptID;
 		$("#transcript-data").load(ajaxUrl)
 
-		
 		// // alert("ajaxUrl: "+ajaxUrl)
 		// $.ajax({
 		// 	url: ajaxUrl
@@ -24,6 +25,15 @@ function BrowserController(config) {
 		// 	alert("It worked!")
 		// })
 		// .. fire off ajax request
+	}
+
+	this.changeUrl = function(title, url) {
+	    if (typeof (history.pushState) != "undefined") {
+	        var obj = { Page: title, Url: url };
+	        history.pushState(obj, obj.Page, obj.Url);
+	    } else {
+	        alert("Your browser does not support HTML5. Please upgrade it.");
+	    }
 	}
 }
 

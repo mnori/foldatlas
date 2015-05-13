@@ -3,6 +3,18 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
+    <script type="text/javascript" src="{{ settings.static_base_url }}/jquery-2.1.4.js"></script>
+
+    <!-- FoldAtlas config and js -->
+    <script type="text/javascript">
+        window.foldatlasConfig = {
+            staticBaseUrl: "{{ settings.static_base_url }}",
+            appBaseUrl: "{{ settings.app_base_url }}"
+        }
+    </script>
+    <script type="text/javascript" src="{{ settings.static_base_url }}/foldatlas/main.js"></script>
+
+    <!-- Genoverse stuff. TODO put this in a seperate template -->
     <link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/genoverse.css" />
     <link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/controlPanel.css" />
     <link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/trackControls.css" />
@@ -11,13 +23,7 @@
 
     <link rel="stylesheet" type="text/css" href="{{ settings.static_base_url }}/foldatlas/style.css" />    
 
-    <script type="text/javascript">
-        window.foldatlasConfig = {
-            staticBaseUrl: "{{ settings.static_base_url }}",
-            appBaseUrl: "{{ settings.app_base_url }}"
-        }
-    </script>
-
+    <!-- this is horrible - including jquery more than once -->
     <script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery.js"></script>
     <script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery-ui.js"></script>
     <script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery.mousewheel.js"></script>
@@ -85,6 +91,8 @@
     <script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBTrack.js"></script>
     <script type="text/javascript">
 
+        {% set chromosomes = genome_browser.get_chromosomes() %}
+
         // must define this config after all the foldatlas scripts are loaded
         window.genoverseConfig = {
             container : '#genoverse',
@@ -117,8 +125,6 @@
         }
     </script>
 
-    <script type="text/javascript" src="{{ settings.static_base_url }}/foldatlas/main.js"></script>
-
   </head>
   <body>
 
@@ -127,6 +133,7 @@
     </div>
 
     <div id="content">
+
         <!-- TODO make this reload the page. Dynamically changing the chromosome is not supported. -->    
         Select your chromosome:     
         <select id="chromosome-selector">
@@ -134,7 +141,10 @@
                 <option value="{{ chromosome.chromosome_id }}">{{ chromosome.chromosome_id }}</option>
             {% endfor %}
         </select><br /><br />
+
+        <!-- this empty div will be filled by Genoverse -->
         <div id="genoverse"></div>
+
         <div id="transcript-data"></div>
     </div>
   </body>

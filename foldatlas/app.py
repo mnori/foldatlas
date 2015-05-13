@@ -12,26 +12,32 @@ def after_request(response):
 	response.headers.add('Access-Control-Allow-Origin', '*')
 	return response
 
+# The index should show the genome browser and also a search box.
+# Maybe also some introductory text.
 @app.route("/")
 def index():
-	browser = GenomeBrowser()
-	chromosomes = browser.get_chromosomes()
-	return render_template("index.html", settings=settings, chromosomes=chromosomes)
+	genome_browser = GenomeBrowser()
+	return render_template("index.html", settings=settings, genome_browser=genome_browser)
 
-@app.route("/ajax/genome-browser/genes")
-def get_genes():
-	browser = GenomeBrowser()
-	return browser.get_genes(request)
-
-@app.route("/ajax/genome-browser/transcripts")
-def get_transcripts():
-	browser = GenomeBrowser()
-	return browser.get_transcripts(request)
-
-@app.route("/ajax/transcript/<transcript_id>")
-def get_transcript(transcript_id):
+# Transcript - initialise the genome browser with custom parameters to center on the gene of interest.
+# Also show the transcript's details
+@app.route("/transcripts/<transcript_id>")
+def get_transcript():
+	chromosomes = GenomeBrowser().get_chromosomes()
 	viewer = AlignmentViewer()
 	viewer.build_alignment_entries(transcript_id)
+	return render_template("index.html", settings=settings, chromosomes=chromosomes, viewer=viewer)
+
+@app.route("/ajax/genome-browser/genes")
+def get_genes_ajax():
+	return GenomeBrowser().get_genes(request)
+
+@app.route("/ajax/genome-browser/transcripts")
+def get_transcripts_ajax():
+	return GenomeBrowser().get_transcripts(request)
+
+@app.route("/ajax/transcript/<transcript_id>")
+def get_transcript_ajax(transcript_id):
 	return render_template("alignment-viewer.html", viewer=viewer)
 
 if __name__ == "__main__": 
