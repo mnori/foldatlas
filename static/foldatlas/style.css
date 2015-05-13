@@ -34,6 +34,11 @@ body {
 	font-family: Ubuntu Mono, Courier New, monospace;
 }
 
+.alignment-row {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
 .snp {
 	background-color: #555;
 	color: #fff;

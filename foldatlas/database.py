@@ -23,20 +23,13 @@ from models import Strain, Gene, Transcript, Feature, AlignmentEntry, Reactivity
 
 def hydrate_db():
     try:
-        # print("Rebuilding schema...")
-        # Base.metadata.drop_all(bind=engine)
-        # Base.metadata.create_all(bind=engine)
 
+        print("Rebuilding schema...")
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
 
-        ReactivityMeasurement.__table__.create(engine)
-
-
-        # print("...done.")
-
-        # these two steps take rather a long time.
-        # SequenceHydrator().hydrate() # add the annotations
-        # TranscriptAligner().align() # make the alignments
-
+        SequenceHydrator().hydrate() # add the annotations
+        TranscriptAligner().align() # make the alignments
         DmsReactivityHydrator().hydrate()
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message

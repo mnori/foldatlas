@@ -3,7 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-    <script type="text/javascript" src="{{ settings.static_base_url }}/jquery-2.1.4.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base_url }}/foldatlas/jquery-2.1.4.js"></script>
 
     <!-- FoldAtlas config and js -->
     <script type="text/javascript">
@@ -145,7 +145,10 @@
         <!-- this empty div will be filled by Genoverse -->
         <div id="genoverse"></div>
 
-        <div id="transcript-data"></div>
+        <div id="transcript-data">
+            <!-- will be filled with data -->
+            {% if alignment_viewer is defined %}{% include "alignment-viewer.html" %}{% endif %}
+        </div>
     </div>
   </body>
 </html>

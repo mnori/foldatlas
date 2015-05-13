@@ -116,17 +116,18 @@ class AlignmentViewer():
     alignment_line_length = 80
     alignment_rows = []
 
-    transcript_id = None
-
-    def build_alignment_entries(self, transcript_id):
-
+    def __init__(self, transcript_id):
         self.transcript_id = transcript_id
+        self.build_alignment_entries()
+
+    def build_alignment_entries(self):
+
         self.alignment_rows = []
 
         # fetch the alignment rows from the DB, using the ORM
         alignment_entries = db_session \
             .query(AlignmentEntry) \
-            .filter(AlignmentEntry.transcript_id==transcript_id) \
+            .filter(AlignmentEntry.transcript_id==self.transcript_id) \
             .all()
 
         if (len(alignment_entries) == 0):

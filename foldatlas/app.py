@@ -21,12 +21,14 @@ def index():
 
 # Transcript - initialise the genome browser with custom parameters to center on the gene of interest.
 # Also show the transcript's details
-@app.route("/transcripts/<transcript_id>")
-def get_transcript():
-	chromosomes = GenomeBrowser().get_chromosomes()
-	viewer = AlignmentViewer()
-	viewer.build_alignment_entries(transcript_id)
-	return render_template("index.html", settings=settings, chromosomes=chromosomes, viewer=viewer)
+@app.route("/transcript/<transcript_id>")
+def get_transcript(transcript_id):
+	genome_browser = GenomeBrowser()
+	return render_template(
+		"index.html", 
+		settings=settings, 
+		genome_browser=GenomeBrowser(), 
+		alignment_viewer=AlignmentViewer(transcript_id))
 
 @app.route("/ajax/genome-browser/genes")
 def get_genes_ajax():
@@ -38,7 +40,7 @@ def get_transcripts_ajax():
 
 @app.route("/ajax/transcript/<transcript_id>")
 def get_transcript_ajax(transcript_id):
-	return render_template("alignment-viewer.html", viewer=viewer)
+	return render_template("alignment-viewer.html", alignment_viewer=AlignmentViewer(transcript_id))
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`
