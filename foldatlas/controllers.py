@@ -135,16 +135,18 @@ class ReactivitiesView():
             ) \
             .all()
 
-        self.reactivity_data = []
+        reactivity_data = []
         for n in range(len(seq_str)): # initialise the array
-            self.reactivity_data.append({
+            reactivity_data.append({
                 "position": n,
                 "nuc": seq_str[n],
                 "reactivity": None
             })
 
         for reactivity in reactivities: # add values where present
-            self.reactivity_data[reactivity.position - 1]["reactivity"] = reactivity.reactivity
+            reactivity_data[reactivity.position - 1]["reactivity"] = reactivity.reactivity
+
+        self.reactivity_data_json = json.dumps(reactivity_data)
         
 class AlignmentView():
 
