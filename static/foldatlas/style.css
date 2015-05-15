@@ -133,3 +133,9 @@ h2 {
 .tick > text {
 	font: 16px Ubuntu Mono, sans-serif;
 }
+
+.line {
+  fill: none;
+  stroke: #a00;
+  stroke-width: 1px;
+}
