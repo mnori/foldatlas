@@ -16,14 +16,14 @@ function BrowserController(config) {
 	}
 
 	this.selectTranscript = function(transcriptID) {
-		$("#transcript-loading").show()
+		$("#loading-indicator").show()
 		this.changeUrl(transcriptID, "/transcript/"+transcriptID)
 
 		$.ajax({
 			url: "/ajax/transcript/"+transcriptID,
 			context: this
 		}).done(function(results) {
-			$("#transcript-loading").hide();
+			$("#loading-indicator").hide();
 			$("#transcript-data").empty();
 			$("#transcript-data").html(results);
 			instance.drawReactivities();
@@ -45,8 +45,34 @@ function BrowserController(config) {
 
 		// Define chart dimensions including axis margins
 		var margin = {top: 20, right: 20, bottom: 40, left: 40}
-		var	width = 898 - margin.left - margin.right,
-			height = 248 - margin.bottom - margin.top;
+
+		var totWidth = 898,
+			totHeight = 248;
+
+		var	width = totWidth - margin.left - margin.right,
+			height = totHeight - margin.bottom - margin.top;
+
+		// Init the chart's container element
+		var chart = d3.select("#reactivities-chart")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.bottom + margin.top)
+
+		// If there's no data, show a message. Otherwise continue plotting the data.
+		// ...
+
+		var y = d3.scale.linear()
+		    .range([height, 0])
+		    .domain([0, d3.max(data, function(d) { return d.reactivity; })]);
+
+		console.log(y.domain());
+		console.log(y.domain()[1]);
+		if (isNaN(y.domain()[1])) { // happens when there is no reactivity data
+			chart.append("text")
+		      .attr("transform", "translate("+(totWidth / 2)+", "+(totHeight / 2)+")")
+		      .style("text-anchor", "middle")
+		      .text("No reactivity data");
+		   return;
+		}
 
 		// Define the scales
 		var x = d3.scale.linear()
@@ -56,9 +82,9 @@ function BrowserController(config) {
 		    // domain describes the range of data to show.
 		    .domain([0, d3.max(data, function(d) { return d.position; })]);
 
-		var y = d3.scale.linear()
-		    .range([height, 0])
-		    .domain([0, d3.max(data, function(d) { return d.reactivity; })]);
+		
+
+
 
 	   	// Create axis objects
 		var xAxis = d3.svg.axis()
@@ -73,11 +99,6 @@ function BrowserController(config) {
 
 		// Define bar width, depends on n values and also width of canvas
 		var barWidth = width / data.length;
-
-		// Get the chart's container element
-		var chart = d3.select("#reactivities-chart")
-			.attr("width", width + margin.left + margin.right)
-			.attr("height", height + margin.bottom + margin.top)
 
 		// Add x-axis objects to the chart
 		chart.append("g")

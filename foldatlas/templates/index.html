@@ -129,6 +129,12 @@
   </head>
   <body>
 
+    <div id="loading-indicator" style="display: none;">
+        <img src="{{ settings.static_base_url}}/assets/spinner.gif" />
+    </div>
+
+    <div id="progress"></div>
+
     <div id="header">
         FoldAtlas
     </div>
@@ -145,11 +151,6 @@
 
         <!-- this empty div will be filled by Genoverse -->
         <div id="genoverse"></div>
-
-        <!-- Loading indicator - TODO use a CSS one instead -->
-        <div id="transcript-loading" style="display: none;">
-            <img src="{{ settings.static_base_url}}/assets/spinner.gif" />
-        </div>
 
         <!-- Transcript data is added here -->
         <div id="transcript-data">
