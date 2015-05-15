@@ -89,12 +89,34 @@ h2 {
 
 /* SVG */
 
+#reactivities-chart {
+	border: 1px solid #000;
+	background-color: #fff;
+}
+
 #reactivities-chart rect {
   fill: #17a;
 }
 
-#reactivities-chart text {
+/*#reactivities-chart text { 
   fill: black;
   font: 10px Ubuntu Mono, sans-serif;
   text-anchor: middle;
+}*/
+
+/*.domain { 
+  fill: none; 
+  stroke: black; 
+  stroke-width: 2px; 
+} */
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.tick > text {
+	font: 16px Ubuntu Mono, sans-serif;
 }
