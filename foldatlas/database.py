@@ -37,6 +37,8 @@ def hydrate_db():
         # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
         TranscriptAligner().align() 
 
+        print("Hydration Complete.")
+
     except Exception as e: # catch the exception so we can display a nicely formatted error message
         print(str(e).replace("\\n", "\n").replace("\\t", "\t"))
         raise e

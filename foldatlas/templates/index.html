@@ -154,7 +154,9 @@
 
         <!-- Transcript data is added here -->
         <div id="transcript-data">
-            {% if transcript_view is defined %}{% include "transcript-view.html" %}{% endif %}
+            {% if transcript_view is defined %}
+                {% include "transcript-view.html" %}
+            {% endif %}
         </div>
     </div>
   </body>

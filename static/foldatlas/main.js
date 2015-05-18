@@ -3,7 +3,8 @@
 function BrowserController(config) {
 
 	var instance = this;
-
+	
+	this.nucsPerRow = 80;
 	this.staticBase = config.staticBaseUrl;
 	this.reactivities = {}
 
@@ -42,26 +43,44 @@ function BrowserController(config) {
 	this.drawReactivities = function(reactivities) {
 
 		var data = this.getReactivitiesJson()
+		if (data == null) {
+			return;
+		}
 
-		// Define chart dimensions including axis margins
-		var margin = {top: 20, right: 20, bottom: 60, left: 70}
+		var nDataRows = data.length;
+		var nChartRows = Math.ceil(nDataRows / this.nucsPerRow);
 
-		var totWidth = 898,
-			totHeight = 248;
+		console.log("nChartRows: "+nChartRows);
 
-		var	width = totWidth - margin.left - margin.right,
-			height = totHeight - margin.bottom - margin.top;
+		// Define chart dimensions including axis panelMargins
+		var panelMargin = {top: 15, right: 60, bottom: 30, left: 70}
+		var panelTotDims = {x: 898, y: 100}
+
+		// dims without margins
+		var panelDims = { 
+			x: panelTotDims.x - panelMargin.left - panelMargin.right,
+			y: panelTotDims.y - panelMargin.bottom - panelMargin.top
+		}
+
+		// Total dimensions of chart across all panels and margins.
+		var chartDims = {
+			x: panelTotDims.x,
+			y: panelTotDims.y * nChartRows
+		}
+
+		// var	width = panelTotDims.x - panelMargin.left - panelMargin.right,
+		// 	height = panelTotDims.y - panelMargin.bottom - panelMargin.top;
 
 		// Init the chart's container element
 		var chart = d3.select("#reactivities-chart")
-			.attr("width", width + margin.left + margin.right)
-			.attr("height", height + margin.bottom + margin.top)
+			.attr("width", chartDims.x)
+			.attr("height", chartDims.y)
 
 		// Define the scales
 		var yScale = d3.scale.linear()
 
 			// range maps to the pixel dimensions.
-		    .range([height, 0])
+		    .range([panelDims.y, 0])
 
 		    // domain describes the range of data to show.
 		    .domain([0, d3.max(data, function(d) { return d.reactivity; })]);
@@ -70,65 +89,118 @@ function BrowserController(config) {
 		if (isNaN(yScale.domain()[1])) { 
 			
 			chart.append("text")
-		      .attr("transform", "translate("+(totWidth / 2)+", "+(totHeight / 2)+")")
+		      .attr("transform", "translate("+(panelTotDims.x / 2)+", "+(panelTotDims.y / 2)+")")
 		      .style("text-anchor", "middle")
 		      .text("No reactivity data");
 			return;
 		}
 		
-		var xScale = d3.scale.linear()
-		    .range([0, width], .1) 
-		    .domain([0, d3.max(data, function(d) { return d.position; })]);
-		    // .domain([0, 80]);
+		for (var rowN = 0; rowN < nChartRows; rowN++) {
+			var start = rowN * this.nucsPerRow;
+			var end = start + this.nucsPerRow;
 
-	   	// Create axis objects
-		var xAxis = d3.svg.axis()
-		    .scale(xScale)
-		    .orient("bottom")
-		    .ticks(10);
+			if (end > nDataRows) {
+				end = nDataRows;
+			}
+			var nucsThisRow = end - start;
 
-		var yAxis = d3.svg.axis()
-		    .scale(yScale)
-		    .orient("left")
-    		.ticks(5); // how many ticks to show.
+			// this is for panel positioning.
+			panelYOffset = rowN * panelTotDims.y;
 
-		// Add x-axis objectsto the chart
-		chart.append("g")
-			.attr("class", "x axis")
-			.attr("transform", "translate("+margin.left+"," + (height + margin.top) + ")")
-			.call(xAxis);
+			// Shows nucleotide numbers
+			var rangeX = parseInt(panelDims.x * ((nucsThisRow - 1) / this.nucsPerRow));
 
-		// Add x axis label
-	    chart.append("text")
-	        .attr("transform", "translate(" + (margin.left + (width / 2)) + " ," + (height + margin.top) + ")")
-	        .style("text-anchor", "middle")
-	        .attr("dy", "2.7em")
-	        .text("Nucleotide");
+			var xScale = d3.scale.linear()
+			    .range([0, rangeX], .1) 
+			    // .domain([0, d3.max(data, function(d) { return d.position; })]);
+			    // .domain([start, end - 1])
+			    .domain([start, end - 1])
 
-		// Add y-axis objects to the chart
-		chart.append("g")
-			.attr("class", "y axis")
-			.attr("transform", "translate("+margin.left+", "+margin.top+")")
-			.call(yAxis)
+			    // custom tick format, to show nucleotides.
 
-		// Add y-axis label
-		chart.append("text")
-	        .attr("transform", "rotate(-90)")
-	        .attr("y", margin.left) // this is actually X direction, because we rotated.
-	        .attr("x", 0 - (margin.top + (height / 2)))
-	        .attr("dy", "-2.7em")
-	        .style("text-anchor", "middle")
-	        .text("Normalised Reactivity");
+			// Shows nucleotide letters (BORKED)
+			// var xScale = d3.scale.ordinal()
+			//     .domain(data.map(function(d) { 
+   //  				return d.nuc; 
+			// 	}))
+			//     .rangeRoundBands([0, panelDims.x]);
 
-	    // add the actual line chart
-		var lineGen = d3.svg.line()
-		    .x(function(d) { return margin.left + xScale(d.position); })
-		    .y(function(d) { return margin.top + yScale(d.reactivity); });
+		   	// Create axis objects
+			var xAxis = d3.svg.axis()
+			    .scale(xScale)
+			    .orient("bottom")
+			    .ticks(nucsThisRow)
 
- 		chart.append("path")
-			.datum(data)
-			.attr("class", "line")
-			.attr("d", lineGen);
+			    // this replaces the position number with the nucleotide at that
+				.tickFormat(function(d, i) {
+					return data[d].nuc;
+				});
+
+			var yAxis = d3.svg.axis()
+			    .scale(yScale)
+			    .orient("left")
+	    		.ticks(3); // how many ticks to show.
+
+			// Add x-axis objectsto the chart
+			chart.append("g")
+				.attr("class", "x axis")
+				.attr("transform", "translate("+
+					panelMargin.left+","+
+					(panelYOffset + panelDims.y + panelMargin.top)
+				+")")
+				.call(xAxis);
+
+			// Add x axis label
+		    chart.append("text")
+		        .attr("transform", "translate("+
+		        	(panelMargin.left + (panelDims.x / 2))+","+
+		        	(panelYOffset + panelDims.y + panelMargin.top)+
+	        	")")
+		        .style("text-anchor", "middle")
+		        .attr("dy", "2.7em");
+		        // .text("Nucleotide");
+
+			// Add y-axis objects to the chart
+			chart.append("g")
+				.attr("class", "y axis")
+				.attr("transform", "translate("+
+					panelMargin.left+","+
+					(panelYOffset + panelMargin.top)+
+				")")
+				.call(yAxis)
+
+			// Add y-axis label
+			chart.append("text")
+		        .attr("transform", "rotate(-90)")
+		        .attr("y", panelMargin.left) // this is actually X direction, because we rotated.
+		        .attr("x", (-panelYOffset - (panelMargin.top + (panelDims.y / 2))))
+		        .attr("dy", "-2.7em")
+		        .style("text-anchor", "middle")
+		        .text("Reactivity");
+
+	        // Add length label
+	        var panelDimsX = panelDims.x * (nucsThisRow / this.nucsPerRow);
+			chart.append("text")
+		        .attr("x", panelMargin.left + panelDimsX)
+		        .attr("y", panelYOffset + panelMargin.top + panelDims.y)
+		        .style("text-anchor", "left")
+		        .attr("dy", "1.3em")
+		        .text(end);
+
+		    // add the actual line chart
+			var lineGen = d3.svg.line()
+			    .x(function(d) { return panelMargin.left + xScale(d.position); })
+			    .y(function(d) { return panelYOffset + panelMargin.top + yScale(d.reactivity); });
+
+			// must slice the data to get out the bit we're interested in
+	 		chart.append("path")
+				.datum(data.slice(start, end))
+				.attr("class", "line")
+				.attr("d", lineGen);
+
+		} // end looping through chart rows
+
+		
 
 		// old code for generating bar chart
 		// chart.append('svg:path')
@@ -144,7 +216,7 @@ function BrowserController(config) {
 		// var bar = chart.selectAll("g")
 		// 	.data(data)
 		// 	.enter().append("g")
-		// 	.attr("transform", function(d, i) { return "translate(" + (margin.left + (i * barWidth)) + ", "+margin.top+")"; })
+		// 	.attr("transform", function(d, i) { return "translate(" + (panelMargin.left + (i * barWidth)) + ", "+panelMargin.top+")"; })
 
 		// // Add rectangles to the bars
 		// bar.append("rect")
@@ -155,8 +227,13 @@ function BrowserController(config) {
 	}
 
 	this.getReactivitiesJson = function() {
-		var json = $.parseJSON($("#reactivities-json").html())
-		return json
+		var html = $("#reactivities-json").html();
+
+		if (html == undefined) { // this means no reactivity data to show
+			return null;
+		}
+		var json = $.parseJSON(html);
+		return json;
 	}
 
 	this.init()

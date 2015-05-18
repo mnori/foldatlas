@@ -2,6 +2,7 @@
 	@author Matthew Norris */
 
 body {
+	height: auto;
 	position: relative;
 	background-color: #17a;
 }
