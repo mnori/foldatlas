@@ -16,10 +16,10 @@ function BrowserController(config) {
 		instance.drawReactivities();
 	}
 
+	// Jump to a specific transcript page
 	this.selectTranscript = function(transcriptID) {
 		$("#loading-indicator").show()
 		this.changeUrl(transcriptID, "/transcript/"+transcriptID)
-
 		$.ajax({
 			url: "/ajax/transcript/"+transcriptID,
 			context: this
@@ -31,6 +31,7 @@ function BrowserController(config) {
 		});
 	}
 
+	// HTML5 change URL method
 	this.changeUrl = function(title, url) {
 	    if (typeof (history.pushState) != "undefined") {
 	        var obj = { Page: title, Url: url };
@@ -40,12 +41,15 @@ function BrowserController(config) {
 	    }
 	}
 
+	// Visualises the reactivity data.
 	this.drawReactivities = function(reactivities) {
 
 		var data = this.getReactivitiesJson()
 		if (data == null) {
 			return;
 		}
+
+		console.log(data);
 
 		var nDataRows = data.length;
 		var nChartRows = Math.ceil(nDataRows / this.nucsPerRow);
@@ -80,9 +84,9 @@ function BrowserController(config) {
 		var yScale = d3.scale.linear()
 
 			// range maps to the pixel dimensions.
-		    .range([panelDims.y, 0])
 
 		    // domain describes the range of data to show.
+		    .range([panelDims.y, 0])
 		    .domain([0, d3.max(data, function(d) { return d.reactivity; })]);
 
 		// when there is no reactivity data, degrade gracefully
@@ -95,13 +99,16 @@ function BrowserController(config) {
 			return;
 		}
 		
-		for (var rowN = 0; rowN < nChartRows; rowN++) {
+		for (var rowN = 0; rowN < nChartRows; rowN++) { // each iteration = 1 chart row
 			var start = rowN * this.nucsPerRow;
 			var end = start + this.nucsPerRow;
 
 			if (end > nDataRows) {
 				end = nDataRows;
 			}
+
+			var dataSlice = data.slice(start, end);
+
 			var nucsThisRow = end - start;
 
 			// this is for panel positioning.
@@ -112,43 +119,56 @@ function BrowserController(config) {
 
 			var xScale = d3.scale.linear()
 			    .range([0, rangeX], .1) 
-			    // .domain([0, d3.max(data, function(d) { return d.position; })]);
-			    // .domain([start, end - 1])
-			    .domain([start, end - 1])
-
-			    // custom tick format, to show nucleotides.
-
-			// Shows nucleotide letters (BORKED)
-			// var xScale = d3.scale.ordinal()
-			//     .domain(data.map(function(d) { 
-   //  				return d.nuc; 
-			// 	}))
-			//     .rangeRoundBands([0, panelDims.x]);
+			    .domain([start - 0.5, (end - 1) + 0.5])
 
 		   	// Create axis objects
 			var xAxis = d3.svg.axis()
 			    .scale(xScale)
 			    .orient("bottom")
 			    .ticks(nucsThisRow)
+				.tickFormat(function(d, i) { return data[d].nuc; })
 
-			    // this replaces the position number with the nucleotide at that
-				.tickFormat(function(d, i) {
-					return data[d].nuc;
-				});
+			// xAxis.select("tick")
+			// 	.append("rect")
+			// 	.setAttr("width", 10)
+			// 	.setAttr("height", 10);
 
 			var yAxis = d3.svg.axis()
 			    .scale(yScale)
 			    .orient("left")
 	    		.ticks(3); // how many ticks to show.
 
-			// Add x-axis objectsto the chart
+			// Add x-axis objects to the chart. X axis ticks have a background,
+			// which depends on the data value.
+			var bgWidth = parseInt(panelDims.x / this.nucsPerRow) + 1;
+
 			chart.append("g")
 				.attr("class", "x axis")
 				.attr("transform", "translate("+
 					panelMargin.left+","+
 					(panelYOffset + panelDims.y + panelMargin.top)
 				+")")
-				.call(xAxis);
+				.call(xAxis)
+				.selectAll(".tick")
+				.insert("rect", ":first-child")
+				.attr("transform", "translate("+(-bgWidth / 2)+", "+10+")")
+				.attr("width", bgWidth)
+				.attr("height", 10)
+
+				// highlight nucleotides with missing reactivities
+				.attr("class", function(n, i) {
+					return (dataSlice[i].reactivity == null) ? 
+						"missing-bg" : "not-missing-bg";
+				})
+
+			// Add y-axis objects to the chart
+			chart.append("g")
+				.attr("class", "y axis")
+				.attr("transform", "translate("+
+					panelMargin.left+","+
+					(panelYOffset + panelMargin.top)+
+				")")
+				.call(yAxis);
 
 			// Add x axis label
 		    chart.append("text")
@@ -159,15 +179,6 @@ function BrowserController(config) {
 		        .style("text-anchor", "middle")
 		        .attr("dy", "2.7em");
 		        // .text("Nucleotide");
-
-			// Add y-axis objects to the chart
-			chart.append("g")
-				.attr("class", "y axis")
-				.attr("transform", "translate("+
-					panelMargin.left+","+
-					(panelYOffset + panelMargin.top)+
-				")")
-				.call(yAxis)
 
 			// Add y-axis label
 			chart.append("text")
@@ -192,15 +203,39 @@ function BrowserController(config) {
 			    .x(function(d) { return panelMargin.left + xScale(d.position); })
 			    .y(function(d) { return panelYOffset + panelMargin.top + yScale(d.reactivity); });
 
-			// must slice the data to get out the bit we're interested in
 	 		chart.append("path")
-				.datum(data.slice(start, end))
+				.datum(dataSlice) // get data specific to this row
 				.attr("class", "line")
 				.attr("d", lineGen);
 
-		} // end looping through chart rows
+			// var barWidth = panelDims.x / this.nucsPerRow;
 
-		
+			// bar = chart.selectAll("g").select("g").data(data).enter()
+			// 	.attr("transform", function(d, i) { 
+			// 		console.log(i);
+			// 		return "translate(" + (
+			// 			panelMargin.left + (i * barWidth)) + ", "+
+			// 			panelMargin.top+
+			// 		")"; 
+				// });
+
+			// Add rectangles to the bars
+			// // // Add bar elements to the chart
+			// var bar = chart.selectAll("g")
+			// 	.data(data.slice(start, end))
+			// 	.enter().append("g")
+			// 	.attr("transform", function(d, i) { 
+			// 		console.log("pos: "+d.position);
+			// 		// console.log("i"+ i);
+			// 		return "translate(" + (panelMargin.left + (i * barWidth)) + ", "+panelMargin.top+")"; 
+			// 	})
+
+			// bar.append("rect")
+			// 	.attr("y", function(d) { return yScale(d.reactivity); })
+			// 	.attr("height", function(d) { return panelDims.y - yScale(d.reactivity); })
+			// 	.attr("width", barWidth);	
+
+		} // end looping through chart rows
 
 		// old code for generating bar chart
 		// chart.append('svg:path')
@@ -223,7 +258,6 @@ function BrowserController(config) {
 		// 	.attr("y", function(d) { return yScale(d.reactivity); })
 		// 	.attr("height", function(d) { return height - yScale(d.reactivity); })
 		// 	.attr("width", barWidth);	
-
 	}
 
 	this.getReactivitiesJson = function() {

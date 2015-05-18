@@ -41,8 +41,6 @@ def get_transcripts_ajax():
 def view_transcript_ajax(transcript_id):
 	return render_template("transcript-view.html", transcript_view=TranscriptView(transcript_id))
 
-	# return render_template("alignment-viewer.html", alignment_viewer=AlignmentViewer(transcript_id))
-
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`
 	if (len(argv) > 1 and argv[1] == "hydratedb"):

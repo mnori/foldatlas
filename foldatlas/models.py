@@ -90,7 +90,10 @@ class Transcript(Base):
 
             # if direction is reverse, do reverse complement
             if transcript_seqs[strain_id]["direction"] == "reverse":
-                seq.reverse_complement()
+                pass
+                seq = seq.reverse_complement()
+            else:
+                print("Not reverse!")
 
             seqs_out[strain_id] = SeqRecord(seq, id=strain_id, description="")
 

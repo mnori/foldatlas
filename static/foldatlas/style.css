@@ -108,10 +108,6 @@ h2 {
 	background-color: #fff;
 }
 
-#reactivities-chart rect {
-  fill: #17a;
-}
-
 /*#reactivities-chart text { 
   fill: black;
   font: 10px Ubuntu Mono, sans-serif;
@@ -139,4 +135,11 @@ h2 {
   fill: none;
   stroke: #a00;
   stroke-width: 1px;
+}
+
+.missing-bg {
+	fill: #bbb;
+}
+.not-missing-bg {
+	fill: #fff;
 }
