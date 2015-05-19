@@ -143,3 +143,12 @@ h2 {
 .not-missing-bg {
 	fill: #fff;
 }
+
+
+/* D3nome-specific */
+
+.d3nome-viewport {
+	stroke: grey;
+	fill: black;
+	fill-opacity: 0.2;
+}

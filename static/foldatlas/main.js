@@ -217,7 +217,7 @@ var BrowserController = Class.extend({
 
 $(document).ready(function () { 
 	window.d3nome = new D3nome(window.d3nomeConfig);
-    window.genoverse = new Genoverse(window.genoverseConfig); 
+    // window.genoverse = new Genoverse(window.genoverseConfig); 
     window.browserController = new BrowserController(window.foldatlasConfig);
 });
 
