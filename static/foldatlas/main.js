@@ -138,8 +138,7 @@ function BrowserController(config) {
 			    .orient("left")
 	    		.ticks(3); // how many ticks to show.
 
-			// Add x-axis objects to the chart. X axis ticks have a background,
-			// which depends on the data value.
+			// Add x-axis objects to the chart.
 			var bgWidth = parseInt(panelDims.x / this.nucsPerRow) + 1;
 
 			chart.append("g")
@@ -149,8 +148,14 @@ function BrowserController(config) {
 					(panelYOffset + panelDims.y + panelMargin.top)
 				+")")
 				.call(xAxis)
+
+				// select the X axis tick element
 				.selectAll(".tick")
+
+				// aadd a rect to it, first child means it draws in the background
 				.insert("rect", ":first-child")
+
+				// set position and dimensions of rectangle element.
 				.attr("transform", "translate("+(-bgWidth / 2)+", "+10+")")
 				.attr("width", bgWidth)
 				.attr("height", 10)
