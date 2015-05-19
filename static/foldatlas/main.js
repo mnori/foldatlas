@@ -30,6 +30,7 @@ var BrowserController = Class.extend({
 	        var obj = { Page: title, Url: url };
 	        history.pushState(obj, obj.Page, obj.Url);
 	    } else {
+	    	// TODO show a prettier warning
 	        alert("Your browser does not support HTML5. Please upgrade it.");
 	    }
 	},
@@ -215,13 +216,9 @@ var BrowserController = Class.extend({
 	}
 })
 
-$(document).ready(function () { 
-	window.d3nome = new D3nome(window.d3nomeConfig);
-    // window.genoverse = new Genoverse(window.genoverseConfig); 
-    window.browserController = new BrowserController(window.foldatlasConfig);
-});
 
-$("#chromosome-selector").change(function() {
-	// TODO reload the page .. difficult / impossible to change the chromosome 
-	// ... 
-});
+
+// $("#chromosome-selector").change(function() {
+// 	// TODO reload the page .. difficult / impossible to change the chromosome 
+// 	// ... 
+// });

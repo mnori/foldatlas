@@ -1,0 +1,110 @@
+<script type="text/javascript">
+	// Genoverse config
+	// must define this config after all the foldatlas scripts are loaded
+	window.genoverseConfig = {
+	    container : '#genoverse',
+	    width     : 900,
+	    genome    : {
+
+	    {% for chromosome in chromosomes %}
+	        {{ chromosome.int_id }}: {
+	            "size": {{ chromosome.length }},
+	            "bands": [
+	                {
+	                    "id": "{{ chromosome.chromosome_id }}",
+	                    "start": 1,
+	                    "end": {{ chromosome.length }},
+	                    "type": "gpos50"
+	                }
+	            ]
+	        },
+	    {% endfor %}
+
+	    },
+	    chr       : 1,
+	    start     : 1,
+	    end       : 50000,
+	    plugins   : [ 'controlPanel', 'karyotype', 'trackControls', 'resizer', 'tooltips', 'fileDrop' ],
+	    tracks    : [
+	        Genoverse.Track.Scalebar,
+	        Genoverse.Track.DBTrack
+	    ]
+	}
+</script>
+
+<!-- Temporary dumping ground for old Genoverse stuff. -->
+
+<link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/genoverse.css" />
+<link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/controlPanel.css" />
+<link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/trackControls.css" />
+<link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/resizer.css" />
+<link rel="stylesheet" type="text/css" href="{{ settings.genoverse_base }}/css/tooltips.css" />
+
+<link rel="stylesheet" type="text/css" href="{{ settings.static_base_url }}/foldatlas/style.css" />    
+
+<!-- this is horrible - including jquery more than once -->
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery-ui.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery.mousehold.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/jquery.tipsy.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/Base.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/lib/rtree.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Genoverse.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Controller.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/View.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/Static.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/Configurable.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Controller/Stranded.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/Stranded.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Controller/Sequence.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/Sequence.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/Sequence/Fasta.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/Sequence/Ensembl.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/Sequence/DAS.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/View/Sequence.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/SequenceVariation.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/SequenceVariation/VCF.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/Gene.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/Gene/Ensembl.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/View/Gene.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/View/Gene/Ensembl.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/Transcript.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/Transcript/Ensembl.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/Transcript/GFF3.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/View/Transcript.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/View/Transcript/Ensembl.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/File.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/File/GFF.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/Model/File/BED.js"></script>
+
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/Chromosome.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/File.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/File/GFF.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/File/GFF3.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/File/BED.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/File/VCF.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/Gene.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/HighlightRegion.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/Legend.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/Scaleline.js"></script>
+<script type="text/javascript" src="{{ settings.genoverse_base }}/js/Track/library/Scalebar.js"></script>
+
+<!-- bespoke classes go here - order matters! TODO combine into a single file -->
+<script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBTranscript.js"></script>
+<script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBGene.js"></script>
+<script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBGeneView.js"></script>
+<script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBTranscriptView.js"></script>
+<script type="text/javascript" src="{{ settings.static_base_url }}/genoverse-custom/DBTrack.js"></script>
