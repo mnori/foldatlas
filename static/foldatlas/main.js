@@ -1,23 +1,16 @@
+// Create the browser controller class
+var BrowserController = Class.extend({
 
-// Define the website's controller. All page changes must go through this badboy
-function BrowserController(config) {
-
-	var instance = this;
-	
-	this.nucsPerRow = 80;
-	this.staticBase = config.staticBaseUrl;
-	this.reactivities = {}
-
-	// initialise: function(config) {
-	// 	this.staticBase = window.browserControllerConfig;
-	// },
-
-	this.init = function() {
-		instance.drawReactivities();
-	}
+	// Constructor
+	init: function(config) {
+		this.nucsPerRow = 80;
+		this.staticBase = config.staticBaseUrl;
+		this.reactivities = {}
+		this.drawReactivities();
+	},
 
 	// Jump to a specific transcript page
-	this.selectTranscript = function(transcriptID) {
+	selectTranscript: function(transcriptID) {
 		$("#loading-indicator").show()
 		this.changeUrl(transcriptID, "/transcript/"+transcriptID)
 		$.ajax({
@@ -27,34 +20,30 @@ function BrowserController(config) {
 			$("#loading-indicator").hide();
 			$("#transcript-data").empty();
 			$("#transcript-data").html(results);
-			instance.drawReactivities();
+			this.drawReactivities();
 		});
-	}
+	},
 
 	// HTML5 change URL method
-	this.changeUrl = function(title, url) {
+	changeUrl: function(title, url) {
 	    if (typeof (history.pushState) != "undefined") {
 	        var obj = { Page: title, Url: url };
 	        history.pushState(obj, obj.Page, obj.Url);
 	    } else {
 	        alert("Your browser does not support HTML5. Please upgrade it.");
 	    }
-	}
+	},
 
 	// Visualises the reactivity data.
-	this.drawReactivities = function(reactivities) {
+	drawReactivities: function(reactivities) {
 
 		var data = this.getReactivitiesJson()
 		if (data == null) {
 			return;
 		}
 
-		console.log(data);
-
 		var nDataRows = data.length;
 		var nChartRows = Math.ceil(nDataRows / this.nucsPerRow);
-
-		console.log("nChartRows: "+nChartRows);
 
 		// Define chart dimensions including axis panelMargins
 		var panelMargin = {top: 15, right: 60, bottom: 30, left: 70}
@@ -212,60 +201,10 @@ function BrowserController(config) {
 				.datum(dataSlice) // get data specific to this row
 				.attr("class", "line")
 				.attr("d", lineGen);
+		} // End looping through chart rows
+	},
 
-			// var barWidth = panelDims.x / this.nucsPerRow;
-
-			// bar = chart.selectAll("g").select("g").data(data).enter()
-			// 	.attr("transform", function(d, i) { 
-			// 		console.log(i);
-			// 		return "translate(" + (
-			// 			panelMargin.left + (i * barWidth)) + ", "+
-			// 			panelMargin.top+
-			// 		")"; 
-				// });
-
-			// Add rectangles to the bars
-			// // // Add bar elements to the chart
-			// var bar = chart.selectAll("g")
-			// 	.data(data.slice(start, end))
-			// 	.enter().append("g")
-			// 	.attr("transform", function(d, i) { 
-			// 		console.log("pos: "+d.position);
-			// 		// console.log("i"+ i);
-			// 		return "translate(" + (panelMargin.left + (i * barWidth)) + ", "+panelMargin.top+")"; 
-			// 	})
-
-			// bar.append("rect")
-			// 	.attr("y", function(d) { return yScale(d.reactivity); })
-			// 	.attr("height", function(d) { return panelDims.y - yScale(d.reactivity); })
-			// 	.attr("width", barWidth);	
-
-		} // end looping through chart rows
-
-		// old code for generating bar chart
-		// chart.append('svg:path')
-		// 	.attr('d', lineGen(data))
-		// 	.attr('stroke', 'green')
-		// 	.attr('stroke-width', 2)
-		// 	.attr('fill', 'none');
-
-		// // // Define bar width, depends on n values and also width of canvas
-		// var barWidth = width / data.length;
-
-		// // Add bar elements to the chart
-		// var bar = chart.selectAll("g")
-		// 	.data(data)
-		// 	.enter().append("g")
-		// 	.attr("transform", function(d, i) { return "translate(" + (panelMargin.left + (i * barWidth)) + ", "+panelMargin.top+")"; })
-
-		// // Add rectangles to the bars
-		// bar.append("rect")
-		// 	.attr("y", function(d) { return yScale(d.reactivity); })
-		// 	.attr("height", function(d) { return height - yScale(d.reactivity); })
-		// 	.attr("width", barWidth);	
-	}
-
-	this.getReactivitiesJson = function() {
+	getReactivitiesJson: function() {
 		var html = $("#reactivities-json").html();
 
 		if (html == undefined) { // this means no reactivity data to show
@@ -274,9 +213,7 @@ function BrowserController(config) {
 		var json = $.parseJSON(html);
 		return json;
 	}
-
-	this.init()
-}
+})
 
 $(document).ready(function () { 
     window.genoverse = new Genoverse(window.genoverseConfig); 
