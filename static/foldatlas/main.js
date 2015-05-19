@@ -34,6 +34,16 @@ var BrowserController = Class.extend({
 	    }
 	},
 
+	getReactivitiesJson: function() {
+		var html = $("#reactivities-json").html();
+
+		if (html == undefined) { // this means no reactivity data to show
+			return null;
+		}
+		var json = $.parseJSON(html);
+		return json;
+	},
+
 	// Visualises the reactivity data.
 	drawReactivities: function(reactivities) {
 
@@ -202,20 +212,11 @@ var BrowserController = Class.extend({
 				.attr("class", "line")
 				.attr("d", lineGen);
 		} // End looping through chart rows
-	},
-
-	getReactivitiesJson: function() {
-		var html = $("#reactivities-json").html();
-
-		if (html == undefined) { // this means no reactivity data to show
-			return null;
-		}
-		var json = $.parseJSON(html);
-		return json;
 	}
 })
 
 $(document).ready(function () { 
+	window.d3nome = new D3nome(window.d3nomeConfig);
     window.genoverse = new Genoverse(window.genoverseConfig); 
     window.browserController = new BrowserController(window.foldatlasConfig);
 });

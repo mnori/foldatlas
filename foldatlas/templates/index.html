@@ -97,6 +97,19 @@
 
         {% set chromosomes = genome_browser.get_chromosomes() %}
 
+        window.d3nomeConfig = {
+            container: "#d3nome",
+            selectedChromosome: 0, // i.e. select the first chromosome
+            chromosomes: [
+                {% for chromosome in chromosomes %}
+                {
+                    id: "{{ chromosome.chromosome_id }}", 
+                    length: "{{ chromosome.length }}}"
+                },
+                {% endfor %}
+            ]
+        }     
+
         // must define this config after all the foldatlas scripts are loaded
         window.genoverseConfig = {
             container : '#genoverse',
@@ -144,13 +157,16 @@
 
     <div id="content">
 
+        <!-- this empty div will be filled by d3nome -->
+        <div id="d3nome"></div>
+
         <!-- TODO make this reload the page. Dynamically changing the chromosome is not supported. -->    
-        Select your chromosome:     
+        <!-- Select your chromosome:     
         <select id="chromosome-selector">
             {% for chromosome in chromosomes %}
                 <option value="{{ chromosome.chromosome_id }}">{{ chromosome.chromosome_id }}</option>
             {% endfor %}
-        </select><br /><br />
+        </select><br /><br /> -->
 
         <!-- this empty div will be filled by Genoverse -->
         <div id="genoverse"></div>
