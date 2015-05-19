@@ -26,9 +26,6 @@ var Genoverse = Base.extend({
   end   : 1000000,
 
   constructor: function (config) {
-
-    console.log("constructor()")
-
     var browser = this;
 
     if (!this.supported()) {
@@ -176,8 +173,6 @@ var Genoverse = Base.extend({
   },
 
   init: function () {
-    console.log("init() invoked")
-
     var width = this.width;
 
     this.addDomElements(width);
@@ -206,8 +201,6 @@ var Genoverse = Base.extend({
     var coords    = urlCoords.chr && urlCoords.start && urlCoords.end ? urlCoords : { chr: this.chr, start: this.start, end: this.end };
 
     this.chr = coords.chr;
-    console.log("this.chr: "+this.chr)
-
     if (this.genome && !this.chromosomeSize) {
       this.chromosomeSize = this.genome[this.chr].size;
     }

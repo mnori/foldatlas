@@ -114,7 +114,6 @@ Genoverse.Plugins.controlPanel = function () {
 
       if (!this.libraryTracks) {
         this.libraryTracks = $.grep(this.tracks, function (track) { 
-          console.log(track)
           return track.prototype.name; 
         });
       }
