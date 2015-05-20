@@ -41,33 +41,83 @@
 
 		$(this.config.container).html(buf);
 		
-		this.initScrollbar()
+		this.initViewer()
 	},
 
 	// Set up the chromosome scrollbar.
-	initScrollbar: function() {
+	initViewer: function() {
+
+		// total dimensions of the browser
+		var totDims = {x: 898, y: 300}
+
+		// dimensions of nav bar area 
 		var navDims = {x: 898, y: 50};
+
+		// dimensions of view genome browser area
+		var viewDims = {x: 898, y: (totDims.y - navDims.y)}
+
 		var bp = this.chromosomes[this.selectedChromosome].length
 
 		var svg = d3.select("#d3nome-canvas")
-			.attr("width", navDims.x)
-		    .attr("height", navDims.y)
+			.attr("width", totDims.x)
+		    .attr("height", totDims.y)
 
+		// view scales
+		var mainXScale = d3.scale.linear()
+	        .domain([0, bp]) // this should correspond to bp
+	        .range([0, navDims.x]);
+
+	    var mainYScale = d3.scale.linear()
+	    	.domain([0, 1]) // this doesn"t matter - there is no y data
+	        .range([navDims.y, 0]);
+
+	    // nav scales
 		var navXScale = d3.scale.linear()
 	        .domain([0, bp]) // this should correspond to bp
 	        .range([0, navDims.x]);
 
 	    var navYScale = d3.scale.linear()
-	        // .domain([0, 1]) // this doesn"t matter - there is no y data
 	        .range([navDims.y, 0]);
 
+	    // nav axis
        	var navXAxis = d3.svg.axis()
 		    .scale(navXScale)
 		    .orient("bottom");
 
+		// view axis
+		var mainXAxis = d3.svg.axis()
+		    .scale(mainXScale)
+		    .orient("bottom");
+
+		// view area - add element
+		var viewElement = svg.append("g")
+			.attr("class", "d3nome-view")
+			.attr("width", viewDims.x)
+			.attr("height", viewDims.y)
+			.attr("transform", "translate("+0+","+0+")")
+
+		// view chart area - add x axis
+		viewElement.append("g")
+		    .attr("class", "x axis")
+		    .attr("width", navDims.x)
+		    .attr("height", navDims.y)
+		    .attr("transform", "translate("+0+","+(viewDims.y - navDims.y)+")")
+		    .call(mainXAxis)
+
 		// create the viewport, i.e. the brush	
 		var brush = d3.svg.brush()
 		    .x(navXScale)
+		    .on("brush", $.proxy(function() {
+		    	// ... Set the x scale domain
+				mainXScale.domain(brush.empty() ? navXScale.domain() : brush.extent());
+
+				
+				// svg.select(".area").attr("d", area);
+
+				// updates the x axis
+				viewElement.select(".x.axis").call(mainXAxis);
+
+		    }, this))
 		    .on("brushend", $.proxy(function() {
 
 				// get the bp coords, use them to fetch the data
@@ -79,20 +129,22 @@
 		    	this.loadData(chrID, start, end);
 			}, this));
 
-		// add x axis to navbar
-		svg.append("g")
-		    .attr("class", "x axis")
-		    .attr("width", navDims.x)
-		    .attr("height", navDims.y)
-		    .attr("transform", "translate(0," + 0 + ")")
-		    .call(navXAxis)
-
-		// add the viewport brush element
+		// navbar - add brush
 		svg.append("g")
 		    .attr("class", "d3nome-viewport")
 		    .call(brush)
 		    .selectAll("rect")
-		    .attr("height", navDims.y);
+		    .attr("height", navDims.y)
+		    .attr("transform", "translate("+0+","+viewDims.y+")")
+
+		// navbar - add x axis
+		svg.append("g")
+		    .attr("class", "x axis")
+		    .attr("id", "navbar-x-axis")
+		    .attr("width", navDims.x)
+		    .attr("height", navDims.y)
+		    .attr("transform", "translate(0," + viewDims.y + ")")
+		    .call(navXAxis)
 	},
 
 	loadData: function(chrID, start, end) {
