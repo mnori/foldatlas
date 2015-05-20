@@ -121,18 +121,16 @@
 		    	// problem is that brush.extent[1] seems to get stuck on the starting point.
 		    	var domain = brush.empty() ? navXScale.domain() : brush.extent()
 
-				domain[0] = Math.floor(domain[0])
-		    	domain[1] = Math.floor(domain[1]);
+				domain[0] = Math.round(domain[0])
+		    	domain[1] = Math.round(domain[1]);
 
 		    	if ((domain[1] - domain[0]) > this.maxBrushRange) { 
-
-		    		console.log("Max hit!");
 		    		if (domain[0] < this.brushExtent[0]) { // dragged backwards
-		    			domain[0] = this.brushExtent[0]
-		    			domain[1] = this.brushExtent[0] + this.maxBrushRange;
-		    		} else { // dragged forward
 		    			domain[0] = this.brushExtent[1] - this.maxBrushRange;
 		    			domain[1] = this.brushExtent[1];
+		    		} else { // dragged forward
+		    			domain[0] = this.brushExtent[0]
+		    			domain[1] = this.brushExtent[0] + this.maxBrushRange;
 		    		}
 		    	}
 
@@ -146,8 +144,6 @@
 
 				// update the view axis
 				viewElement.select(".x.axis").call(mainXAxis);
-
-				console.log("extentAfter: "+brush.extent());
 
 				// tell d3 to redraw the brush - this is important!
 			    svg.select(".d3nome-viewport").call(brush);
