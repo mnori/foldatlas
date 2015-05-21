@@ -250,23 +250,32 @@
 	onZoom: function() {
 		// this is all about prevent dragging past the boundary.
 		var bp = this.chromosomes[this.selectedChromosome].length
-		if (this.viewXScale.domain()[0] < 0) {
+
+		var domain = this.viewXScale.domain();
+
+		if (domain[0] < 0) {
+
+			var offset = -domain[0];
+			domain[0] += offset;
+			domain[1] += offset;
+
 			var x = this.zoom.translate()[0] - this.viewXScale(0) + this.viewXScale.range()[0];
 			x = Math.round(x); // rounding gets rid of unpleasant flicker
 			this.zoom.translate([x, 0]);
 
-		} else if (this.viewXScale.domain()[1] > bp) {
+		} else if (domain[1] > bp) {
+
+			var offset = domain[1] - bp;
+			domain[0] -= offset;
+			domain[1] -= offset;
+			
 			var x = this.zoom.translate()[0] - this.viewXScale(bp) + this.viewXScale.range()[1];
 			x = Math.round(x);
 			this.zoom.translate([x, 0]);
 		}
 
-		// update various components with the new settings.
-		var domain = this.viewXScale.domain();
-
-		// make sure we aren't too zoomed in or out
-		// var newDomain = this.restrictDomainSize(this.brushExtent, domain);
-
+		// // update various components with the new settings.
+		// var domain = this.viewXScale.domain();
 
 		this.brushExtent = [Math.round(domain[0]), Math.round(domain[1])];
 
