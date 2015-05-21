@@ -133,42 +133,17 @@
 		this.zoom = d3.behavior.zoom()
 			.x(this.viewXScale)
 			.size([viewDims.x, viewDims.y])
-			.on('zoom', $.proxy(function() {
+			.on('zoom', $.proxy(this.onZoom, this))
+			.on('zoomend', $.proxy(this.onZoomEnd, this))
 
-				console.log("DOMAIN", this.viewXScale.domain());
-				// console.log("before: "+this.brushExtent);
-
-				// this.brushExtent = zoom.scaleExtent();
-
-				// console.log("after: "+this.brushExtent);
-				// var bp = this.chromosomes[this.selectedChromosome].length
-				// if (this.viewXScale.domain()[0] < 0) {
-				// 	var x = zoom.translate()[0] - this.viewXScale(0) + this.viewXScale.range()[0];
-				// 	zoom.translate([x, 0]);
-				// } else if (this.viewXScale.domain()[1] > bp) {
-				// 	var x = zoom.translate()[0] - this.viewXScale(bp) + this.viewXScale.range()[1];
-				// 	zoom.translate([x, 0]);
-				// }
-				// console.log(this.viewXScale.domain());
-
-				// console.log(zoom.scaleExtent());
-
-				// get the domain ouyt of the zoom element
-				var domain = this.viewXScale.domain();
-				this.brushExtent = domain;
-
-				// this.updateBrush(domain); // this borks mouse dragging!
-				this.drawData();
-			}, this));
-
-		console.log(this.zoom.size()); // size
+		// console.log(this.zoom.size()); // size
 
 		this.viewElement = svg.append("g")
 			.attr("class", "d3nome-view")
 			.attr("width", viewDims.x)
 			.attr("height", viewDims.y)
 			.attr("transform", "translate("+0+","+0+")")
-			.call(this.zoom)
+			// .call(this.zoom)
 
 		// view chart area - add x axis
 		this.viewElement.append("g")
@@ -176,7 +151,14 @@
 		    .attr("width", navDims.x)
 		    .attr("height", navDims.y)
 		    .attr("transform", "translate("+0+","+(viewDims.y - navDims.y)+")")
-		    // .call(this.viewXAxis)
+		    .call(this.viewXAxis)
+
+		// Append an invisible overlay rectangle to recieve zoom commands
+		svg.append("rect")
+			.attr("class", "d3nome-overlay")
+			.attr("width", totDims.x)
+			.attr("height", totDims.y)
+			.call(this.zoom);
 
 		// create the viewport, i.e. the brush	
 		this.brush = d3.svg.brush()
@@ -189,12 +171,12 @@
 		    .on("brushend", $.proxy(function() {
 
 				// get the bp coords, use them to fetch the data
-		    	var extent = this.brush.extent(); 
-		    	var chrID = this.chromosomes[this.selectedChromosome].id
-		    	var start = Math.round(extent[0]);
-		    	var end = Math.round(extent[1]);
+		    	// var extent = this.brush.extent(); 
+		    	// var chrID = this.chromosomes[this.selectedChromosome].id
+		    	// var start = Math.round(extent[0]);
+		    	// var end = Math.round(extent[1]);
 
-		    	this.loadData(chrID, start, end);
+		    	this.loadData();
 			}, this));
 
 		// navbar - add brush
@@ -232,24 +214,8 @@
     	domain[1] = Math.round(domain[1]);
 
     	// enforce minimum and maximum constraints on the extent
-    	var newRange = domain[1] - domain[0];
-    	if (newRange > this.maxBrushRange) { 
-    		if (domain[0] < this.brushExtent[0]) { // dragged backwards
-    			domain[0] = this.brushExtent[1] - this.maxBrushRange;
-    			domain[1] = this.brushExtent[1];
-    		} else { // dragged forward
-    			domain[0] = this.brushExtent[0]
-    			domain[1] = this.brushExtent[0] + this.maxBrushRange;
-    		}
-    	} else if (newRange < this.minBrushRange) {
-    		if (domain[0] > this.brushExtent[0]) { // dragged backwards
-    			domain[0] = this.brushExtent[1] - this.minBrushRange;
-    			domain[1] = this.brushExtent[1];
-    		} else { // dragged forward
-    			domain[0] = this.brushExtent[0]
-    			domain[1] = this.brushExtent[0] + this.minBrushRange;
-    		}
-    	}
+
+    	domain = this.restrictDomainSize(this.brushExtent, domain);
 
     	// store the extent data for comparison later.
     	this.brushExtent = domain;
@@ -257,6 +223,95 @@
 
     	// redraw the data
     	this.drawData();
+	},
+
+	restrictDomainSize: function(oldDomain, newDomain) {
+		var newRange = newDomain[1] - newDomain[0];
+    	if (newRange > this.maxBrushRange) { 
+    		if (newDomain[0] < oldDomain[0]) { // dragged backwards
+    			newDomain[0] = oldDomain[1] - this.maxBrushRange;
+    			newDomain[1] = oldDomain[1];
+    		} else { // dragged forward
+    			newDomain[0] = oldDomain[0]
+    			newDomain[1] = oldDomain[0] + this.maxBrushRange;
+    		}
+    	} else if (newRange < this.minBrushRange) {
+    		if (newDomain[0] > oldDomain[0]) { // dragged backwards
+    			newDomain[0] = oldDomain[1] - this.minBrushRange;
+    			newDomain[1] = oldDomain[1];
+    		} else { // dragged forward
+    			newDomain[0] = oldDomain[0]
+    			newDomain[1] = oldDomain[0] + this.minBrushRange;
+    		}
+    	}
+    	return newDomain;
+	},
+
+	onZoom: function() {
+		// this is all about prevent dragging past the boundary.
+		var domain = this.viewXScale.domain();
+
+		var bp = this.chromosomes[this.selectedChromosome].length
+		if (domain[0] < 0) {
+
+			var offset = -domain[0];
+			domain[0] += offset;
+			domain[1] += offset;
+			// var x = this.zoom.translate()[0] - this.viewXScale(0) + this.viewXScale.range()[0];
+			// x = Math.round(x); // rounding gets rid of unpleasant flicker
+			// this.zoom.translate([x, 0]);
+
+		} else if (domain[1] > bp) {
+
+			var offset = domain[1] - bp;
+			domain[0] -= offset;
+			domain[1] -= offset;
+
+			// var x = this.zoom.translate()[0] - this.viewXScale(bp) + this.viewXScale.range()[1];
+			// x = Math.round(x);
+			// this.zoom.translate([x, 0]);
+		}
+
+		// update the brush's version of the extent
+	    this.brush.extent(domain);
+
+	    // update the view X scale domain with the new data
+		this.viewXScale.domain(domain);
+
+		// must update the zoom as well
+		this.zoom.x(this.viewXScale);
+
+		// // make sure we aren't too zoomed in or out
+		// var newDomain = this.restrictDomainSize(this.brushExtent, domain);
+
+		// update various components with the new settings.
+		
+
+		// domain was too big/small. must update the zoom.
+		// if (newDomain[0] != domain[0] || newDomain[1] != domain[1]) {
+
+		// 	console.log("BOUNDARY!");
+		// 	// keep zoom y size
+		// 	var sizeY = this.zoom.size().y;
+			
+		// }
+
+		// this.brushExtent = [Math.round(domain[0]), Math.round(domain[1])];
+
+		// // update brush extent - important
+		// this.brush.extent(this.brushExtent);
+
+		// update the view X axis as well
+		this.viewElement.select(".x.axis").call(this.viewXAxis);
+
+		// tell d3 to redraw the brush - this is important!
+	    this.navBoxNode.call(this.brush);
+
+		this.drawData();
+	},
+
+	onZoomEnd: function() {
+		this.loadData();
 	},
 
 	updateBrush: function(domain) {
@@ -276,8 +331,12 @@
 	    this.navBoxNode.call(this.brush);
 	},
 
-	loadData: function(chrID, start, end) {
+	loadData: function() {
 		// fetch int value of chr
+
+		var chrID = this.chromosomes[this.selectedChromosome].id
+    	var start = Math.round(this.brushExtent[0]);
+    	var end = Math.round(this.brushExtent[1]);
 
 		var chrNum = chrID[3];
 		var url = this.config.dataUrl+"?chr="+chrNum+"&start="+start+"&end="+end;
@@ -309,9 +368,7 @@
 		element
 			.data(this.data).enter() // select missing nodes
 			.append("rect")
-			// .attr("transform", $.proxy(function(d, i) { 
-			// 	return "translate("+this.viewXScale(d.start)+"," + 0 + ")"; 
-			// }, this))
+			.attr("class", "d3nome-feature")
 
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 			.attr("y", function(d, i) { return 50; })
