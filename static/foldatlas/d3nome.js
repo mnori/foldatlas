@@ -253,34 +253,38 @@
 
 		var domain = this.viewXScale.domain();
 
-		if (domain[0] < 0) {
+		// enforce min/max zoom size
+		// if domain is too big, make it smaller
 
-			var offset = -domain[0];
-			domain[0] += offset;
-			domain[1] += offset;
+		domain = restrictDomainSize();
 
-			var x = this.zoom.translate()[0] - this.viewXScale(0) + this.viewXScale.range()[0];
-			x = Math.round(x); // rounding gets rid of unpleasant flicker
-			this.zoom.translate([x, 0]);
+		console.log("this.brushExtent", this.brushExtent);
+		console.log("domain: "+domain);
 
-		} else if (domain[1] > bp) {
+		// enforce chromosome boundaries
+		if (domain[0] < 0 || domain[1] > bp) {
+			if (domain[0] < 0) {
+				var offset = -domain[0];
+				domain = [domain[0] + offset, domain[1] + offset];
 
-			var offset = domain[1] - bp;
-			domain[0] -= offset;
-			domain[1] -= offset;
-			
-			var x = this.zoom.translate()[0] - this.viewXScale(bp) + this.viewXScale.range()[1];
-			x = Math.round(x);
-			this.zoom.translate([x, 0]);
+			} else if (domain[1] > bp) {
+				var offset = domain[1] - bp; // positive number
+				domain = [domain[0] - offset, domain[1] - offset];
+			}
+			// Translate the zoom by x scaled according to tot number of nucleotides
+			var scaledTransX = Math.round(domain[0] / bp);
+			this.zoom.translate([scaledTransX, 0]);
 		}
 
-		// // update various components with the new settings.
-		// var domain = this.viewXScale.domain();
+	    // update the brush's version of the extent
+	    this.brush.extent(domain);
 
-		this.brushExtent = [Math.round(domain[0]), Math.round(domain[1])];
+	    // update the view X scale domain with the new data
+		this.viewXScale.domain(domain);
 
-		// update brush extent - important
-		this.brush.extent(this.brushExtent);
+		// keep track of our local extent data
+		// Rename to navBoundaries
+		this.brushExtent = domain;
 
 		// update the view X axis as well
 		this.viewElement.select(".x.axis").call(this.viewXAxis);
