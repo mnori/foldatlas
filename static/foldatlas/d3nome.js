@@ -115,17 +115,15 @@
        	this.navXAxis = d3.svg.axis()
 		    .scale(this.navXScale)
 		    .orient("bottom")
-		    .ticks(5)
+		    .ticks(8)
 			.tickFormat(this.xFormat);
 
 		// view axis
 		this.viewXAxis = d3.svg.axis()
 		    .scale(this.viewXScale)
 		    .orient("bottom")
-		    .ticks(5)
+		    .ticks(8)
 		    .tickFormat(this.xFormat);
-		    // .ticks(10)
-		    // .tickFormat(d3.format("s"))
 
 		// view area - add element
 		this.viewElement = svg.append("g")
@@ -165,7 +163,6 @@
 		this.navBoxNode = svg.append("g")
 		    .attr("class", "d3nome-viewport")
 		    .call(this.brush);
-
 		this.navBoxNode
 		    .selectAll("rect")
 		    .attr("height", navDims.y)
@@ -186,13 +183,15 @@
 	onBrush: function() {
 
     	// if brush is empty, use the this.brushExtent - i.e. the previous brush value
-    	// otherwise grab the existing extent
+    	// otherwise grab the new extent from the brush.
+
+    	// using this.brushExtent when empty disables the clearing behaviour
     	var domain = this.brush.empty() ? this.brushExtent : this.brush.extent()
 
 		domain[0] = Math.round(domain[0])
     	domain[1] = Math.round(domain[1]);
 
-    	// enforce some constraints on the extent.
+    	// enforce minimum and maximum constraints on the extent
     	var newRange = domain[1] - domain[0];
     	if (newRange > this.maxBrushRange) { 
     		if (domain[0] < this.brushExtent[0]) { // dragged backwards
@@ -218,7 +217,6 @@
 	},
 
 	updateBrush: function(domain) {
-		// put this in a new method?
 	    // update the brush's version of the extent
 	    this.brush.extent(domain);
 
