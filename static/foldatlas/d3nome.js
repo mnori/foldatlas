@@ -249,57 +249,29 @@
 
 	onZoom: function() {
 		// this is all about prevent dragging past the boundary.
-		var domain = this.viewXScale.domain();
-
 		var bp = this.chromosomes[this.selectedChromosome].length
-		if (domain[0] < 0) {
+		if (this.viewXScale.domain()[0] < 0) {
+			var x = this.zoom.translate()[0] - this.viewXScale(0) + this.viewXScale.range()[0];
+			x = Math.round(x); // rounding gets rid of unpleasant flicker
+			this.zoom.translate([x, 0]);
 
-			var offset = -domain[0];
-			domain[0] += offset;
-			domain[1] += offset;
-			// var x = this.zoom.translate()[0] - this.viewXScale(0) + this.viewXScale.range()[0];
-			// x = Math.round(x); // rounding gets rid of unpleasant flicker
-			// this.zoom.translate([x, 0]);
-
-		} else if (domain[1] > bp) {
-
-			var offset = domain[1] - bp;
-			domain[0] -= offset;
-			domain[1] -= offset;
-
-			// var x = this.zoom.translate()[0] - this.viewXScale(bp) + this.viewXScale.range()[1];
-			// x = Math.round(x);
-			// this.zoom.translate([x, 0]);
+		} else if (this.viewXScale.domain()[1] > bp) {
+			var x = this.zoom.translate()[0] - this.viewXScale(bp) + this.viewXScale.range()[1];
+			x = Math.round(x);
+			this.zoom.translate([x, 0]);
 		}
 
-		// update the brush's version of the extent
-	    this.brush.extent(domain);
+		// update various components with the new settings.
+		var domain = this.viewXScale.domain();
 
-	    // update the view X scale domain with the new data
-		this.viewXScale.domain(domain);
-
-		// must update the zoom as well
-		this.zoom.x(this.viewXScale);
-
-		// // make sure we aren't too zoomed in or out
+		// make sure we aren't too zoomed in or out
 		// var newDomain = this.restrictDomainSize(this.brushExtent, domain);
 
-		// update various components with the new settings.
-		
 
-		// domain was too big/small. must update the zoom.
-		// if (newDomain[0] != domain[0] || newDomain[1] != domain[1]) {
+		this.brushExtent = [Math.round(domain[0]), Math.round(domain[1])];
 
-		// 	console.log("BOUNDARY!");
-		// 	// keep zoom y size
-		// 	var sizeY = this.zoom.size().y;
-			
-		// }
-
-		// this.brushExtent = [Math.round(domain[0]), Math.round(domain[1])];
-
-		// // update brush extent - important
-		// this.brush.extent(this.brushExtent);
+		// update brush extent - important
+		this.brush.extent(this.brushExtent);
 
 		// update the view X axis as well
 		this.viewElement.select(".x.axis").call(this.viewXAxis);
