@@ -34,9 +34,10 @@
 		this.totDims = {x: 898, y: 300}
 
 		// height of nav bar area 
-		this.navHeight = 50;
+		this.navHeight = 40;
 
 		this.brush = null;
+		this.zoom = null;
 
 		this.viewXScale = null;
 		this.viewYScale = null;
@@ -128,11 +129,46 @@
 		    .tickFormat(this.xFormat);
 
 		// create view element
+
+		this.zoom = d3.behavior.zoom()
+			.x(this.viewXScale)
+			.size([viewDims.x, viewDims.y])
+			.on('zoom', $.proxy(function() {
+
+				console.log("DOMAIN", this.viewXScale.domain());
+				// console.log("before: "+this.brushExtent);
+
+				// this.brushExtent = zoom.scaleExtent();
+
+				// console.log("after: "+this.brushExtent);
+				// var bp = this.chromosomes[this.selectedChromosome].length
+				// if (this.viewXScale.domain()[0] < 0) {
+				// 	var x = zoom.translate()[0] - this.viewXScale(0) + this.viewXScale.range()[0];
+				// 	zoom.translate([x, 0]);
+				// } else if (this.viewXScale.domain()[1] > bp) {
+				// 	var x = zoom.translate()[0] - this.viewXScale(bp) + this.viewXScale.range()[1];
+				// 	zoom.translate([x, 0]);
+				// }
+				// console.log(this.viewXScale.domain());
+
+				// console.log(zoom.scaleExtent());
+
+				// get the domain ouyt of the zoom element
+				var domain = this.viewXScale.domain();
+				this.brushExtent = domain;
+
+				// this.updateBrush(domain); // this borks mouse dragging!
+				this.drawData();
+			}, this));
+
+		console.log(this.zoom.size()); // size
+
 		this.viewElement = svg.append("g")
 			.attr("class", "d3nome-view")
 			.attr("width", viewDims.x)
 			.attr("height", viewDims.y)
 			.attr("transform", "translate("+0+","+0+")")
+			.call(this.zoom)
 
 		// view chart area - add x axis
 		this.viewElement.append("g")
@@ -140,7 +176,7 @@
 		    .attr("width", navDims.x)
 		    .attr("height", navDims.y)
 		    .attr("transform", "translate("+0+","+(viewDims.y - navDims.y)+")")
-		    .call(this.viewXAxis)
+		    // .call(this.viewXAxis)
 
 		// create the viewport, i.e. the brush	
 		this.brush = d3.svg.brush()
@@ -230,6 +266,9 @@
 	    // update the view X scale domain with the new data
 		this.viewXScale.domain(domain);
 
+		// must update the zoom as well
+		this.zoom.x(this.viewXScale);
+
 		// update the view X axis as well
 		this.viewElement.select(".x.axis").call(this.viewXAxis);
 
@@ -253,6 +292,10 @@
 
 	parseData: function(data) {
 		this.data = data;
+
+		// do cool stuff with the data here. 
+		// maybs arrange into lanes for overlapping transcripts
+
 		this.drawData();
 	},
 
