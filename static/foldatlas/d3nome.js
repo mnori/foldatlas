@@ -12,7 +12,7 @@
 	init: function(config) {
 
 		this.maxBrushRange = 2500000;
-		this.minBrushRange = 100000;
+		this.minBrushRange = 10000;
 
 		// Set this to config.initialBPRange
 		// Storing the extent locally is a hack that kills 2 birds with 1 stone
@@ -28,6 +28,32 @@
 
 		// function for fetching and parsing data into the right format.
 		this.fetchData = this.config.fetchData 
+
+		// total dimensions of the browser 
+		// TODO use config values
+		this.totDims = {x: 898, y: 300}
+
+		// height of nav bar area 
+		this.navHeight = 50;
+
+		this.brush = null;
+
+		this.viewXScale = null;
+		this.viewYScale = null;
+		this.viewXAxis = null;
+
+		this.navXScale = null;
+		this.navYScale = null;
+		this.navXAxis = null;
+		
+		this.viewElement = null;
+		this.navBoxNode = null;
+
+		this.xFormat = function (d) {
+	        var prefix = d3.formatPrefix(d);
+	        return prefix.scale(d) + prefix.symbol + "b";
+	    }
+
 		this.draw();
 	},
 
@@ -47,7 +73,7 @@
 	    }
 
 		buf += "</select><br />";
-		buf = "<svg id=\"d3nome-canvas\"></svg>"
+		buf += "<svg id=\"d3nome-canvas\"></svg>"
 
 		$(this.config.container).html(buf);
 		
@@ -57,14 +83,11 @@
 	// Set up the chromosome scrollbar.
 	initViewer: function() {
 
-		// total dimensions of the browser
-		var totDims = {x: 898, y: 300}
+		var totDims = this.totDims;
 
-		// dimensions of nav bar area 
-		var navDims = {x: 898, y: 50};
-
+		var navDims = {x: totDims.x, y: this.navHeight};
 		// dimensions of view genome browser area
-		var viewDims = {x: 898, y: (totDims.y - navDims.y)}
+		var viewDims = {x: 898, y: (totDims.y - navDims.y)};
 
 		var bp = this.chromosomes[this.selectedChromosome].length
 
@@ -73,114 +96,64 @@
 		    .attr("height", totDims.y)
 
 		// view scales
-		var viewXScale = d3.scale.linear()
+		this.viewXScale = d3.scale.linear()
 	        .domain([0, bp]) // this should correspond to bp
 	        .range([0, navDims.x])
 
-	    var viewYScale = d3.scale.linear()
+	    this.viewYScale = d3.scale.linear()
 	        .range([navDims.y, 0]);
 
 	    // nav scales
-		var navXScale = d3.scale.linear()
+		this.navXScale = d3.scale.linear()
 	        .domain([0, bp]) // this should correspond to bp
 	        .range([0, navDims.x]);
 
-	    var navYScale = d3.scale.linear()
+	    this.navYScale = d3.scale.linear()
 	        .range([navDims.y, 0]);
 
-	    var xFormat = function (d) {
-	        var prefix = d3.formatPrefix(d);
-	        return prefix.scale(d) + prefix.symbol + "b";
-	    }
-
 	    // nav axis
-       	var navXAxis = d3.svg.axis()
-		    .scale(navXScale)
+       	this.navXAxis = d3.svg.axis()
+		    .scale(this.navXScale)
 		    .orient("bottom")
 		    .ticks(5)
-			.tickFormat(xFormat);
+			.tickFormat(this.xFormat);
 
 		// view axis
-		var mainXAxis = d3.svg.axis()
-		    .scale(viewXScale)
+		this.viewXAxis = d3.svg.axis()
+		    .scale(this.viewXScale)
 		    .orient("bottom")
 		    .ticks(5)
-		    .tickFormat(xFormat);
+		    .tickFormat(this.xFormat);
 		    // .ticks(10)
 		    // .tickFormat(d3.format("s"))
 
 		// view area - add element
-		var viewElement = svg.append("g")
+		this.viewElement = svg.append("g")
 			.attr("class", "d3nome-view")
 			.attr("width", viewDims.x)
 			.attr("height", viewDims.y)
 			.attr("transform", "translate("+0+","+0+")")
 
 		// view chart area - add x axis
-		viewElement.append("g")
+		this.viewElement.append("g")
 		    .attr("class", "x axis")
 		    .attr("width", navDims.x)
 		    .attr("height", navDims.y)
 		    .attr("transform", "translate("+0+","+(viewDims.y - navDims.y)+")")
-		    .call(mainXAxis)
+		    .call(this.viewXAxis)
 
 		// create the viewport, i.e. the brush	
-		var brush = d3.svg.brush()
-		    .x(navXScale)
+		this.brush = d3.svg.brush()
+		    .x(this.navXScale)
 
 		    // attach brush size change event handler
-		    .on("brush", $.proxy(function() {
-
-		    	// if brush is empty, use the this.brushExtent - i.e. the previous brush value
-		    	// otherwise grab the existing extent
-		    	var domain = brush.empty() ? this.brushExtent : brush.extent()
-
-				domain[0] = Math.round(domain[0])
-		    	domain[1] = Math.round(domain[1]);
-
-		    	// enforce some constraints on the extent.
-		    	var newRange = domain[1] - domain[0];
-		    	if (newRange > this.maxBrushRange) { 
-		    		if (domain[0] < this.brushExtent[0]) { // dragged backwards
-		    			domain[0] = this.brushExtent[1] - this.maxBrushRange;
-		    			domain[1] = this.brushExtent[1];
-		    		} else { // dragged forward
-		    			domain[0] = this.brushExtent[0]
-		    			domain[1] = this.brushExtent[0] + this.maxBrushRange;
-		    		}
-		    	} else if (newRange < this.minBrushRange) {
-		    		if (domain[0] > this.brushExtent[0]) { // dragged backwards
-		    			domain[0] = this.brushExtent[1] - this.minBrushRange;
-		    			domain[1] = this.brushExtent[1];
-		    		} else { // dragged forward
-		    			domain[0] = this.brushExtent[0]
-		    			domain[1] = this.brushExtent[0] + this.minBrushRange;
-		    		}
-		    	}
-
-		    	// store the extent data for comparison later.
-		    	this.brushExtent = domain;
-
-		    	// put this in a new method?
-			    // update the brush's version of the extent
-			    brush.extent(domain);
-
-			    // update the view X scale domain with the new data
-				viewXScale.domain(domain);
-
-				// update the view X axis as well
-				viewElement.select(".x.axis").call(mainXAxis);
-
-				// tell d3 to redraw the brush - this is important!
-			    navBoxNode.call(brush);
-
-		    }, this))
+		    .on("brush", $.proxy(this.onBrush, this))
 
 		    // on mouseup, load data.
 		    .on("brushend", $.proxy(function() {
 
 				// get the bp coords, use them to fetch the data
-		    	var extent = brush.extent(); 
+		    	var extent = this.brush.extent(); 
 		    	var chrID = this.chromosomes[this.selectedChromosome].id
 		    	var start = Math.round(extent[0]);
 		    	var end = Math.round(extent[1]);
@@ -189,11 +162,11 @@
 			}, this));
 
 		// navbar - add brush
-		var navBoxNode = svg.append("g")
+		this.navBoxNode = svg.append("g")
 		    .attr("class", "d3nome-viewport")
-		    .call(brush);
+		    .call(this.brush);
 
-		navBoxNode
+		this.navBoxNode
 		    .selectAll("rect")
 		    .attr("height", navDims.y)
 		    .attr("transform", "translate("+0+","+viewDims.y+")")
@@ -205,43 +178,59 @@
 		    .attr("width", navDims.x)
 		    .attr("height", navDims.y)
 		    .attr("transform", "translate(0," + viewDims.y + ")")
-		    .call(navXAxis)
+		    .call(this.navXAxis)
 
-		// update the extent
-	    brush.extent(this.brushExtent);
-
-	    // update the view scale domain with the new data
-		viewXScale.domain(this.brushExtent);
-
-		// update the view axis
-		viewElement.select(".x.axis").call(mainXAxis);
-
-		// tell d3 to redraw the brush - this is important!
-		// note - this breaks the clear handler
-	    navBoxNode.call(brush);
+		this.updateBrush(this.brushExtent);
 	},
 
-// 	drawBar: function(domain) {
-		
+	onBrush: function() {
 
-// 		var x_range = d3.scale.linear()
-// 			.domain([0, range.length])
-// 			.range([0, width]); 
+    	// if brush is empty, use the this.brushExtent - i.e. the previous brush value
+    	// otherwise grab the existing extent
+    	var domain = this.brush.empty() ? this.brushExtent : this.brush.extent()
 
-// 		svg.selectAll("rect.items").remove();
+		domain[0] = Math.round(domain[0])
+    	domain[1] = Math.round(domain[1]);
 
-// 		svg.selectAll("rect.items")
-// 		.data(range)
-// 		.enter().append("svg:rect")
-// 		.attr("class", "items")
-// 		.attr("x", function(d, i) {return x_range(i);})
-// 		.attr("y", 0)
-// 		.attr("width",  width/range.length-2)
-// 		.attr("height", 100)
-// 		.attr("fill", function(d) {return d})
-// 		.attr("title", function(d) {return d});
-// }
-	// }
+    	// enforce some constraints on the extent.
+    	var newRange = domain[1] - domain[0];
+    	if (newRange > this.maxBrushRange) { 
+    		if (domain[0] < this.brushExtent[0]) { // dragged backwards
+    			domain[0] = this.brushExtent[1] - this.maxBrushRange;
+    			domain[1] = this.brushExtent[1];
+    		} else { // dragged forward
+    			domain[0] = this.brushExtent[0]
+    			domain[1] = this.brushExtent[0] + this.maxBrushRange;
+    		}
+    	} else if (newRange < this.minBrushRange) {
+    		if (domain[0] > this.brushExtent[0]) { // dragged backwards
+    			domain[0] = this.brushExtent[1] - this.minBrushRange;
+    			domain[1] = this.brushExtent[1];
+    		} else { // dragged forward
+    			domain[0] = this.brushExtent[0]
+    			domain[1] = this.brushExtent[0] + this.minBrushRange;
+    		}
+    	}
+
+    	// store the extent data for comparison later.
+    	this.brushExtent = domain;
+    	this.updateBrush(domain);
+	},
+
+	updateBrush: function(domain) {
+		// put this in a new method?
+	    // update the brush's version of the extent
+	    this.brush.extent(domain);
+
+	    // update the view X scale domain with the new data
+		this.viewXScale.domain(domain);
+
+		// update the view X axis as well
+		this.viewElement.select(".x.axis").call(this.viewXAxis);
+
+		// tell d3 to redraw the brush - this is important!
+	    this.navBoxNode.call(this.brush);
+	},
 
 	loadData: function(chrID, start, end) {
 		// fetch int value of chr
@@ -253,11 +242,11 @@
 			url: url,
 			context: this
 		}).done($.proxy(function(results) {
-			this.parseAndDisplayData($.parseJSON(results));
+			this.parseData($.parseJSON(results));
 		}, this));
 	},
 
-	parseAndDisplayData: function(data) {
+	parseData: function(data) {
 		console.log("Data grabbed");
 		// console.log("DATA", data);
 	}
