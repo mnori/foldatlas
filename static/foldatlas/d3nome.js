@@ -12,7 +12,7 @@
 	init: function(config) {
 
 		this.maxBrushRange = 2500000;
-		this.minBrushRange = 1000000;
+		this.minBrushRange = 100000;
 
 		// Set this to config.initialBPRange
 		// Storing the extent locally is a hack that kills 2 birds with 1 stone
@@ -75,10 +75,9 @@
 		// view scales
 		var viewXScale = d3.scale.linear()
 	        .domain([0, bp]) // this should correspond to bp
-	        .range([0, navDims.x]);
+	        .range([0, navDims.x])
 
 	    var viewYScale = d3.scale.linear()
-	    	.domain([0, 1]) // this doesn"t matter - there is no y data
 	        .range([navDims.y, 0]);
 
 	    // nav scales
@@ -89,15 +88,26 @@
 	    var navYScale = d3.scale.linear()
 	        .range([navDims.y, 0]);
 
+	    var xFormat = function (d) {
+	        var prefix = d3.formatPrefix(d);
+	        return prefix.scale(d) + prefix.symbol + "b";
+	    }
+
 	    // nav axis
        	var navXAxis = d3.svg.axis()
 		    .scale(navXScale)
-		    .orient("bottom");
+		    .orient("bottom")
+		    .ticks(5)
+			.tickFormat(xFormat);
 
 		// view axis
 		var mainXAxis = d3.svg.axis()
 		    .scale(viewXScale)
-		    .orient("bottom");
+		    .orient("bottom")
+		    .ticks(5)
+		    .tickFormat(xFormat);
+		    // .ticks(10)
+		    // .tickFormat(d3.format("s"))
 
 		// view area - add element
 		var viewElement = svg.append("g")
@@ -121,12 +131,14 @@
 		    // attach brush size change event handler
 		    .on("brush", $.proxy(function() {
 
-		    	// problem is that brush.extent[1] seems to get stuck on the starting point.
+		    	// if brush is empty, use the this.brushExtent - i.e. the previous brush value
+		    	// otherwise grab the existing extent
 		    	var domain = brush.empty() ? this.brushExtent : brush.extent()
 
 				domain[0] = Math.round(domain[0])
 		    	domain[1] = Math.round(domain[1]);
 
+		    	// enforce some constraints on the extent.
 		    	var newRange = domain[1] - domain[0];
 		    	if (newRange > this.maxBrushRange) { 
 		    		if (domain[0] < this.brushExtent[0]) { // dragged backwards
@@ -146,15 +158,17 @@
 		    		}
 		    	}
 
+		    	// store the extent data for comparison later.
 		    	this.brushExtent = domain;
 
-			    // update the extent
+		    	// put this in a new method?
+			    // update the brush's version of the extent
 			    brush.extent(domain);
 
-			    // update the view scale domain with the new data
+			    // update the view X scale domain with the new data
 				viewXScale.domain(domain);
 
-				// update the view axis
+				// update the view X axis as well
 				viewElement.select(".x.axis").call(mainXAxis);
 
 				// tell d3 to redraw the brush - this is important!
@@ -162,7 +176,7 @@
 
 		    }, this))
 
-		    // attach mouseup event handler
+		    // on mouseup, load data.
 		    .on("brushend", $.proxy(function() {
 
 				// get the bp coords, use them to fetch the data
