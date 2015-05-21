@@ -254,12 +254,18 @@
 		var domain = this.viewXScale.domain();
 
 		// enforce min/max zoom size
-		// if domain is too big, make it smaller
+		// if domain is too big, make it smaller and vice versa
+		var oldSize = domain[1] - domain[0];
+		domain = this.restrictDomainSize(this.brushExtent, domain);
 
-		domain = restrictDomainSize();
+		var newSize = domain[1] - domain[0];
 
-		console.log("this.brushExtent", this.brushExtent);
-		console.log("domain: "+domain);
+		if (newSize != oldSize) { // a restriction was applied
+			this.zoom.scale(this.zoom.scale() * (oldSize / newSize));
+		}
+
+		// console.log("this.brushExtent", this.brushExtent);
+		// console.log("domain: "+domain);
 
 		// enforce chromosome boundaries
 		if (domain[0] < 0 || domain[1] > bp) {
