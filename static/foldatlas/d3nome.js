@@ -12,9 +12,12 @@
 	init: function(config) {
 
 		this.maxBrushRange = 2500000;
+		this.minBrushRange = 1000000;
 
 		// Set this to config.initialBPRange
-		// Storing the extent locally is a hack to get maxBrushRange working.
+		// Storing the extent locally is a hack that kills 2 birds with 1 stone
+		//  - lets us constrain the box size
+		//  - lets us disable the clear functionality
 		this.brushExtent = [0, 1000000];
 
 		this.config = config;
@@ -119,18 +122,27 @@
 		    .on("brush", $.proxy(function() {
 
 		    	// problem is that brush.extent[1] seems to get stuck on the starting point.
-		    	var domain = brush.empty() ? navXScale.domain() : brush.extent()
+		    	var domain = brush.empty() ? this.brushExtent : brush.extent()
 
 				domain[0] = Math.round(domain[0])
 		    	domain[1] = Math.round(domain[1]);
 
-		    	if ((domain[1] - domain[0]) > this.maxBrushRange) { 
+		    	var newRange = domain[1] - domain[0];
+		    	if (newRange > this.maxBrushRange) { 
 		    		if (domain[0] < this.brushExtent[0]) { // dragged backwards
 		    			domain[0] = this.brushExtent[1] - this.maxBrushRange;
 		    			domain[1] = this.brushExtent[1];
 		    		} else { // dragged forward
 		    			domain[0] = this.brushExtent[0]
 		    			domain[1] = this.brushExtent[0] + this.maxBrushRange;
+		    		}
+		    	} else if (newRange < this.minBrushRange) {
+		    		if (domain[0] > this.brushExtent[0]) { // dragged backwards
+		    			domain[0] = this.brushExtent[1] - this.minBrushRange;
+		    			domain[1] = this.brushExtent[1];
+		    		} else { // dragged forward
+		    			domain[0] = this.brushExtent[0]
+		    			domain[1] = this.brushExtent[0] + this.minBrushRange;
 		    		}
 		    	}
 
@@ -146,7 +158,7 @@
 				viewElement.select(".x.axis").call(mainXAxis);
 
 				// tell d3 to redraw the brush - this is important!
-			    svg.select(".d3nome-viewport").call(brush);
+			    navBoxNode.call(brush);
 
 		    }, this))
 
@@ -163,14 +175,16 @@
 			}, this));
 
 		// navbar - add brush
-		svg.append("g")
+		var navBoxNode = svg.append("g")
 		    .attr("class", "d3nome-viewport")
-		    .call(brush)
+		    .call(brush);
+
+		navBoxNode
 		    .selectAll("rect")
 		    .attr("height", navDims.y)
 		    .attr("transform", "translate("+0+","+viewDims.y+")")
 
-		// navbar - add x axis
+	 	// navbar - add x axis
 		svg.append("g")
 		    .attr("class", "x axis")
 		    .attr("id", "navbar-x-axis")
@@ -178,6 +192,19 @@
 		    .attr("height", navDims.y)
 		    .attr("transform", "translate(0," + viewDims.y + ")")
 		    .call(navXAxis)
+
+		// update the extent
+	    brush.extent(this.brushExtent);
+
+	    // update the view scale domain with the new data
+		viewXScale.domain(this.brushExtent);
+
+		// update the view axis
+		viewElement.select(".x.axis").call(mainXAxis);
+
+		// tell d3 to redraw the brush - this is important!
+		// note - this breaks the clear handler
+	    navBoxNode.call(brush);
 	},
 
 // 	drawBar: function(domain) {
@@ -217,7 +244,8 @@
 	},
 
 	parseAndDisplayData: function(data) {
-		console.log(data);
+		console.log("Data grabbed");
+		// console.log("DATA", data);
 	}
 }
 
