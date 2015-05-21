@@ -12,13 +12,13 @@
 	init: function(config) {
 
 		this.maxBrushRange = 2500000;
-		this.minBrushRange = 10000;
+		this.minBrushRange = 25000;
 
 		// Set this to config.initialBPRange
 		// Storing the extent locally is a hack that kills 2 birds with 1 stone
 		//  - lets us constrain the box size
 		//  - lets us disable the clear functionality
-		this.brushExtent = [0, 1000000];
+		this.brushExtent = [0, this.minBrushRange];
 
 		this.config = config;
 		this.chromosomes = this.config.chromosomes;
@@ -48,6 +48,8 @@
 		
 		this.viewElement = null;
 		this.navBoxNode = null;
+
+		this.data = null;
 
 		this.xFormat = function (d) {
 	        var prefix = d3.formatPrefix(d);
@@ -125,7 +127,7 @@
 		    .ticks(8)
 		    .tickFormat(this.xFormat);
 
-		// view area - add element
+		// create view element
 		this.viewElement = svg.append("g")
 			.attr("class", "d3nome-view")
 			.attr("width", viewDims.x)
@@ -178,6 +180,8 @@
 		    .call(this.navXAxis)
 
 		this.updateBrush(this.brushExtent);
+
+		this.loadData(this.chromosomes[this.selectedChromosome].id, this.brushExtent[0], this.brushExtent[1]);
 	},
 
 	onBrush: function() {
@@ -214,6 +218,9 @@
     	// store the extent data for comparison later.
     	this.brushExtent = domain;
     	this.updateBrush(domain);
+
+    	// redraw the data
+    	this.drawData();
 	},
 
 	updateBrush: function(domain) {
@@ -245,8 +252,31 @@
 	},
 
 	parseData: function(data) {
-		console.log("Data grabbed");
-		// console.log("DATA", data);
+		this.data = data;
+		this.drawData();
+	},
+
+	drawData: function() {
+		// Remove old elements
+		this.viewElement.selectAll("rect").remove()
+
+		// Add new elements
+
+		var element = this.viewElement.selectAll(".d3nome-view")
+		element
+			.data(this.data).enter() // select missing nodes
+			.append("rect")
+			// .attr("transform", $.proxy(function(d, i) { 
+			// 	return "translate("+this.viewXScale(d.start)+"," + 0 + ")"; 
+			// }, this))
+
+			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+			.attr("y", function(d, i) { return 50; })
+
+		    .attr("width", $.proxy(function(d, i) { 
+		    	return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
+		    }, this))
+		    .attr("height", 30)
 	}
 }
 

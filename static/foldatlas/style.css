@@ -150,4 +150,6 @@ h2 {
 .d3nome-viewport {
 	fill: black;
 	fill-opacity: 0.2;
+	stroke: #555;
+  	stroke-width: 1px;
 }
