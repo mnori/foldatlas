@@ -215,10 +215,7 @@
 		var bp = this.chromosomes[this.selectedChromosome].length
 
 		var domain = this.viewXScale.domain();
-		// need a more specialised restrictDomainSize here
 		var range = domain[1] - domain[0];
-
-		var hitBoundary = false;
 
 		if (domain[0] <= 0 && domain[1] >= bp) {
 			range = domain[1] - domain[0];
