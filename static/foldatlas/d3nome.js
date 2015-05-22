@@ -136,14 +136,14 @@
 			.on('zoom', $.proxy(this.onZoom, this))
 			.on('zoomend', $.proxy(this.onZoomEnd, this))
 
-		// console.log(this.zoom.size()); // size
+		this.zoomTranslate = this.zoom.translate();
+		this.zoomScale = this.zoom.scale();
 
 		this.viewElement = svg.append("g")
 			.attr("class", "d3nome-view")
 			.attr("width", viewDims.x)
 			.attr("height", viewDims.y)
 			.attr("transform", "translate("+0+","+0+")")
-			// .call(this.zoom)
 
 		// view chart area - add x axis
 		this.viewElement.append("g")
@@ -169,13 +169,6 @@
 
 		    // on mouseup, load data.
 		    .on("brushend", $.proxy(function() {
-
-				// get the bp coords, use them to fetch the data
-		    	// var extent = this.brush.extent(); 
-		    	// var chrID = this.chromosomes[this.selectedChromosome].id
-		    	// var start = Math.round(extent[0]);
-		    	// var end = Math.round(extent[1]);
-
 		    	this.loadData();
 			}, this));
 
@@ -214,8 +207,7 @@
     	domain[1] = Math.round(domain[1]);
 
     	// enforce minimum and maximum constraints on the extent
-
-    	domain = this.restrictDomainSize(this.brushExtent, domain);
+    	// domain = this.restrictDomainSize(this.brushExtent, domain);
 
     	// store the extent data for comparison later.
     	this.brushExtent = domain;
@@ -225,26 +217,26 @@
     	this.drawData();
 	},
 
-	restrictDomainSize: function(oldDomain, newDomain) {
-		var newRange = newDomain[1] - newDomain[0];
-    	if (newRange > this.maxBrushRange) { 
-    		if (newDomain[0] < oldDomain[0]) { // dragged backwards
-    			newDomain[0] = oldDomain[1] - this.maxBrushRange;
-    			newDomain[1] = oldDomain[1];
-    		} else { // dragged forward
-    			newDomain[0] = oldDomain[0]
-    			newDomain[1] = oldDomain[0] + this.maxBrushRange;
-    		}
-    	} else if (newRange < this.minBrushRange) {
-    		if (newDomain[0] > oldDomain[0]) { // dragged backwards
-    			newDomain[0] = oldDomain[1] - this.minBrushRange;
-    			newDomain[1] = oldDomain[1];
-    		} else { // dragged forward
-    			newDomain[0] = oldDomain[0]
-    			newDomain[1] = oldDomain[0] + this.minBrushRange;
-    		}
-    	}
-    	return newDomain;
+	// restrictDomainSize: function(oldDomain, newDomain) {
+	// 	// var newRange = newDomain[1] - newDomain[0];
+ //  //   	if (newRange > this.maxBrushRange) { 
+ //  //   		if (newDomain[0] < oldDomain[0]) { // dragged backwards
+ //  //   			newDomain[0] = oldDomain[1] - this.maxBrushRange;
+ //  //   			newDomain[1] = oldDomain[1];
+ //  //   		} else { // dragged forward
+ //  //   			newDomain[0] = oldDomain[0]
+ //  //   			newDomain[1] = oldDomain[0] + this.maxBrushRange;
+ //  //   		}
+ //  //   	} else if (newRange < this.minBrushRange) {
+ //  //   		if (newDomain[0] > oldDomain[0]) { // dragged backwards
+ //  //   			newDomain[0] = oldDomain[1] - this.minBrushRange;
+ //  //   			newDomain[1] = oldDomain[1];
+ //  //   		} else { // dragged forward
+ //  //   			newDomain[0] = oldDomain[0]
+ //  //   			newDomain[1] = oldDomain[0] + this.minBrushRange;
+ //  //   		}
+ //  //   	}
+ //    	return newDomain;
 	},
 
 	onZoom: function() {
@@ -253,34 +245,96 @@
 
 		var domain = this.viewXScale.domain();
 
+		// if (range != this.maxBrushRange) {
+		// 	var diff = (this.maxBrushRange - range) / 2;
+		// 	domain[0] += diff;
+		// 	domain[1] -= diff;
+		// 	// var translate = Math.round(diff / bp);
+		// 	// this.zoom.translate([this.zoom.translate()[0] + translate, 0]);
+		// 	// var scale = range / this.maxBrushRange
+		// 	// this.zoom.scale(this.zoom.scale() * scale);
+
+		// } else if (range < this.minBrushRange) {
+		// 	var diff = (range - this.minBrushRange) / 2;
+		// 	domain[0] -= diff;
+		// 	domain[1] += diff;
+		// 	var translate = Math.round(diff / bp);
+		// 	this.zoom.translate([this.zoom.translate()[0] - translate, 0]);
+		// 	var scale = range / this.minBrushRange;
+		// 	console.log("scale: "+scale);
+		// 	this.zoom.scale(this.zoom.scale() * scale);
+		// }
+
 		// enforce min/max zoom size
 		// if domain is too big, make it smaller and vice versa
-		var oldSize = domain[1] - domain[0];
-		domain = this.restrictDomainSize(this.brushExtent, domain);
 
-		var newSize = domain[1] - domain[0];
+		// var oldSize = domain[1] - domain[0];
+		// domain = this.restrictDomainSize(this.brushExtent, domain);
 
-		if (newSize != oldSize) { // a restriction was applied
-			this.zoom.scale(this.zoom.scale() * (oldSize / newSize));
-		}
+		// var newSize = domain[1] - domain[0];
+
+		// if (newSize != oldSize) { // a restriction was applied
+		// 	this.zoom.scale(this.zoom.scale() * (oldSize / newSize));
+
+
+		// 	// var translate = this.zoom.translate()[0] - ((oldSize - newSize) / 2)
+		// 	// translate = Math.round(translate / bp);
+		// 	// console.log("translate", translate);
+		// 	// this.zoom.translate([translate, 0])
+		// }
 
 		// console.log("this.brushExtent", this.brushExtent);
 		// console.log("domain: "+domain);
 
-		// enforce chromosome boundaries
-		if (domain[0] < 0 || domain[1] > bp) {
-			if (domain[0] < 0) {
-				var offset = -domain[0];
-				domain = [domain[0] + offset, domain[1] + offset];
+		// need a more specialised restrictDomainSize here
+		var range = domain[1] - domain[0];
 
-			} else if (domain[1] > bp) {
-				var offset = domain[1] - bp; // positive number
-				domain = [domain[0] - offset, domain[1] - offset];
-			}
-			// Translate the zoom by x scaled according to tot number of nucleotides
-			var scaledTransX = Math.round(domain[0] / bp);
+		var hitBoundary = false;
+
+		// enforce chromosome boundaries
+		// if (domain[0] < 0 || domain[1] > bp) {
+		// 	console.log("crap1");
+		// 	domain = this.brushExtent;
+		// 	this.zoom.translate(this.zoomTranslate);
+		// 	this.zoom.scale(this.zoomScale);
+		// }
+
+		if (domain[0] < 0 && domain[1] > bp) {
+			range = domain[1] - domain[0];
+			domain = [0, bp];
+			this.zoom.translate([0, 0]);
+			this.zoom.scale(this.zoom.scale() * (range / bp));
+
+		} else if (domain[0] < 0) {
+			var offset = -domain[0];
+			domain = [domain[0] + offset, domain[1] + offset];
+			var scaledTransX = domain[0] / bp;
+			this.zoom.translate([scaledTransX, 0]);
+
+		} else if (domain[1] > bp) {
+			var offset = domain[1] - bp; // positive number
+			domain = [domain[0] - offset, domain[1] - offset];
+			var scaledTransX = domain[0] / bp;
 			this.zoom.translate([scaledTransX, 0]);
 		}
+
+		// zoom window is too big.
+		// if (range > this.maxBrushRange || range < this.minBrushRange) {
+		// 	console.log("crap2");
+		// 	// just set it all back to previous values. in theory, this leads to buggy
+		// 	// behaviour, but that's really hard to notice ;)
+
+		// 	// would be better to 
+		// 	// grow the box to just the right dimensions, but that's rather tricky.
+		// 	// maybs improve this in version 2.0.
+		// 	domain = this.brushExtent;
+		// 	this.zoom.translate(this.zoomTranslate);
+		// 	this.zoom.scale(this.zoomScale);
+		// }
+
+		// store copies of the translate and scale settings
+		this.zoomTranslate = this.zoom.translate();
+		this.zoomScale = this.zoom.scale();
 
 	    // update the brush's version of the extent
 	    this.brush.extent(domain);
@@ -314,6 +368,10 @@
 
 		// must update the zoom as well
 		this.zoom.x(this.viewXScale);
+
+		// also save zoom state stuff
+		this.zoomTranslate = this.zoom.translate();
+		this.zoomScale = this.zoom.scale();
 
 		// update the view X axis as well
 		this.viewElement.select(".x.axis").call(this.viewXAxis);
