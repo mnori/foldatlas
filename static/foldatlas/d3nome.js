@@ -217,87 +217,16 @@
     	this.drawData();
 	},
 
-	// restrictDomainSize: function(oldDomain, newDomain) {
-	// 	// var newRange = newDomain[1] - newDomain[0];
- //  //   	if (newRange > this.maxBrushRange) { 
- //  //   		if (newDomain[0] < oldDomain[0]) { // dragged backwards
- //  //   			newDomain[0] = oldDomain[1] - this.maxBrushRange;
- //  //   			newDomain[1] = oldDomain[1];
- //  //   		} else { // dragged forward
- //  //   			newDomain[0] = oldDomain[0]
- //  //   			newDomain[1] = oldDomain[0] + this.maxBrushRange;
- //  //   		}
- //  //   	} else if (newRange < this.minBrushRange) {
- //  //   		if (newDomain[0] > oldDomain[0]) { // dragged backwards
- //  //   			newDomain[0] = oldDomain[1] - this.minBrushRange;
- //  //   			newDomain[1] = oldDomain[1];
- //  //   		} else { // dragged forward
- //  //   			newDomain[0] = oldDomain[0]
- //  //   			newDomain[1] = oldDomain[0] + this.minBrushRange;
- //  //   		}
- //  //   	}
- //    	return newDomain;
-	},
-
 	onZoom: function() {
 		// this is all about prevent dragging past the boundary.
 		var bp = this.chromosomes[this.selectedChromosome].length
 
 		var domain = this.viewXScale.domain();
 
-		// if (range != this.maxBrushRange) {
-		// 	var diff = (this.maxBrushRange - range) / 2;
-		// 	domain[0] += diff;
-		// 	domain[1] -= diff;
-		// 	// var translate = Math.round(diff / bp);
-		// 	// this.zoom.translate([this.zoom.translate()[0] + translate, 0]);
-		// 	// var scale = range / this.maxBrushRange
-		// 	// this.zoom.scale(this.zoom.scale() * scale);
-
-		// } else if (range < this.minBrushRange) {
-		// 	var diff = (range - this.minBrushRange) / 2;
-		// 	domain[0] -= diff;
-		// 	domain[1] += diff;
-		// 	var translate = Math.round(diff / bp);
-		// 	this.zoom.translate([this.zoom.translate()[0] - translate, 0]);
-		// 	var scale = range / this.minBrushRange;
-		// 	console.log("scale: "+scale);
-		// 	this.zoom.scale(this.zoom.scale() * scale);
-		// }
-
-		// enforce min/max zoom size
-		// if domain is too big, make it smaller and vice versa
-
-		// var oldSize = domain[1] - domain[0];
-		// domain = this.restrictDomainSize(this.brushExtent, domain);
-
-		// var newSize = domain[1] - domain[0];
-
-		// if (newSize != oldSize) { // a restriction was applied
-		// 	this.zoom.scale(this.zoom.scale() * (oldSize / newSize));
-
-
-		// 	// var translate = this.zoom.translate()[0] - ((oldSize - newSize) / 2)
-		// 	// translate = Math.round(translate / bp);
-		// 	// console.log("translate", translate);
-		// 	// this.zoom.translate([translate, 0])
-		// }
-
-		// console.log("this.brushExtent", this.brushExtent);
-		// console.log("domain: "+domain);
-
 		// need a more specialised restrictDomainSize here
 		var range = domain[1] - domain[0];
 
 		var hitBoundary = false;
-
-		// enforce chromosome boundaries
-		// if (domain[0] < 0 || domain[1] > bp) {
-		// 	console.log("crap1");
-		// 	domain = this.brushExtent;
-		// 	this.zoom.translate(this.zoomTranslate);
-		// 	this.zoom.scale(this.zoomScale);
-		// }
 
 		if (domain[0] < 0 && domain[1] > bp) {
 			range = domain[1] - domain[0];
@@ -317,20 +246,6 @@
 			var scaledTransX = domain[0] / bp;
 			this.zoom.translate([scaledTransX, 0]);
 		}
-
-		// zoom window is too big.
-		// if (range > this.maxBrushRange || range < this.minBrushRange) {
-		// 	console.log("crap2");
-		// 	// just set it all back to previous values. in theory, this leads to buggy
-		// 	// behaviour, but that's really hard to notice ;)
-
-		// 	// would be better to 
-		// 	// grow the box to just the right dimensions, but that's rather tricky.
-		// 	// maybs improve this in version 2.0.
-		// 	domain = this.brushExtent;
-		// 	this.zoom.translate(this.zoomTranslate);
-		// 	this.zoom.scale(this.zoomScale);
-		// }
 
 		// store copies of the translate and scale settings
 		this.zoomTranslate = this.zoom.translate();
