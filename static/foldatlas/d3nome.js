@@ -229,18 +229,21 @@
 		var hitBoundary = false;
 
 		if (domain[0] < 0 && domain[1] > bp) {
+			console.log("a");
 			range = domain[1] - domain[0];
 			domain = [0, bp];
 			this.zoom.translate([0, 0]);
 			this.zoom.scale(this.zoom.scale() * (range / bp));
 
 		} else if (domain[0] < 0) {
+			console.log("b");
 			var offset = -domain[0];
 			domain = [domain[0] + offset, domain[1] + offset];
 			var scaledTransX = domain[0] / bp;
 			this.zoom.translate([scaledTransX, 0]);
 
 		} else if (domain[1] > bp) {
+			console.log("c");
 			var offset = domain[1] - bp; // positive number
 			domain = [domain[0] - offset, domain[1] - offset];
 			var scaledTransX = domain[0] / bp;
