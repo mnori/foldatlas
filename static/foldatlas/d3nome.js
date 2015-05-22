@@ -1,11 +1,7 @@
-// IDEAS
-
-// Max window size:
-// 	http://bl.ocks.org/raffazizzi/3691274
-
-// Disable clicking outside the brush
-// 	http://stackoverflow.com/questions/18036836/disable-clearing-of-d3-js-brush
-
+/**
+ * D3nome: D3-based genome browser
+ * Matthew Norris 2015
+ */
 (D3nome = function(config) { this.init(config); }).prototype = {
 
 	// config should include chromosome data?
@@ -18,7 +14,7 @@
 		// Storing the extent locally is a hack that kills 2 birds with 1 stone
 		//  - lets us constrain the box size
 		//  - lets us disable the clear functionality
-		this.brushExtent = [0, this.minBrushRange];
+		this.navBoundaries = [0, this.minBrushRange];
 
 		this.config = config;
 		this.chromosomes = this.config.chromosomes;
@@ -190,27 +186,24 @@
 		    .attr("transform", "translate(0," + viewDims.y + ")")
 		    .call(this.navXAxis)
 
-		this.updateBrush(this.brushExtent);
+		this.updateBrush(this.navBoundaries);
 
-		this.loadData(this.chromosomes[this.selectedChromosome].id, this.brushExtent[0], this.brushExtent[1]);
+		this.loadData(this.chromosomes[this.selectedChromosome].id, this.navBoundaries[0], this.navBoundaries[1]);
 	},
 
 	onBrush: function() {
 
-    	// if brush is empty, use the this.brushExtent - i.e. the previous brush value
+    	// if brush is empty, use the this.navBoundaries - i.e. the previous brush value
     	// otherwise grab the new extent from the brush.
 
-    	// using this.brushExtent when empty disables the clearing behaviour
-    	var domain = this.brush.empty() ? this.brushExtent : this.brush.extent()
+    	// using this.navBoundaries when empty disables the clearing behaviour
+    	var domain = this.brush.empty() ? this.navBoundaries : this.brush.extent()
 
 		domain[0] = Math.round(domain[0])
     	domain[1] = Math.round(domain[1]);
 
-    	// enforce minimum and maximum constraints on the extent
-    	// domain = this.restrictDomainSize(this.brushExtent, domain);
-
     	// store the extent data for comparison later.
-    	this.brushExtent = domain;
+    	this.navBoundaries = domain;
     	this.updateBrush(domain);
 
     	// redraw the data
@@ -222,28 +215,23 @@
 		var bp = this.chromosomes[this.selectedChromosome].length
 
 		var domain = this.viewXScale.domain();
-		console.log("Got domain "+domain); // new domain is changed back to old value
-
 		// need a more specialised restrictDomainSize here
 		var range = domain[1] - domain[0];
 
 		var hitBoundary = false;
 
 		if (domain[0] <= 0 && domain[1] >= bp) {
-			// console.log("a");
 			range = domain[1] - domain[0];
 			domain = [0, bp];
 			this.zoom.translate([0, 0]);
 			this.zoom.scale(this.zoom.scale() * (range / bp));
 
 		} else if (domain[0] <= 0) {
-			// console.log("b");
 			var offset = -domain[0];
 			domain = [domain[0] + offset, domain[1] + offset];
 			this.zoom.translate([0, 0]);
 
 		} else if (domain[1] >= bp) {
-			// console.log("c");
 			var offset = domain[1] - bp; // positive number
 			domain = [domain[0] - offset, domain[1] - offset];
 			var scaledTransX = domain[0] / bp;
@@ -258,9 +246,7 @@
 
 		// keep track of our local extent data
 		// Rename to navBoundaries
-
-		// console.log("Setting domain: "+domain);
-		this.brushExtent = domain;
+		this.navBoundaries = domain;
 
 		// update the view X axis as well
 		this.viewElement.select(".x.axis").call(this.viewXAxis);
@@ -281,9 +267,6 @@
 	    this.brush.extent(domain);
 
 	    // update the view X scale domain with the new data
-
-	    console.log("updateBrush domain: "+domain);
-
 		this.viewXScale.domain(domain);
 
 		// must update the zoom as well
@@ -300,8 +283,8 @@
 		// fetch int value of chr
 
 		var chrID = this.chromosomes[this.selectedChromosome].id
-    	var start = Math.round(this.brushExtent[0]);
-    	var end = Math.round(this.brushExtent[1]);
+    	var start = Math.round(this.navBoundaries[0]);
+    	var end = Math.round(this.navBoundaries[1]);
 
 		var chrNum = chrID[3];
 		var url = this.config.dataUrl+"?chr="+chrNum+"&start="+start+"&end="+end;
