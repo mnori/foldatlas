@@ -222,6 +222,7 @@
 		var bp = this.chromosomes[this.selectedChromosome].length
 
 		var domain = this.viewXScale.domain();
+		console.log("Got domain "+domain); // new domain is changed back to old value
 
 		// need a more specialised restrictDomainSize here
 		var range = domain[1] - domain[0];
@@ -229,21 +230,20 @@
 		var hitBoundary = false;
 
 		if (domain[0] <= 0 && domain[1] >= bp) {
-			console.log("a");
+			// console.log("a");
 			range = domain[1] - domain[0];
 			domain = [0, bp];
 			this.zoom.translate([0, 0]);
 			this.zoom.scale(this.zoom.scale() * (range / bp));
 
 		} else if (domain[0] <= 0) {
-			console.log("b");
+			// console.log("b");
 			var offset = -domain[0];
 			domain = [domain[0] + offset, domain[1] + offset];
-			var scaledTransX = domain[0] / bp;
-			this.zoom.translate([scaledTransX, 0]);
+			this.zoom.translate([0, 0]);
 
 		} else if (domain[1] >= bp) {
-			console.log("c");
+			// console.log("c");
 			var offset = domain[1] - bp; // positive number
 			domain = [domain[0] - offset, domain[1] - offset];
 			var scaledTransX = domain[0] / bp;
@@ -258,6 +258,8 @@
 
 		// keep track of our local extent data
 		// Rename to navBoundaries
+
+		// console.log("Setting domain: "+domain);
 		this.brushExtent = domain;
 
 		// update the view X axis as well
@@ -271,6 +273,7 @@
 
 	onZoomEnd: function() {
 		this.loadData();
+		this.zoom.x(this.viewXScale); // this fixes a shit load of issues!
 	},
 
 	updateBrush: function(domain) {
@@ -278,6 +281,9 @@
 	    this.brush.extent(domain);
 
 	    // update the view X scale domain with the new data
+
+	    console.log("updateBrush domain: "+domain);
+
 		this.viewXScale.domain(domain);
 
 		// must update the zoom as well
@@ -322,7 +328,6 @@
 		this.viewElement.selectAll("rect").remove()
 
 		// Add new elements
-
 		var element = this.viewElement.selectAll(".d3nome-view")
 		element
 			.data(this.data).enter() // select missing nodes
