@@ -7,6 +7,8 @@
 	// config should include chromosome data?
 	init: function(config) {
 
+		this.transcriptHeight = 20;
+
 		this.maxBrushRange = 2500000;
 		this.minBrushRange = 25000;
 
@@ -430,7 +432,7 @@
 			.attr("width", $.proxy(function(d, i) { 
 				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
 			}, this))
-			.attr("height", 30)
+			.attr("height", this.transcriptHeight)
 
 		// CDSs
 		transcriptGroups.selectAll('g.d3nome-transcript')
@@ -444,21 +446,36 @@
 			.attr("width", $.proxy(function(d, i) { 
 				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
 			}, this))
-			.attr("height", 30)
+			.attr("height", this.transcriptHeight)
 
-		// Introns
+		// Introns - represented using bezier curves
 		transcriptGroups.selectAll('g.d3nome-transcript')
 			.data(function(transcript) { 
 				return getFeatures(transcript, "intron");
 			}).enter()
-			.append("rect")
-			.attr("class", "d3nome-feature-intron")
-			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-			.attr("y", function(d, i) { return 50; })
-			.attr("width", $.proxy(function(d, i) { 
-				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
+			.append("path")
+			.attr("d", $.proxy(function(d) {
+				// we are drawing a Bezier curve.
+				// see https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
+				// for explanation.
+				var yOffset = 50;
+				var bulge = 10;
+				var bulgeOffset = 20;
+				var startStr = this.viewXScale(d.start)+" "+yOffset;
+				var endStr = this.viewXScale(d.end)+" "+yOffset;
+
+				var control1 = this.viewXScale(d.start+bulgeOffset)+" "+(yOffset-bulge);
+				var control2 = this.viewXScale(d.end-bulgeOffset)+" "+(yOffset-bulge);
+
+				return "M"+startStr+" C "+control1+", "+control2+", "+endStr;
 			}, this))
-			.attr("height", 30)
+			.attr("class", "d3nome-feature-intron")
+			// .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+			// .attr("y", function(d, i) { return 50; })
+			// .attr("width", $.proxy(function(d, i) { 
+			// 	return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
+			// }, this))
+			// .attr("height", 30)
 
 	}
 }

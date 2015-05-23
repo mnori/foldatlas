@@ -166,13 +166,13 @@ h2 {
 
 .d3nome-feature-cds {
 	stroke: #000;
-	fill: #333;
+	fill: #888;
 	stroke-width: 1px;
 }
 
 .d3nome-feature-intron {
-	stroke: #f00;
-	fill: #fff;
+	stroke: #000;
+	fill: none;
 	stroke-width: 1px;
 }
 
