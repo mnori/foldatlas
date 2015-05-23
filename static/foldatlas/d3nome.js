@@ -295,11 +295,49 @@
 	},
 
 	parseData: function(data) {
-		this.data = data;
 
-		// do cool stuff with the data here. 
-		// maybs arrange into lanes for overlapping transcripts
+		console.log("parseData() invoked -----------------------------------------------------")
 
+		// create an empty object to use as a key-value store
+		var transcripts = {};
+
+		// first pass - collect UTR and CDS sequences
+		for (var i = 0; i < data.length; i++) {
+			var feature = data[i];
+			if (	feature.feature_type == "CDS" || 
+					feature.feature_type.indexOf("UTR") > -1) {
+
+				var transcriptID = feature["Parent"];
+				console.log("transcriptID: "+transcriptID);
+
+				// create transcript object if it does not exist.
+				if (transcripts[transcriptID] === undefined) {
+					transcripts[transcriptID] = {
+
+						// start and end will be filled while adding features
+						id: transcriptID,
+						start: null,
+						end: null,
+						features: []
+					}
+				}
+				var transcript = transcripts[transcriptID];
+
+				// deal with start and end
+				if (transcript.start == null || feature.start < transcript.start) {
+					transcript.start = feature.start;
+				}
+				if (transcript.end == null || feature.end > transcript.end) {
+					transcript.end = feature.end;
+				}
+				transcript.features.push(feature)
+			}
+		}
+
+		// second pass - infer the intronic sequences using the UTR shiz
+		// +/- 1 boundaries
+
+		this.data = data; // parsedData;
 		this.drawData();
 	},
 
@@ -312,7 +350,12 @@
 		element
 			.data(this.data).enter() // select missing nodes
 			.append("rect")
-			.attr("class", "d3nome-feature")
+			.attr("class", function(d) {
+				console.log(d);
+				// return a different class depending on the feature
+				// how to deal with splice? maybs use a box radius
+				return "d3nome-feature"
+			})
 
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 			.attr("y", function(d, i) { return 50; })
