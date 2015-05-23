@@ -158,9 +158,21 @@ h2 {
 	fill-opacity: 0;
 }
 
-.d3nome-feature {
+.d3nome-feature-utr {
 	stroke: #000;
 	fill: #ccc;
+	stroke-width: 1px;
+}
+
+.d3nome-feature-cds {
+	stroke: #000;
+	fill: #333;
+	stroke-width: 1px;
+}
+
+.d3nome-feature-intron {
+	stroke: #f00;
+	fill: #fff;
 	stroke-width: 1px;
 }
 

@@ -294,9 +294,9 @@
 		}, this));
 	},
 
+	// Parses the data from the API into a format that can be easily 
+	// understood by the D3 library.
 	parseData: function(data) {
-
-		// console.log("parseData() invoked -----------------------------------------------------")
 
 		// create an empty object to use as a key-value store
 		var transcripts = {};
@@ -396,25 +396,70 @@
 	drawData: function() {
 		// Remove old elements
 		this.viewElement.selectAll("rect").remove()
+		this.viewElement.selectAll("g.d3nome-transcript").remove()
 
-		// Add new elements
 		var element = this.viewElement.selectAll(".d3nome-view")
-		element
-			.data(this.data).enter() // select missing nodes
-			.append("rect")
-			.attr("class", function(d) {
-				// return a different class depending on the feature
-				// how to deal with splice? maybs use a box radius
-				return "d3nome-feature"
-			})
 
+		// Append 1 group element per transcript
+		var transcriptGroups = element
+			.data(this.data).enter()
+			.append('g')
+			.attr('class', "d3nome-transcript")
+
+		// Find features of specific type.
+		function getFeatures(transcript, featureType) {
+			var out = []
+			var features = transcript.features;
+			for (var i = 0; i < features.length; i++) {
+				if (features[i].type == featureType) {
+					out.push(features[i]);
+				}
+			}
+			return out;
+		}
+
+		// UTRs
+		transcriptGroups.selectAll('g.d3nome-transcript')
+			.data(function(transcript) { 
+				return getFeatures(transcript, "utr");
+			}).enter()
+			.append("rect")
+			.attr("class", "d3nome-feature-utr")
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 			.attr("y", function(d, i) { return 50; })
+			.attr("width", $.proxy(function(d, i) { 
+				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
+			}, this))
+			.attr("height", 30)
 
-		    .attr("width", $.proxy(function(d, i) { 
-		    	return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
-		    }, this))
-		    .attr("height", 30)
+		// CDSs
+		transcriptGroups.selectAll('g.d3nome-transcript')
+			.data(function(transcript) { 
+				return getFeatures(transcript, "cds");
+			}).enter()
+			.append("rect")
+			.attr("class", "d3nome-feature-cds")
+			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+			.attr("y", function(d, i) { return 50; })
+			.attr("width", $.proxy(function(d, i) { 
+				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
+			}, this))
+			.attr("height", 30)
+
+		// Introns
+		transcriptGroups.selectAll('g.d3nome-transcript')
+			.data(function(transcript) { 
+				return getFeatures(transcript, "intron");
+			}).enter()
+			.append("rect")
+			.attr("class", "d3nome-feature-intron")
+			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+			.attr("y", function(d, i) { return 50; })
+			.attr("width", $.proxy(function(d, i) { 
+				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
+			}, this))
+			.attr("height", 30)
+
 	}
 }
 
