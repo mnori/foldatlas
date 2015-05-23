@@ -296,7 +296,7 @@
 
 	parseData: function(data) {
 
-		console.log("parseData() invoked -----------------------------------------------------")
+		// console.log("parseData() invoked -----------------------------------------------------")
 
 		// create an empty object to use as a key-value store
 		var transcripts = {};
@@ -308,36 +308,88 @@
 					feature.feature_type.indexOf("UTR") > -1) {
 
 				var transcriptID = feature["Parent"];
-				console.log("transcriptID: "+transcriptID);
 
 				// create transcript object if it does not exist.
 				if (transcripts[transcriptID] === undefined) {
 					transcripts[transcriptID] = {
-
-						// start and end will be filled while adding features
 						id: transcriptID,
-						start: null,
+						start: null, // start and end will be filled while adding features
 						end: null,
 						features: []
-					}
+					};
 				}
+
 				var transcript = transcripts[transcriptID];
 
-				// deal with start and end
+				// add the feature data
+				transcript.features.push({
+					transcriptID: feature.Parent,
+					type: (feature.feature_type == "CDS") ? "cds" : "utr",
+					start: feature.start,
+					end: feature.end
+				});
+
+				// keep track of the start and end
 				if (transcript.start == null || feature.start < transcript.start) {
 					transcript.start = feature.start;
 				}
 				if (transcript.end == null || feature.end > transcript.end) {
 					transcript.end = feature.end;
 				}
-				transcript.features.push(feature)
 			}
 		}
 
 		// second pass - infer the intronic sequences using the UTR shiz
 		// +/- 1 boundaries
+		var sortFeatures = function(a, b) {
+			if (a.start > b.start) {
+				return 1;
+			} else {
+				return -1;
+			}
+		}
+		$.each(transcripts, function(transcriptID, transcript) {
+			var features = transcript.features;
 
-		this.data = data; // parsedData;
+			// sort features by their positions.
+			features.sort(sortFeatures);
+			
+			var prevFeature = null;
+			var introns = [];
+
+			// figure out locations of introns
+			for (var i = 0; i < features.length; i++) {
+				var currFeature = features[i];
+
+				if (	prevFeature != null && 
+						currFeature.start - prevFeature.end > 1) { // there is a gap
+
+					introns.push({
+						transcriptID: transcriptID,
+						type: "intron",
+						start: prevFeature.end + 1, // offset by 1 since coords are inclusive.
+						end: currFeature.start - 1
+					});
+				}
+				prevFeature = currFeature;
+			}
+
+			// add the introns to the features array
+			features = features.concat(introns);
+
+			// sort features, including introns, by their positions.
+			features.sort(sortFeatures);
+
+			// set back into the data structure.
+			transcript.features = features;
+		});
+
+		var dataOut = [];
+		$.each(transcripts, function(transcriptID, transcript) {
+			dataOut.push(transcript);
+		});
+
+		this.data = dataOut;
 		this.drawData();
 	},
 
@@ -351,7 +403,6 @@
 			.data(this.data).enter() // select missing nodes
 			.append("rect")
 			.attr("class", function(d) {
-				console.log(d);
 				// return a different class depending on the feature
 				// how to deal with splice? maybs use a box radius
 				return "d3nome-feature"
