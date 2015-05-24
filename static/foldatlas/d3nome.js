@@ -349,7 +349,32 @@
 			}
 		}
 
-		// second pass - infer the intronic sequences from the features already stored
+		// Find the non-CDS transcripts
+		var nonCds = {};
+		$.each(transcripts, function(transcriptID, transcript) {
+			if (transcript.features.length == 0) {
+				nonCds[transcriptID] = transcript;
+			}
+		});
+
+		// For non-CDS transcripts, add exons as UTRs
+		for (var i = 0; i < data.length; i++) {
+			var feature = data[i];
+			var transcriptID = feature["Parent"];
+			if (	nonCds[transcriptID] !== undefined && 
+					feature.feature_type == "exon") {
+
+				var transcript = nonCds[transcriptID];
+				transcript.features.push({
+					transcriptID: transcriptID,
+					type: "utr",
+					start: feature.start,
+					end: feature.end
+				});
+			}
+		}
+
+		// Now infer the intronic sequences from the features already stored
 		var sortFeatures = function(a, b) {
 			if (a.start > b.start) {
 				return 1;
