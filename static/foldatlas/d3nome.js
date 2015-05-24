@@ -341,8 +341,7 @@
 			}
 		}
 
-		// second pass - infer the intronic sequences using the UTR shiz
-		// +/- 1 boundaries
+		// second pass - infer the intronic sequences from the features already stored
 		var sortFeatures = function(a, b) {
 			if (a.start > b.start) {
 				return 1;
@@ -386,6 +385,12 @@
 			transcript.features = features;
 		});
 
+		// Organise the transcripts by lane, so that no overlapping occurs.
+		var transcriptsByLane = []
+		$.each(transcripts, function(transcriptID, transcript) {
+		}
+
+
 		var dataOut = [];
 		$.each(transcripts, function(transcriptID, transcript) {
 			dataOut.push(transcript);
@@ -398,6 +403,7 @@
 	drawData: function() {
 		// Remove old elements
 		this.viewElement.selectAll("rect").remove()
+		this.viewElement.selectAll("path.d3nome-feature-intron").remove()
 		this.viewElement.selectAll("g.d3nome-transcript").remove()
 
 		var element = this.viewElement.selectAll(".d3nome-view")
@@ -422,9 +428,8 @@
 
 		// UTRs
 		transcriptGroups.selectAll('g.d3nome-transcript')
-			.data(function(transcript) { 
-				return getFeatures(transcript, "utr");
-			}).enter()
+			.data(function(transcript) { return getFeatures(transcript, "utr"); })
+			.enter()
 			.append("rect")
 			.attr("class", "d3nome-feature-utr")
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
@@ -436,9 +441,8 @@
 
 		// CDSs
 		transcriptGroups.selectAll('g.d3nome-transcript')
-			.data(function(transcript) { 
-				return getFeatures(transcript, "cds");
-			}).enter()
+			.data(function(transcript) { return getFeatures(transcript, "cds"); })
+			.enter()
 			.append("rect")
 			.attr("class", "d3nome-feature-cds")
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
@@ -450,9 +454,8 @@
 
 		// Introns - represented using bezier curves
 		transcriptGroups.selectAll('g.d3nome-transcript')
-			.data(function(transcript) { 
-				return getFeatures(transcript, "intron");
-			}).enter()
+			.data(function(transcript) { return getFeatures(transcript, "intron"); })
+			.enter()
 			.append("path")
 			.attr("d", $.proxy(function(d) {
 				// we are drawing a Bezier curve.
@@ -470,13 +473,7 @@
 				return "M"+startStr+" C "+control1+", "+control2+", "+endStr;
 			}, this))
 			.attr("class", "d3nome-feature-intron")
-			// .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-			// .attr("y", function(d, i) { return 50; })
-			// .attr("width", $.proxy(function(d, i) { 
-			// 	return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
-			// }, this))
-			// .attr("height", 30)
-
 	}
 }
+
 
