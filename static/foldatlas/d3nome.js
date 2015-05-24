@@ -8,6 +8,13 @@
 	init: function(config) {
 
 		this.transcriptHeight = 20;
+		this.labelHeight = 15;
+		this.laneMargin = 10;
+		this.intronBulge = 10;
+		this.intronBulgeOffset = 20;
+
+		// total height of lane excluding the margin
+		this.laneHeight = this.intronBulge + this.transcriptHeight + this.labelHeight
 
 		this.maxBrushRange = 2500000;
 		this.minBrushRange = 25000;
@@ -306,21 +313,30 @@
 		// first pass - collect UTR and CDS sequences
 		for (var i = 0; i < data.length; i++) {
 			var feature = data[i];
+
+			if (feature.feature_type == "transcript") {
+				// create transcript object if it does not exist.
+
+				var transcriptID = feature.id;
+
+				if (transcriptID == "AT1G01010.1") {
+					console.log(feature);
+				}
+
+				if (transcripts[transcriptID] === undefined) {
+					transcripts[transcriptID] = {
+						id: transcriptID,
+						start: feature.start,
+						end: feature.end,
+						features: []
+					};
+				}
+			}
+
 			if (	feature.feature_type == "CDS" || 
 					feature.feature_type.indexOf("UTR") > -1) {
 
 				var transcriptID = feature["Parent"];
-
-				// create transcript object if it does not exist.
-				if (transcripts[transcriptID] === undefined) {
-					transcripts[transcriptID] = {
-						id: transcriptID,
-						start: null, // start and end will be filled while adding features
-						end: null,
-						features: []
-					};
-				}
-
 				var transcript = transcripts[transcriptID];
 
 				// add the feature data
@@ -330,14 +346,6 @@
 					start: feature.start,
 					end: feature.end
 				});
-
-				// keep track of the start and end
-				if (transcript.start == null || feature.start < transcript.start) {
-					transcript.start = feature.start;
-				}
-				if (transcript.end == null || feature.end > transcript.end) {
-					transcript.end = feature.end;
-				}
 			}
 		}
 
@@ -385,14 +393,49 @@
 			transcript.features = features;
 		});
 
-		// Organise the transcripts by lane, so that no overlapping occurs.
-		var transcriptsByLane = []
-		$.each(transcripts, function(transcriptID, transcript) {
+		// Figure out whether transcript overlaps another in the given lane
+		var overlaps = function(transcript, lane) {
+			for (var i = 0; i < lane.length; i++) {
+				var otherTranscript = lane[i];
+
+				// test whether transcript overlaps the other transcript.
+				if (	(	transcript.start 		>= otherTranscript.start && 
+						 	transcript.start 		<= otherTranscript.end) ||
+						(	transcript.end 			>= otherTranscript.start && 
+							transcript.end 			<= otherTranscript.end) ||
+						(	otherTranscript.start 	>= transcript.start  && 
+						 	otherTranscript.start 	<= transcript.end) ||
+						(	otherTranscript.end 	>= transcript.start && 
+						 	otherTranscript.end 	<= transcript.end)) {
+					return true;
+				}
+			}
+			return false;
 		}
 
+		// Organise transcripts into "lanes", according to overlaps.
+		var transcriptsByLane = []
+		$.each(transcripts, function(transcriptID, transcript) {
+			var laneNum = 0;
+			while(true) {
+				if (transcriptsByLane[laneNum] === undefined) {
+					transcriptsByLane[laneNum] = [];
+				}
+				if (!overlaps(transcript, transcriptsByLane[laneNum])) {
+					transcript.lane = laneNum;
+					transcriptsByLane[laneNum].push(transcript);
+					break;
+				}
+				laneNum++;
+			}
+		});
 
 		var dataOut = [];
 		$.each(transcripts, function(transcriptID, transcript) {
+			// add lane metadata to the features
+			for (var i = 0; i < transcript.features.length; i++) {
+				transcript.features[i].lane = transcript.lane;
+			}
 			dataOut.push(transcript);
 		});
 
@@ -405,14 +448,29 @@
 		this.viewElement.selectAll("rect").remove()
 		this.viewElement.selectAll("path.d3nome-feature-intron").remove()
 		this.viewElement.selectAll("g.d3nome-transcript").remove()
+		this.viewElement.selectAll("text.d3nome-transcript-label").remove()
 
 		var element = this.viewElement.selectAll(".d3nome-view")
+
+		var getYPos = $.proxy(function(d) {
+			return this.laneMargin + (d.lane * (this.laneHeight + this.laneMargin));
+		}, this);
 
 		// Append 1 group element per transcript
 		var transcriptGroups = element
 			.data(this.data).enter()
 			.append('g')
 			.attr('class', "d3nome-transcript")
+
+		transcriptGroups
+			.append("text")
+			.attr("class", "d3nome-transcript-label")
+		    .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+		    .attr("y", $.proxy(function(d, i) { 
+		    	return getYPos(d) + this.intronBulge + this.transcriptHeight; 
+		    }, this))
+		    .attr("dy", ".35em")
+		    .text(function(d) { return d.id; });
 
 		// Find features of specific type.
 		function getFeatures(transcript, featureType) {
@@ -433,7 +491,7 @@
 			.append("rect")
 			.attr("class", "d3nome-feature-utr")
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-			.attr("y", function(d, i) { return 50; })
+			.attr("y", function(d, i) { return getYPos(d); })
 			.attr("width", $.proxy(function(d, i) { 
 				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
 			}, this))
@@ -446,7 +504,7 @@
 			.append("rect")
 			.attr("class", "d3nome-feature-cds")
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-			.attr("y", function(d, i) { return 50; })
+			.attr("y", function(d, i) { return getYPos(d); })
 			.attr("width", $.proxy(function(d, i) { 
 				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
 			}, this))
@@ -461,9 +519,11 @@
 				// we are drawing a Bezier curve.
 				// see https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
 				// for explanation.
-				var yOffset = 50;
-				var bulge = 10;
-				var bulgeOffset = 20;
+
+				var bulge = this.intronBulge;
+				var bulgeOffset = this.intronBulgeOffset;
+
+				var yOffset = getYPos(d);
 				var startStr = this.viewXScale(d.start)+" "+yOffset;
 				var endStr = this.viewXScale(d.end)+" "+yOffset;
 
