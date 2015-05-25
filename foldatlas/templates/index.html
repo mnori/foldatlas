@@ -42,7 +42,10 @@
                         length: "{{ chromosome.length }}"
                     },
                     {% endfor %}
-                ]
+                ],
+                geneClick: function(transcriptID) {
+                    window.browserController.selectTranscript(transcriptID);
+                }
             }
 
             console.log(window.d3nomeConfig);

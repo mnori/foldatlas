@@ -537,9 +537,20 @@
 		
 		// TODO catch all the other events and redirect them to the overlay,
 		// for better interactivity
-		$(".d3nome-transcript-label").click(function() {
-			console.log($(this).data("transcript_id"));
-		});
+		$(".d3nome-transcript-label").bind("click", {self:this}, function(event) {
+			var self = event.data.self;
+			var transcriptID = $(this).data("transcript_id");
+			self.config.geneClick(transcriptID);
+			// console.log("transcriptID: "+transcriptID);
+		})
+
+
+		// click($.proxy(function(element) {
+		// 	console.log(element);
+		// 	var transcriptID = $(element).data("transcript_id");
+		// 	console.log("transcriptID: "+transcriptID);
+		// 	this.config.geneClick(transcriptID);
+		// }, this));
 		////////////////////////////////////////////////////
 
 		// old method with SVG labels
@@ -577,7 +588,8 @@
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 			.attr("y", $.proxy(function(d, i) { return this.navDims.y + getYPos(d); }, this))
 			.attr("width", $.proxy(function(d, i) { 
-				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
+				// Must add 1 here since boundaries are inclusive.
+				return (this.viewXScale(d.end + 1) - this.viewXScale(d.start)); 
 			}, this))
 			.attr("height", this.transcriptHeight)
 
@@ -590,7 +602,7 @@
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 			.attr("y", $.proxy(function(d, i) { return this.navDims.y + getYPos(d); }, this))
 			.attr("width", $.proxy(function(d, i) { 
-				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
+				return (this.viewXScale(d.end + 1) - this.viewXScale(d.start)); 
 			}, this))
 			.attr("height", this.transcriptHeight)
 
@@ -609,10 +621,10 @@
 
 				var yOffset = this.navDims.y + getYPos(d);
 				var startStr = this.viewXScale(d.start)+" "+yOffset;
-				var endStr = this.viewXScale(d.end)+" "+yOffset;
+				var endStr = this.viewXScale(d.end + 1)+" "+yOffset;
 
 				var control1 = this.viewXScale(d.start+bulgeOffset)+" "+(yOffset-bulge);
-				var control2 = this.viewXScale(d.end-bulgeOffset)+" "+(yOffset-bulge);
+				var control2 = this.viewXScale((d.end + 1)-bulgeOffset)+" "+(yOffset-bulge);
 
 				return "M"+startStr+" C "+control1+", "+control2+", "+endStr;
 			}, this))
