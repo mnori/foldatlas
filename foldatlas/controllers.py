@@ -11,52 +11,80 @@ class GenomeBrowser():
 
     def get_transcripts(self, request):
 
-        out = []
-
         chromosome_id = "Chr"+str(int(request.args.get('chr'))) # SQL-injection safe
         start = int(request.args.get('start'))
         end = int(request.args.get('end'))
 
-        sql =   ("SELECT *, MIN(start) min_start, MAX(end) max_end "
-                 "FROM feature "
-                 "WHERE strain_id = '"+settings.reference_strain_id+"'"
-                 "AND chromosome_id = '"+chromosome_id+"' "
-                 "AND start > '"+str(start)+"' "
-                 "AND end < '"+str(end)+"' "
-                 "GROUP BY transcript_id")
+        # need to rework this. get gene IDs first, then expand using the gene ID list.
+        # using feature table and start/end, grab the gene IDs that fall within the range.
+        sql = ( "SELECT transcript.gene_id "
+                "FROM feature, transcript "
+                "WHERE strain_id = '"+settings.reference_strain_id+"' "
+                "AND chromosome_id = '"+chromosome_id+"' "
+                "AND start > '"+str(start)+"' "
+                "AND end < '"+str(end)+"' "
+                "AND feature.transcript_id = transcript.id ");
 
-        # Add the transcript rows to the output
         results = database.engine.execute(sql)
+        gene_ids = [];
         for result in results:
-            out.append({
-                "Parent": result.transcript_id,
-                "feature_type": "transcript", # without this, it won't draw
-                "direction": result.direction,
-                "start": result.min_start,
-                "end": result.max_end,
-                "id": result.transcript_id
-            })
+            gene_ids.append(result["gene_id"])
 
-        # Use the ORM to get feature details
-        results = db_session \
-            .query(Feature) \
-            .filter(and_( \
-                Feature.chromosome_id == chromosome_id,
-                Feature.strain_id == settings.reference_strain_id,
-                Feature.start >= start,
-                Feature.end <= end
-            )) \
-            .all() 
+        # use the gene IDs to get feature data
+        sql = ( "SELECT * "
+                "FROM transcript, feature "
+                "WHERE transcript.gene_id IN ('"+"','".join(gene_ids)+"') "
+                "AND strain_id = '"+settings.reference_strain_id+"' "
+                "AND chromosome_id = '"+chromosome_id+"' "
+                "AND transcript.id = feature.transcript_id ")
 
-        # Add transcript feature rows to the output
-        for feature in results:
+        results = database.engine.execute(sql)
+
+        # collect transcript data
+        transcripts = {}
+        feature_rows = []
+        for result in results:
+            if result.transcript_id not in transcripts:
+                transcripts[result.transcript_id] = {
+                    "Parent": result.transcript_id,
+                    "feature_type": "transcript", # without this, it won't draw
+                    "direction": result.direction,
+                    "start": None,
+                    "end": None,
+                    "id": result.transcript_id
+                }
+
+            transcript = transcripts[result.transcript_id]
+
+            # keep track of total start and end
+            if transcript["start"] == None or result.start < transcript["start"]:
+                transcript["start"] = result.start
+            if transcript["end"] == None or result.end > transcript["end"]:
+                transcript["end"] = result.end
+
+            feature_rows.append(result)
+
+        out = []
+
+        # add the transcript metadata to the output. make sure the transcripts are added
+        # in alphabetical order
+        transcript_ids = []
+        for transcript_id in transcripts:
+            transcript_ids.append(transcript_id)
+
+        transcript_ids = sorted(transcript_ids)
+        for transcript_id in transcript_ids:
+            out.append(transcripts[transcript_id])
+
+        # also add all the feature metadata to the output
+        for feature_row in feature_rows:
             out.append({
-                "Parent": feature.transcript_id,
-                "feature_type": feature.type_id,
+                "Parent": feature_row.transcript_id,
+                "feature_type": feature_row.type_id,
                 "direction": result.direction,
-                "start": feature.start,
-                "end": feature.end,
-                "id": feature.transcript_id+"-"+str(feature.id)
+                "start": feature_row.start,
+                "end": feature_row.end,
+                "id": feature_row.transcript_id+"-"+str(feature_row.id)
             })
 
         return json.dumps(out)

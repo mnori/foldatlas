@@ -7,8 +7,8 @@
 	// config should include chromosome data?
 	init: function(config) {
 
-		this.transcriptHeight = 20;
-		this.labelHeight = 15;
+		this.transcriptHeight = 15;
+		this.labelHeight = 10;
 		this.laneMargin = 10;
 		this.intronBulge = 10;
 		this.intronBulgeOffset = 20;
@@ -461,6 +461,8 @@
 			for (var i = 0; i < transcript.features.length; i++) {
 				transcript.features[i].lane = transcript.lane;
 			}
+
+			// add transcript to final output
 			dataOut.push(transcript);
 		});
 
@@ -560,5 +562,3 @@
 			.attr("class", "d3nome-feature-intron")
 	}
 }
-
-
