@@ -198,7 +198,7 @@ h2 {
 	cursor: pointer;
 }
 
-.d3nome-transcript-label:hover {
+.d3nome-transcript-label-hover {
 	background-color: #fff;
 	color: #b00;
 }
@@ -206,7 +206,14 @@ h2 {
 .d3nome-overlay {
 	stroke-width: 0px;
 	fill-opacity: 0;
-
 	position: relative;
 	z-index: 2;
+}
+
+.d3nome-overlay-hover {
+	cursor: pointer;
+}
+
+.d3nome-hover {
+	cursor: pointer;
 }

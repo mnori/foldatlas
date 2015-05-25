@@ -157,7 +157,7 @@
 		    .attr("transform", "translate("+0+","+(this.navDims.y)+")")
 		    .call(this.viewXAxis)
 
-		// Append an invisible overlay rectangle to recieve zoom commands
+		
 		// SVG version
 		// svg.append("rect")
 		// 	.attr("class", "d3nome-overlay")
@@ -165,7 +165,8 @@
 		// 	.attr("height", totDims.y)
 		// 	.call(this.zoom);
 
-		// Div version
+		// OVERLAY
+		// Uses a div overlay
 		var foreignObject = this.viewElement.append("foreignObject")
 			.attr("x", 0).attr("y", this.navDims.y)
 		
@@ -173,31 +174,53 @@
 		    .style("margin",0)
 		    .style("padding",0);
 
+		// This is a hack for sending mouse events behind the overlay.
+		// see http://www.vinylfox.com/forwarding-mouse-events-through-layers/
+		var getElementBehind = function(element) {
+
+			// Mouse position within the offset div
+			var point = d3.mouse(element);
+
+			// Absolute position of the overlay
+			var overlayOffset = $(".d3nome-overlay").offset()
+
+			// Get total offset
+			var totOffset = {
+				x: point[0] + overlayOffset.left,
+				y: point[1] + overlayOffset.top
+			}
+
+			// Put the event behind the overlay
+			$(".d3nome-overlay").hide()
+			var elementOut = $(document.elementFromPoint(totOffset.x, totOffset.y))
+			$(".d3nome-overlay").show() 
+			return elementOut; // .trigger(eventName);
+		};		
+
+		// Append the overlay div
 		htmlDoms.append("div")
 			.attr("class", "d3nome-overlay")
 			.attr("style", "width: "+this.viewDims.x+"px; height: "+this.viewDims.y+"px;")
 			.call(this.zoom)
-			.on("click", function(ev) {
-				// Hack to send the mouse event behind the overlay.
-				// see http://www.vinylfox.com/forwarding-mouse-events-through-layers/
 
-				// Mouse position within the offset div
-				var point = d3.mouse(this);
-
-				// Absolute position of the overlay
-				var overlayOffset = $(".d3nome-overlay").offset()
-
-				// Get total offset
-				var totOffset = {
-					x: point[0] + overlayOffset.left,
-					y: point[1] + overlayOffset.top
+			// this gets us a nice pointer when the user hovers over a gene label
+			// also decorates the gene labels
+			.on("mousemove", function(ev) {
+				$(".d3nome-transcript-label-hover").removeClass("d3nome-transcript-label-hover");
+				var element = getElementBehind(this); 
+				if (element.hasClass("d3nome-transcript-label")) {
+					$(this).addClass("d3nome-overlay-hover");
+					element.addClass("d3nome-transcript-label-hover");
+				} else {
+					$(this).removeClass("d3nome-overlay-hover")
 				}
-
-				// Put the event behind the overlay
-				$(".d3nome-overlay").hide()
-				$(document.elementFromPoint(totOffset.x, totOffset.y)).trigger("click");
-				$(".d3nome-overlay").show()
 			})
+
+			// sends the click event to the correct gene label element
+			.on("click", function() { 
+				var element = getElementBehind(this); 
+				element.trigger("click");
+			});
 
 		// create the viewport, i.e. the brush	
 		this.brush = d3.svg.brush()
@@ -517,13 +540,11 @@
 			.append('g')
 			.attr('class', "d3nome-transcript")
 
-		////////////////////////////////////////////////////
-
-		// Append text as ForeignObject to get HTML formatting
+		// Append text as ForeignObject to get HTML formatting and nice background
 		var foreignObjects = transcriptGroups.append("foreignObject")
 		    .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 		    .attr("y", $.proxy(function(d, i) { 
-		    	return (this.navDims.y * 2) + getYPos(d) + this.transcriptHeight; 
+		    	return (this.navDims.y * 2) + this.laneMargin + getYPos(d) + this.transcriptHeight; 
 		    }, this))
 
 		var htmlDoms = foreignObjects.append("xhtml:body")
@@ -534,24 +555,16 @@
 			.attr("class", "d3nome-transcript-label")
 			.attr("data-transcript_id", function(d) { return d.id; })
 			.text(function(d) { return d.id; })
-		
-		// TODO catch all the other events and redirect them to the overlay,
-		// for better interactivity
+	
+		// When gene label is clicked, use the callback		
 		$(".d3nome-transcript-label").bind("click", {self:this}, function(event) {
 			var self = event.data.self;
 			var transcriptID = $(this).data("transcript_id");
-			self.config.geneClick(transcriptID);
-			// console.log("transcriptID: "+transcriptID);
+			self.config.geneClick(transcriptID); // callback
 		})
 
-
-		// click($.proxy(function(element) {
-		// 	console.log(element);
-		// 	var transcriptID = $(element).data("transcript_id");
-		// 	console.log("transcriptID: "+transcriptID);
-		// 	this.config.geneClick(transcriptID);
-		// }, this));
-		////////////////////////////////////////////////////
+		// .on("mouseover", function(ev) { sendEventBehind(this, "mouseover"); })
+		// .on("mouseout", function(ev) { sendEventBehind(this, "mouseout"); })
 
 		// old method with SVG labels
 		// transcriptGroups
@@ -586,7 +599,9 @@
 			.append("rect")
 			.attr("class", "d3nome-feature-utr")
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-			.attr("y", $.proxy(function(d, i) { return this.navDims.y + getYPos(d); }, this))
+			.attr("y", $.proxy(function(d, i) { 
+				return this.navDims.y + this.laneMargin + getYPos(d); 
+			}, this))
 			.attr("width", $.proxy(function(d, i) { 
 				// Must add 1 here since boundaries are inclusive.
 				return (this.viewXScale(d.end + 1) - this.viewXScale(d.start)); 
@@ -600,7 +615,9 @@
 			.append("rect")
 			.attr("class", "d3nome-feature-cds")
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-			.attr("y", $.proxy(function(d, i) { return this.navDims.y + getYPos(d); }, this))
+			.attr("y", $.proxy(function(d, i) { 
+				return this.navDims.y + this.laneMargin + getYPos(d); 
+			}, this))
 			.attr("width", $.proxy(function(d, i) { 
 				return (this.viewXScale(d.end + 1) - this.viewXScale(d.start)); 
 			}, this))
@@ -619,7 +636,7 @@
 				var bulge = this.intronBulge;
 				var bulgeOffset = this.intronBulgeOffset;
 
-				var yOffset = this.navDims.y + getYPos(d);
+				var yOffset = this.navDims.y + this.laneMargin + getYPos(d) + 1;
 				var startStr = this.viewXScale(d.start)+" "+yOffset;
 				var endStr = this.viewXScale(d.end + 1)+" "+yOffset;
 
