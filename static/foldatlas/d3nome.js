@@ -42,7 +42,7 @@
 		this.viewDims = null;
 
 		// height of nav bar area (axis is the same as this)
-		this.navHeight = 40;
+		this.navHeight = 30;
 
 		this.brush = null;
 		this.zoom = null;
@@ -177,6 +177,27 @@
 			.attr("class", "d3nome-overlay")
 			.attr("style", "width: "+this.viewDims.x+"px; height: "+this.viewDims.y+"px;")
 			.call(this.zoom)
+			.on("click", function(ev) {
+				// Hack to send the mouse event behind the overlay.
+				// see http://www.vinylfox.com/forwarding-mouse-events-through-layers/
+
+				// Mouse position within the offset div
+				var point = d3.mouse(this);
+
+				// Absolute position of the overlay
+				var overlayOffset = $(".d3nome-overlay").offset()
+
+				// Get total offset
+				var totOffset = {
+					x: point[0] + overlayOffset.left,
+					y: point[1] + overlayOffset.top
+				}
+
+				// Put the event behind the overlay
+				$(".d3nome-overlay").hide()
+				$(document.elementFromPoint(totOffset.x, totOffset.y)).trigger("click");
+				$(".d3nome-overlay").show()
+			})
 
 		// create the viewport, i.e. the brush	
 		this.brush = d3.svg.brush()
@@ -328,13 +349,7 @@
 			var feature = data[i];
 
 			if (feature.feature_type == "transcript") {
-				// create transcript object if it does not exist.
-
 				var transcriptID = feature.id;
-
-				if (transcriptID == "AT1G01010.1") {
-					console.log(feature);
-				}
 
 				if (transcripts[transcriptID] === undefined) {
 					transcripts[transcriptID] = {
@@ -502,8 +517,9 @@
 			.append('g')
 			.attr('class', "d3nome-transcript")
 
-		// Append text as ForeignObject. This lets us use nicer HTML styling
+		////////////////////////////////////////////////////
 
+		// Append text as ForeignObject to get HTML formatting
 		var foreignObjects = transcriptGroups.append("foreignObject")
 		    .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 		    .attr("y", $.proxy(function(d, i) { 
@@ -522,9 +538,9 @@
 		// TODO catch all the other events and redirect them to the overlay,
 		// for better interactivity
 		$(".d3nome-transcript-label").click(function() {
-			// .. call the callback with the right transcript_id
 			console.log($(this).data("transcript_id"));
 		});
+		////////////////////////////////////////////////////
 
 		// old method with SVG labels
 		// transcriptGroups
@@ -532,10 +548,13 @@
 		// 	.attr("class", "d3nome-transcript-label")
 		//     .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 		//     .attr("y", $.proxy(function(d, i) { 
-		//     	return getYPos(d) + this.intronBulge + this.transcriptHeight; 
+		//     	return (this.navDims.y * 2) + getYPos(d) + this.transcriptHeight; 
 		//     }, this))
 		//     .attr("dy", ".35em")
-		//     .text(function(d) { return d.id; });
+		//     .text(function(d) { return d.id; })
+		//     .on("click", function() { alert("test"); })
+
+		////////////////////////////////////////////////////
 
 		// Find features of specific type.
 		function getFeatures(transcript, featureType) {

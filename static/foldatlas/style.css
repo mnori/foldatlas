@@ -156,6 +156,7 @@ h2 {
 	fill-opacity: 0.2;
 	stroke: #555;
   	stroke-width: 1px;
+  	shape-rendering: crispEdges;
 }
 
 .d3nome-feature-utr, .d3nome-feature-cds, .d3nome-feature-intron {
@@ -177,22 +178,28 @@ h2 {
 	fill: none;
 }
 
+.d3nome-transcript-label-container {
+	position: relative;
+}
+
 .d3nome-transcript-label {
 	box-shadow: 0px 0px 4px #000;
 	display: inline-block;
 	background-color: #f6f6f6;
-	/*border: 1px solid #666;*/
+	color: #555;
 	margin-top: 3px;
 	padding: 2px;
 	font-size: 13px;
 	white-space: nowrap; /* prevents line break at hyphens */
-	z-index: 2; 
+	z-index: 1; 
+	font-weight: bold;
 
-	position: relative;
+	position: absolute;
 	cursor: pointer;
 }
 
 .d3nome-transcript-label:hover {
+	background-color: #fff;
 	color: #b00;
 }
 
@@ -201,5 +208,5 @@ h2 {
 	fill-opacity: 0;
 
 	position: relative;
-	z-index: 1;
+	z-index: 2;
 }
