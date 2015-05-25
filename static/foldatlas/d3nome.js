@@ -38,7 +38,10 @@
 		// TODO use config values
 		this.totDims = {x: 898, y: 300}
 
-		// height of nav bar area 
+		this.navDims = null;
+		this.viewDims = null;
+
+		// height of nav bar area (axis is the same as this)
 		this.navHeight = 40;
 
 		this.brush = null;
@@ -51,7 +54,7 @@
 		this.navXScale = null;
 		this.navYScale = null;
 		this.navXAxis = null;
-		
+
 		this.viewElement = null;
 		this.navBoxNode = null;
 
@@ -90,46 +93,42 @@
 
 	// Set up the chromosome scrollbar.
 	initViewer: function() {
-
-		var totDims = this.totDims;
-
-		var navDims = {x: totDims.x, y: this.navHeight};
-		// dimensions of view genome browser area
-		var viewDims = {x: 898, y: (totDims.y - navDims.y)};
+		this.navDims = {x: this.totDims.x, y: this.navHeight};
+		this.viewDims = {x: 898, y: (this.totDims.y - this.navDims.y)};
 
 		var bp = this.chromosomes[this.selectedChromosome].length
 
 		var svg = d3.select("#d3nome-canvas")
-			.attr("width", totDims.x)
-		    .attr("height", totDims.y)
+			.attr("width", this.totDims.x)
+		    .attr("height", this.totDims.y)
 
 		// view scales
 		this.viewXScale = d3.scale.linear()
 	        .domain([0, bp]) // this should correspond to bp
-	        .range([0, navDims.x])
+	        .range([0, this.navDims.x])
 
 	    this.viewYScale = d3.scale.linear()
-	        .range([navDims.y, 0]);
+	        .range([this.navDims.y, 0]);
 
 	    // nav scales
 		this.navXScale = d3.scale.linear()
 	        .domain([0, bp]) // this should correspond to bp
-	        .range([0, navDims.x]);
+	        .range([0, this.navDims.x]);
 
 	    this.navYScale = d3.scale.linear()
-	        .range([navDims.y, 0]);
+	        .range([this.navDims.y, 0]);
 
 	    // nav axis
        	this.navXAxis = d3.svg.axis()
 		    .scale(this.navXScale)
-		    .orient("bottom")
+		    .orient("top")
 		    .ticks(8)
 			.tickFormat(this.xFormat);
 
 		// view axis
 		this.viewXAxis = d3.svg.axis()
 		    .scale(this.viewXScale)
-		    .orient("bottom")
+		    .orient("top")
 		    .ticks(8)
 		    .tickFormat(this.xFormat);
 
@@ -137,7 +136,7 @@
 
 		this.zoom = d3.behavior.zoom()
 			.x(this.viewXScale)
-			.size([viewDims.x, viewDims.y])
+			.size([this.viewDims.x, this.viewDims.y])
 			.on('zoom', $.proxy(this.onZoom, this))
 			.on('zoomend', $.proxy(this.onZoomEnd, this))
 
@@ -146,20 +145,19 @@
 
 		this.viewElement = svg.append("g")
 			.attr("class", "d3nome-view")
-			.attr("width", viewDims.x)
-			.attr("height", viewDims.y)
-			.attr("transform", "translate("+0+","+0+")")
+			.attr("width", this.viewDims.x)
+			.attr("height", this.viewDims.y)
+			.attr("transform", "translate("+0+","+this.navDims.y+")")
 
 		// view chart area - add x axis
 		this.viewElement.append("g")
 		    .attr("class", "x axis")
-		    .attr("width", navDims.x)
-		    .attr("height", navDims.y)
-		    .attr("transform", "translate("+0+","+(viewDims.y - navDims.y)+")")
+		    .attr("width", this.navDims.x)
+		    .attr("height", this.navDims.y)
+		    .attr("transform", "translate("+0+","+(this.navDims.y)+")")
 		    .call(this.viewXAxis)
 
 		// Append an invisible overlay rectangle to recieve zoom commands
-
 		// SVG version
 		// svg.append("rect")
 		// 	.attr("class", "d3nome-overlay")
@@ -169,7 +167,7 @@
 
 		// Div version
 		var foreignObject = this.viewElement.append("foreignObject")
-			.attr("x", 0).attr("y", 0)
+			.attr("x", 0).attr("y", this.navDims.y)
 		
 		var htmlDoms = foreignObject.append("xhtml:body")
 		    .style("margin",0)
@@ -177,8 +175,8 @@
 
 		htmlDoms.append("div")
 			.attr("class", "d3nome-overlay")
-			.attr("style", "width: "+viewDims.x+"px; height: "+viewDims.y+"px;")
-			.call(this.zoom);
+			.attr("style", "width: "+this.viewDims.x+"px; height: "+this.viewDims.y+"px;")
+			.call(this.zoom)
 
 		// create the viewport, i.e. the brush	
 		this.brush = d3.svg.brush()
@@ -198,16 +196,16 @@
 		    .call(this.brush);
 		this.navBoxNode
 		    .selectAll("rect")
-		    .attr("height", navDims.y)
-		    .attr("transform", "translate("+0+","+viewDims.y+")")
+		    .attr("height", this.navDims.y)
+		    .attr("transform", "translate("+0+","+0+")")
 
 	 	// navbar - add x axis
 		svg.append("g")
 		    .attr("class", "x axis")
 		    .attr("id", "navbar-x-axis")
-		    .attr("width", navDims.x)
-		    .attr("height", navDims.y)
-		    .attr("transform", "translate(0," + viewDims.y + ")")
+		    .attr("width", this.navDims.x)
+		    .attr("height", this.navDims.y)
+		    .attr("transform", "translate(0,"+this.navDims.y+")")
 		    .call(this.navXAxis)
 
 		this.updateBrush(this.navBoundaries);
@@ -509,7 +507,7 @@
 		var foreignObjects = transcriptGroups.append("foreignObject")
 		    .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 		    .attr("y", $.proxy(function(d, i) { 
-		    	return getYPos(d) + this.transcriptHeight; 
+		    	return (this.navDims.y * 2) + getYPos(d) + this.transcriptHeight; 
 		    }, this))
 
 		var htmlDoms = foreignObjects.append("xhtml:body")
@@ -518,8 +516,17 @@
 
 		htmlDoms.append("div")
 			.attr("class", "d3nome-transcript-label")
-			.text(function(d) { return d.id; });
+			.attr("data-transcript_id", function(d) { return d.id; })
+			.text(function(d) { return d.id; })
+		
+		// TODO catch all the other events and redirect them to the overlay,
+		// for better interactivity
+		$(".d3nome-transcript-label").click(function() {
+			// .. call the callback with the right transcript_id
+			console.log($(this).data("transcript_id"));
+		});
 
+		// old method with SVG labels
 		// transcriptGroups
 		// 	.append("text")
 		// 	.attr("class", "d3nome-transcript-label")
@@ -549,7 +556,7 @@
 			.append("rect")
 			.attr("class", "d3nome-feature-utr")
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-			.attr("y", function(d, i) { return getYPos(d); })
+			.attr("y", $.proxy(function(d, i) { return this.navDims.y + getYPos(d); }, this))
 			.attr("width", $.proxy(function(d, i) { 
 				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
 			}, this))
@@ -562,7 +569,7 @@
 			.append("rect")
 			.attr("class", "d3nome-feature-cds")
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-			.attr("y", function(d, i) { return getYPos(d); })
+			.attr("y", $.proxy(function(d, i) { return this.navDims.y + getYPos(d); }, this))
 			.attr("width", $.proxy(function(d, i) { 
 				return (this.viewXScale(d.end) - this.viewXScale(d.start)); 
 			}, this))
@@ -581,7 +588,7 @@
 				var bulge = this.intronBulge;
 				var bulgeOffset = this.intronBulgeOffset;
 
-				var yOffset = getYPos(d);
+				var yOffset = this.navDims.y + getYPos(d);
 				var startStr = this.viewXScale(d.start)+" "+yOffset;
 				var endStr = this.viewXScale(d.end)+" "+yOffset;
 
