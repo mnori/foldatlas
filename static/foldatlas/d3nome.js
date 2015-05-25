@@ -8,7 +8,7 @@
 	init: function(config) {
 
 		this.transcriptHeight = 15;
-		this.labelHeight = 10;
+		this.labelHeight = 20;
 		this.laneMargin = 10;
 		this.intronBulge = 10;
 		this.intronBulgeOffset = 20;
@@ -159,10 +159,25 @@
 		    .call(this.viewXAxis)
 
 		// Append an invisible overlay rectangle to recieve zoom commands
-		svg.append("rect")
+
+		// SVG version
+		// svg.append("rect")
+		// 	.attr("class", "d3nome-overlay")
+		// 	.attr("width", totDims.x)
+		// 	.attr("height", totDims.y)
+		// 	.call(this.zoom);
+
+		// Div version
+		var foreignObject = this.viewElement.append("foreignObject")
+			.attr("x", 0).attr("y", 0)
+		
+		var htmlDoms = foreignObject.append("xhtml:body")
+		    .style("margin",0)
+		    .style("padding",0);
+
+		htmlDoms.append("div")
 			.attr("class", "d3nome-overlay")
-			.attr("width", totDims.x)
-			.attr("height", totDims.y)
+			.attr("style", "width: "+viewDims.x+"px; height: "+viewDims.y+"px;")
 			.call(this.zoom);
 
 		// create the viewport, i.e. the brush	
@@ -489,15 +504,31 @@
 			.append('g')
 			.attr('class', "d3nome-transcript")
 
-		transcriptGroups
-			.append("text")
-			.attr("class", "d3nome-transcript-label")
+		// Append text as ForeignObject. This lets us use nicer HTML styling
+
+		var foreignObjects = transcriptGroups.append("foreignObject")
 		    .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 		    .attr("y", $.proxy(function(d, i) { 
-		    	return getYPos(d) + this.intronBulge + this.transcriptHeight; 
+		    	return getYPos(d) + this.transcriptHeight; 
 		    }, this))
-		    .attr("dy", ".35em")
-		    .text(function(d) { return d.id; });
+
+		var htmlDoms = foreignObjects.append("xhtml:body")
+		    .style("margin",0)
+		    .style("padding",0);
+
+		htmlDoms.append("div")
+			.attr("class", "d3nome-transcript-label")
+			.text(function(d) { return d.id; });
+
+		// transcriptGroups
+		// 	.append("text")
+		// 	.attr("class", "d3nome-transcript-label")
+		//     .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+		//     .attr("y", $.proxy(function(d, i) { 
+		//     	return getYPos(d) + this.intronBulge + this.transcriptHeight; 
+		//     }, this))
+		//     .attr("dy", ".35em")
+		//     .text(function(d) { return d.id; });
 
 		// Find features of specific type.
 		function getFeatures(transcript, featureType) {

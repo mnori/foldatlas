@@ -17,12 +17,12 @@ class GenomeBrowser():
 
         # need to rework this. get gene IDs first, then expand using the gene ID list.
         # using feature table and start/end, grab the gene IDs that fall within the range.
-        sql = ( "SELECT transcript.gene_id "
+        sql = ( "SELECT DISTINCT transcript.gene_id "
                 "FROM feature, transcript "
                 "WHERE strain_id = '"+settings.reference_strain_id+"' "
                 "AND chromosome_id = '"+chromosome_id+"' "
-                "AND start > '"+str(start)+"' "
-                "AND end < '"+str(end)+"' "
+                "AND end > '"+str(start)+"' "
+                "AND start < '"+str(end)+"' "
                 "AND feature.transcript_id = transcript.id ");
 
         results = database.engine.execute(sql)
