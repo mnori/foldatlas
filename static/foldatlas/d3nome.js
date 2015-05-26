@@ -87,7 +87,7 @@
 
 		buf += 	"</select><br />"+
 				"<svg id=\"d3nome-canvas\"></svg>"+
-				"<div id=\"d3nome-resize-bar\" style=\"width: "+this.totSvgDims.x+"px;\">"+
+				"<div id=\"d3nome-resize-bar\" class=\"ui-resizable-handle ui-resizable-s\" style=\"width: "+this.totSvgDims.x+"px;\">"+
 					"..."+
 				"</div>"
 
@@ -101,12 +101,11 @@
 		this.initialContainerHeight = $(this.config.container).height()
 
 		$(this.config.container).resizable({
-			handles: 's'
+			handles: {"s": "#d3nome-resize-bar"}, 
 		}).bind({resize: $.proxy(function(event, ui) {
 			var newContainerHeight = ui.size.height;
 			var heightDiff = newContainerHeight - this.initialContainerHeight;
 			var newSvgHeight = this.initialSvgDims.y + heightDiff;
-
 			this.totSvgDims.y = newSvgHeight;
 
 			// set the new canvas height
