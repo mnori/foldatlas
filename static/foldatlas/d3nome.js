@@ -64,7 +64,6 @@
 	        var prefix = d3.formatPrefix(d);
 	        return prefix.scale(d) + prefix.symbol + "b";
 	    }
-
 		this.draw();
 	},
 
@@ -83,10 +82,15 @@
     			"</option>";
 	    }
 
-		buf += "</select><br />";
-		buf += "<svg id=\"d3nome-canvas\"></svg>"
+		buf += 	"</select><br />"+
+				"<svg id=\"d3nome-canvas\"></svg>"+
+				"<div id=\"d3nome-resize-bar\" style=\"width: "+this.totDims.x+"px;\">"+
+					"..."+
+				"</div>"
 
 		$(this.config.container).html(buf);
+
+		$(this.config.container).resizable();
 		
 		this.initViewer()
 	},
