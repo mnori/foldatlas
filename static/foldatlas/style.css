@@ -108,18 +108,6 @@ h2 {
 	background-color: #fff;
 }
 
-/*#reactivities-chart text { 
-  fill: black;
-  font: 10px Ubuntu Mono, sans-serif;
-  text-anchor: middle;
-}*/
-
-/*.domain { 
-  fill: none; 
-  stroke: black; 
-  stroke-width: 2px; 
-} */
-
 .axis path,
 .axis line {
   fill: none;

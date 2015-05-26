@@ -212,10 +212,10 @@
 			// Absolute position of the overlay
 			var overlayOffset = $("#d3nome-overlay").offset()
 
-			// Get total offset
+			// Get total offset, must take window scroll offsets into account
 			var totOffset = {
-				x: point[0] + overlayOffset.left,
-				y: point[1] + overlayOffset.top
+				x: point[0] + overlayOffset.left - $(window).scrollLeft(),
+				y: point[1] + overlayOffset.top - $(window).scrollTop()
 			}
 
 			// Put the event behind the overlay
