@@ -36,7 +36,8 @@
 
 		// total dimensions of the browser 
 		// TODO use config values
-		this.totDims = {x: 898, y: 300}
+		this.totSvgDims = {x: 898, y: 300}
+		this.initialSvgDims = {x: this.totSvgDims.x, y: this.totSvgDims.y}
 
 		this.navDims = null;
 		this.viewDims = null;
@@ -57,6 +58,8 @@
 
 		this.viewElement = null;
 		this.navBoxNode = null;
+
+		this.initialContainerHeight = null;
 
 		this.data = null;
 
@@ -84,27 +87,49 @@
 
 		buf += 	"</select><br />"+
 				"<svg id=\"d3nome-canvas\"></svg>"+
-				"<div id=\"d3nome-resize-bar\" style=\"width: "+this.totDims.x+"px;\">"+
+				"<div id=\"d3nome-resize-bar\" style=\"width: "+this.totSvgDims.x+"px;\">"+
 					"..."+
 				"</div>"
 
+		// Add the HTML
 		$(this.config.container).html(buf);
 
-		$(this.config.container).resizable();
-		
+		// Initialise the viewer SVG
 		this.initViewer()
+
+		// Add resizer
+		this.initialContainerHeight = $(this.config.container).height()
+
+		$(this.config.container).resizable({
+			handles: 's'
+		}).bind({resize: $.proxy(function(event, ui) {
+			var newContainerHeight = ui.size.height;
+			var heightDiff = newContainerHeight - this.initialContainerHeight;
+			var newSvgHeight = this.initialSvgDims.y + heightDiff;
+
+			this.totSvgDims.y = newSvgHeight;
+
+			// set the new canvas height
+			$("#d3nome-canvas").height(this.totSvgDims.y);
+
+			// must also set the overlay height
+			$("#d3nome-overlay").height(this.totSvgDims.y);
+
+		}, this)});
+
+		
 	},
 
 	// Set up the chromosome scrollbar.
 	initViewer: function() {
-		this.navDims = {x: this.totDims.x, y: this.navHeight};
-		this.viewDims = {x: 898, y: (this.totDims.y - this.navDims.y)};
+		this.navDims = {x: this.totSvgDims.x, y: this.navHeight};
+		this.viewDims = {x: 898, y: (this.totSvgDims.y - this.navDims.y)};
 
 		var bp = this.chromosomes[this.selectedChromosome].length
 
 		var svg = d3.select("#d3nome-canvas")
-			.attr("width", this.totDims.x)
-		    .attr("height", this.totDims.y)
+			.attr("width", this.totSvgDims.x)
+		    .attr("height", this.totSvgDims.y)
 
 		// view scales
 		this.viewXScale = d3.scale.linear()
@@ -165,8 +190,8 @@
 		// SVG version
 		// svg.append("rect")
 		// 	.attr("class", "d3nome-overlay")
-		// 	.attr("width", totDims.x)
-		// 	.attr("height", totDims.y)
+		// 	.attr("width", totSvgDims.x)
+		// 	.attr("height", totSvgDims.y)
 		// 	.call(this.zoom);
 
 		// OVERLAY
@@ -186,7 +211,7 @@
 			var point = d3.mouse(element);
 
 			// Absolute position of the overlay
-			var overlayOffset = $(".d3nome-overlay").offset()
+			var overlayOffset = $("#d3nome-overlay").offset()
 
 			// Get total offset
 			var totOffset = {
@@ -195,15 +220,15 @@
 			}
 
 			// Put the event behind the overlay
-			$(".d3nome-overlay").hide()
+			$("#d3nome-overlay").hide()
 			var elementOut = $(document.elementFromPoint(totOffset.x, totOffset.y))
-			$(".d3nome-overlay").show() 
+			$("#d3nome-overlay").show() 
 			return elementOut; // .trigger(eventName);
 		};		
 
 		// Append the overlay div
 		htmlDoms.append("div")
-			.attr("class", "d3nome-overlay")
+			.attr("id", "d3nome-overlay")
 			.attr("style", "width: "+this.viewDims.x+"px; height: "+this.viewDims.y+"px;")
 			.call(this.zoom)
 
