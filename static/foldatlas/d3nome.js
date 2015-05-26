@@ -60,6 +60,7 @@
 		this.navBoxNode = null;
 
 		this.initialContainerHeight = null;
+		this.gridElement = null;
 
 		this.data = null;
 
@@ -114,15 +115,26 @@
 			// must also set the overlay height
 			$("#d3nome-overlay").height(this.totSvgDims.y);
 
+			// reset the x grid - could also do initViewer(), but that's rather slow
+			this.calcDims();
+			this.setXGrid();
+
 		}, this)});
 
 		
 	},
 
-	// Set up the chromosome scrollbar.
-	initViewer: function() {
+	calcDims: function() {
 		this.navDims = {x: this.totSvgDims.x, y: this.navHeight};
 		this.viewDims = {x: 898, y: (this.totSvgDims.y - this.navDims.y)};
+	},
+
+	// Set up the chromosome scrollbar.
+	initViewer: function() {
+
+		$("#d3nome-canvas").empty();
+
+		this.calcDims();
 
 		var bp = this.chromosomes[this.selectedChromosome].length
 
@@ -153,14 +165,19 @@
 		    .ticks(8)
 			.tickFormat(this.xFormat);
 
-		// view axis
+		// chart axis lines
+		this.navXAxis = d3.svg.axis()
+		    .scale(this.navXScale)
+		    .orient("top")
+		    .ticks(8)
+			.tickFormat(this.xFormat);
+
+		// view x axis
 		this.viewXAxis = d3.svg.axis()
 		    .scale(this.viewXScale)
 		    .orient("top")
 		    .ticks(8)
 		    .tickFormat(this.xFormat);
-
-		// create view element
 
 		this.zoom = d3.behavior.zoom()
 			.x(this.viewXScale)
@@ -179,13 +196,15 @@
 
 		// view chart area - add x axis
 		this.viewElement.append("g")
-		    .attr("class", "x axis")
+		    .attr("class", "d3nome-x d3nome-axis")
 		    .attr("width", this.navDims.x)
 		    .attr("height", this.navDims.y)
 		    .attr("transform", "translate("+0+","+(this.navDims.y)+")")
 		    .call(this.viewXAxis)
 
-		
+		// add grid lines too
+		this.setXGrid();
+
 		// SVG version
 		// svg.append("rect")
 		// 	.attr("class", "d3nome-overlay")
@@ -273,7 +292,7 @@
 
 	 	// navbar - add x axis
 		svg.append("g")
-		    .attr("class", "x axis")
+		    .attr("class", "d3nome-x d3nome-axis")
 		    .attr("id", "navbar-x-axis")
 		    .attr("width", this.navDims.x)
 		    .attr("height", this.navDims.y)
@@ -283,6 +302,22 @@
 		this.updateBrush(this.navBoundaries);
 
 		this.loadData(this.chromosomes[this.selectedChromosome].id, this.navBoundaries[0], this.navBoundaries[1]);
+	},
+
+	setXGrid: function() {
+		this.viewElement.selectAll(".d3nome-x.d3nome-grid").remove()
+		this.viewXGrid = d3.svg.axis()
+		    .scale(this.viewXScale)
+		    .orient("top")
+		    .ticks(8)
+		    .tickFormat("")
+		    .tickSize(this.viewDims.y - this.navDims.y)
+		    .outerTickSize(0);
+
+		this.gridElement = this.viewElement.append("g")
+		    .attr("class", "d3nome-x d3nome-grid")
+		    .attr("transform", "translate("+0+","+(this.viewDims.y + 1)+")")
+		    .call(this.viewXGrid);
 	},
 
 	onBrush: function() {
@@ -340,7 +375,8 @@
 		this.navBoundaries = domain;
 
 		// update the view X axis as well
-		this.viewElement.select(".x.axis").call(this.viewXAxis);
+		this.viewElement.select(".d3nome-x.d3nome-axis").call(this.viewXAxis);
+		this.viewElement.select(".d3nome-x.d3nome-grid").call(this.viewXGrid); // .. and the grid
 
 		// tell d3 to redraw the brush - this is important!
 	    this.navBoxNode.call(this.brush);
@@ -363,8 +399,9 @@
 		// must update the zoom as well
 		this.zoom.x(this.viewXScale);
 
-		// update the view X axis as well
-		this.viewElement.select(".x.axis").call(this.viewXAxis);
+		// update the view X axis/grid as well
+		this.viewElement.select(".d3nome-x.d3nome-axis").call(this.viewXAxis);
+		this.viewElement.select(".d3nome-x.d3nome-grid").call(this.viewXGrid);
 
 		// tell d3 to redraw the brush - this is important!
 	    this.navBoxNode.call(this.brush);
@@ -550,7 +587,6 @@
 	},
 
 	drawData: function() {
-		// Remove old elements
 		this.viewElement.selectAll("rect").remove()
 		this.viewElement.selectAll("path.d3nome-feature-intron").remove()
 		this.viewElement.selectAll("g.d3nome-transcript").remove()
@@ -676,3 +712,4 @@
 			.attr("class", "d3nome-feature-intron")
 	}
 }
+

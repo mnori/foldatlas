@@ -225,3 +225,38 @@ h2 {
 	z-index: 10;
 	cursor: s-resize;
 }
+
+.d3nome-grid path,
+.d3nome-grid line {
+	fill: none;
+	stroke: #aaa;
+	stroke-width: 1px;
+	shape-rendering: crispEdges;
+}
+
+.d3nome-x {
+	shape-rendering: crispEdges;
+	fill: none;
+	stroke-width: 1px;
+	stroke: #333;
+}
+
+.d3nome-x > .tick > text {
+	font: 16px Ubuntu Mono, sans-serif;
+	stroke: none;
+	fill: #000;
+}
+
+/*.d3nome-x .line {
+	fill: none;
+	stroke: blue;
+	stroke-width: 2px;
+}
+
+.d3nome-x .tick text {
+	font-size: 14px;
+}
+
+.d3nome-x .tick line {
+	opacity: 0.2;
+}*/
