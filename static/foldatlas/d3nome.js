@@ -87,7 +87,9 @@
 	    }
 
 		buf += 	"</select><br />"+
-				"<svg id=\"d3nome-canvas\"></svg>"+
+				"<div id=\"d3nome-canvas-container\">"+
+					"<svg id=\"d3nome-canvas\"></svg>"+
+				"</div>"+
 				"<div id=\"d3nome-resize-bar\" class=\"ui-resizable-handle ui-resizable-s\" style=\"width: "+this.totSvgDims.x+"px;\">"+
 					"..."+
 				"</div>"
@@ -113,15 +115,22 @@
 			$("#d3nome-canvas").height(this.totSvgDims.y);
 
 			// must also set the overlay height
-			$("#d3nome-overlay").height(this.totSvgDims.y);
-
+			this.setOverlayDims();
+			
 			// reset the x grid - could also do initViewer(), but that's rather slow
 			this.calcDims();
 			this.setXGrid();
 
 		}, this)});
+	},
 
-		
+	setOverlayDims: function() {
+		var styleStr = 
+			"width: "+this.viewDims.x+"px; "+
+			"height: "+(this.viewDims.y - this.navHeight)+"px; "+
+			"top: "+(this.navHeight * 2)+"px;";
+		d3.select("#d3nome-overlay").attr("style", styleStr)
+		d3.select("#d3nome-underlay").attr("style", styleStr)
 	},
 
 	calcDims: function() {
@@ -214,12 +223,14 @@
 
 		// OVERLAY
 		// Uses a div overlay
-		var foreignObject = this.viewElement.append("foreignObject")
-			.attr("x", 0).attr("y", this.navDims.y)
+		// Fuck foreignObject - does not play nicely with browser zooming
+
+		// var foreignObject = this.viewElement.append("foreignObject")
+		// 	.attr("x", 0).attr("y", this.navDims.y)
 		
-		var htmlDoms = foreignObject.append("xhtml:body")
-		    .style("margin",0)
-		    .style("padding",0);
+		// var htmlDoms = foreignObject.append("xhtml:body")
+		//     .style("margin",0)
+		//     .style("padding",0);
 
 		// This is a hack for sending mouse events behind the overlay.
 		// see http://www.vinylfox.com/forwarding-mouse-events-through-layers/
@@ -244,10 +255,12 @@
 			return elementOut; // .trigger(eventName);
 		};		
 
-		// Append the overlay div
-		htmlDoms.append("div")
+		d3.select("#d3nome-canvas-container")
+			.append("div")
+			.attr("id", "d3nome-underlay")
+
+		d3.select("#d3nome-canvas-container").append("div")
 			.attr("id", "d3nome-overlay")
-			.attr("style", "width: "+this.viewDims.x+"px; height: "+this.viewDims.y+"px;")
 			.call(this.zoom)
 
 			// this gets us a nice pointer when the user hovers over a gene label
@@ -268,6 +281,10 @@
 				var element = getElementBehind(this); 
 				element.trigger("click");
 			});
+
+		// Append the underlay - this is where the labels will go
+
+		this.setOverlayDims();
 
 		// create the viewport, i.e. the brush	
 		this.brush = d3.svg.brush()
@@ -435,32 +452,33 @@
 		// first pass - collect UTR and CDS sequences
 		for (var i = 0; i < data.length; i++) {
 			var feature = data[i];
-
 			if (feature.feature_type == "transcript") {
 				var transcriptID = feature.id;
+				var direction = feature.direction;
 
 				if (transcripts[transcriptID] === undefined) {
 					transcripts[transcriptID] = {
 						id: transcriptID,
 						start: feature.start,
 						end: feature.end,
+						direction: direction,
 						features: []
 					};
 				}
-			}
-
-			if (	feature.feature_type == "CDS" || 
-					feature.feature_type.indexOf("UTR") > -1) {
+			} else if (	feature.feature_type == "CDS" || 
+				feature.feature_type.indexOf("UTR") > -1) {
 
 				var transcriptID = feature["Parent"];
 				var transcript = transcripts[transcriptID];
+				var direction = transcript.direction;
 
 				// add the feature data
 				transcript.features.push({
 					transcriptID: feature.Parent,
 					type: (feature.feature_type == "CDS") ? "cds" : "utr",
 					start: feature.start,
-					end: feature.end
+					end: feature.end,
+					direction: direction
 				});
 			}
 		}
@@ -485,7 +503,8 @@
 					transcriptID: transcriptID,
 					type: "utr",
 					start: feature.start,
-					end: feature.end
+					end: feature.end,
+					direction: transcript.direction
 				});
 			}
 		}
@@ -590,7 +609,7 @@
 		this.viewElement.selectAll("rect").remove()
 		this.viewElement.selectAll("path.d3nome-feature-intron").remove()
 		this.viewElement.selectAll("g.d3nome-transcript").remove()
-		this.viewElement.selectAll("text.d3nome-transcript-label").remove()
+		this.viewElement.selectAll(".d3nome-transcript-label").remove()
 
 		var element = this.viewElement.selectAll(".d3nome-view")
 
@@ -604,26 +623,45 @@
 			.append('g')
 			.attr('class', "d3nome-transcript")
 
-		// Append text as ForeignObject to get HTML formatting and nice background
-		var foreignObjects = transcriptGroups.append("foreignObject")
-		    .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-		    .attr("y", $.proxy(function(d, i) { 
-		    	return (this.navDims.y * 2) + this.laneMargin + getYPos(d) + this.transcriptHeight; 
-		    }, this))
+		//////////////////////////////////////////////////
+		// Add labels to underlay div
 
-		var htmlDoms = foreignObjects.append("xhtml:body")
-		    .style("margin",0)
-		    .style("padding",0);
+		// Append text as div to get HTML formatting and nice background
 
-		htmlDoms.append("div")
+		d3.select("#d3nome-underlay").selectAll("#d3nome-underlay")
+
+			.data(this.data).enter().append("div")
 			.attr("class", "d3nome-transcript-label")
 			.attr("data-transcript_id", function(d) { return d.id; })
+			.attr("style", $.proxy(function(d) {
+				var leftVal = this.viewXScale(d.start);
+				var topVal = this.laneMargin + getYPos(d) + this.transcriptHeight;
+				var out = 	"left: "+Math.round(leftVal)+"px; "+
+							"top: "+topVal+"px";
+				return out;
+			}, this))
 			.text(function(d) { return d.id; })
+
+		// var foreignObjects = transcriptGroups.append("foreignObject")
+		//     .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+		//     .attr("y", $.proxy(function(d, i) { 
+		//     	return (this.navDims.y * 2) + this.laneMargin + getYPos(d) + this.transcriptHeight; 
+		//     }, this))
+
+		// var htmlDoms = foreignObjects.append("xhtml:body")
+		//     .style("margin",0)
+		//     .style("padding",0);
+
+		// htmlDoms.append("div")
+		// 	.attr("class", "d3nome-transcript-label")
+		// 	.attr("data-transcript_id", function(d) { return d.id; })
+		// 	.text(function(d) { return d.id; })
 	
 		// When gene label is clicked, use the callback		
 		$(".d3nome-transcript-label").bind("click", {self:this}, function(event) {
 			var self = event.data.self;
 			var transcriptID = $(this).data("transcript_id");
+			console.log("transcriptID", transcriptID);
 			self.config.geneClick(transcriptID); // callback
 		})
 
@@ -661,7 +699,7 @@
 			.data(function(transcript) { return getFeatures(transcript, "utr"); })
 			.enter()
 			.append("rect")
-			.attr("class", "d3nome-feature-utr")
+			.attr("class", function(d) { return "d3nome-feature-utr "+d.direction; })
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 			.attr("y", $.proxy(function(d, i) { 
 				return this.navDims.y + this.laneMargin + getYPos(d); 
@@ -677,7 +715,7 @@
 			.data(function(transcript) { return getFeatures(transcript, "cds"); })
 			.enter()
 			.append("rect")
-			.attr("class", "d3nome-feature-cds")
+			.attr("class", function(d) { return "d3nome-feature-cds "+d.direction; })
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 			.attr("y", $.proxy(function(d, i) { 
 				return this.navDims.y + this.laneMargin + getYPos(d); 
@@ -688,15 +726,13 @@
 			.attr("height", this.transcriptHeight)
 
 		// Introns - represented using bezier curves
+		// see https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
+		// for explanation of drawing method
 		transcriptGroups.selectAll('g.d3nome-transcript')
 			.data(function(transcript) { return getFeatures(transcript, "intron"); })
 			.enter()
 			.append("path")
 			.attr("d", $.proxy(function(d) {
-				// we are drawing a Bezier curve.
-				// see https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths
-				// for explanation.
-
 				var bulge = this.intronBulge;
 				var bulgeOffset = this.intronBulgeOffset;
 
