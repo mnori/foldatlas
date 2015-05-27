@@ -609,7 +609,7 @@
 		this.viewElement.selectAll("rect").remove()
 		this.viewElement.selectAll("path.d3nome-feature-intron").remove()
 		this.viewElement.selectAll("g.d3nome-transcript").remove()
-		this.viewElement.selectAll(".d3nome-transcript-label").remove()
+		d3.select("#d3nome-underlay").selectAll(".d3nome-transcript-label").remove()
 
 		var element = this.viewElement.selectAll(".d3nome-view")
 
