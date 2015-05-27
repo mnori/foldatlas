@@ -214,24 +214,6 @@
 		// add grid lines too
 		this.setXGrid();
 
-		// SVG version
-		// svg.append("rect")
-		// 	.attr("class", "d3nome-overlay")
-		// 	.attr("width", totSvgDims.x)
-		// 	.attr("height", totSvgDims.y)
-		// 	.call(this.zoom);
-
-		// OVERLAY
-		// Uses a div overlay
-		// Fuck foreignObject - does not play nicely with browser zooming
-
-		// var foreignObject = this.viewElement.append("foreignObject")
-		// 	.attr("x", 0).attr("y", this.navDims.y)
-		
-		// var htmlDoms = foreignObject.append("xhtml:body")
-		//     .style("margin",0)
-		//     .style("padding",0);
-
 		// This is a hack for sending mouse events behind the overlay.
 		// see http://www.vinylfox.com/forwarding-mouse-events-through-layers/
 		var getElementBehind = function(element) {
@@ -623,11 +605,7 @@
 			.append('g')
 			.attr('class', "d3nome-transcript")
 
-		//////////////////////////////////////////////////
-		// Add labels to underlay div
-
 		// Append text as div to get HTML formatting and nice background
-
 		d3.select("#d3nome-underlay").selectAll("#d3nome-underlay")
 
 			.data(this.data).enter().append("div")
@@ -642,21 +620,6 @@
 			}, this))
 			.text(function(d) { return d.id; })
 
-		// var foreignObjects = transcriptGroups.append("foreignObject")
-		//     .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-		//     .attr("y", $.proxy(function(d, i) { 
-		//     	return (this.navDims.y * 2) + this.laneMargin + getYPos(d) + this.transcriptHeight; 
-		//     }, this))
-
-		// var htmlDoms = foreignObjects.append("xhtml:body")
-		//     .style("margin",0)
-		//     .style("padding",0);
-
-		// htmlDoms.append("div")
-		// 	.attr("class", "d3nome-transcript-label")
-		// 	.attr("data-transcript_id", function(d) { return d.id; })
-		// 	.text(function(d) { return d.id; })
-	
 		// When gene label is clicked, use the callback		
 		$(".d3nome-transcript-label").bind("click", {self:this}, function(event) {
 			var self = event.data.self;
@@ -664,23 +627,6 @@
 			console.log("transcriptID", transcriptID);
 			self.config.geneClick(transcriptID); // callback
 		})
-
-		// .on("mouseover", function(ev) { sendEventBehind(this, "mouseover"); })
-		// .on("mouseout", function(ev) { sendEventBehind(this, "mouseout"); })
-
-		// old method with SVG labels
-		// transcriptGroups
-		// 	.append("text")
-		// 	.attr("class", "d3nome-transcript-label")
-		//     .attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
-		//     .attr("y", $.proxy(function(d, i) { 
-		//     	return (this.navDims.y * 2) + getYPos(d) + this.transcriptHeight; 
-		//     }, this))
-		//     .attr("dy", ".35em")
-		//     .text(function(d) { return d.id; })
-		//     .on("click", function() { alert("test"); })
-
-		////////////////////////////////////////////////////
 
 		// Find features of specific type.
 		function getFeatures(transcript, featureType) {
