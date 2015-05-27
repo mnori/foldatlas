@@ -19,6 +19,12 @@
 		this.maxBrushRange = 2500000;
 		this.minBrushRange = 25000;
 
+		// If zoomed out more than this, it will just fetch gene boundaries rather than features
+		this.simpleThreshold = 200000;
+
+		// If zoomed out further than this, no data will be shown.
+		this.blankThreshold = 10000000;
+
 		// Set this to config.initialBPRange
 		// Storing the extent locally is a hack that kills 2 birds with 1 stone
 		//  - lets us constrain the box size
@@ -62,7 +68,11 @@
 		this.initialContainerHeight = null;
 		this.gridElement = null;
 
-		this.data = null;
+		// Detailed data about gene features
+		this.featureData = null;
+
+		// Generalised data about genes
+		this.geneData = null;
 
 		this.xFormat = function (d) {
 	        var prefix = d3.formatPrefix(d);
@@ -419,42 +429,94 @@
 	    this.navBoxNode.call(this.brush);
 	},
 
+	getBounds: function() {
+		var start = Math.round(this.navBoundaries[0])
+		var end = Math.round(this.navBoundaries[1])
+		return {
+			start: start,
+			end: end,
+			diff: end - start
+		}
+	},
+
 	loadData: function() {
-		// fetch int value of chr
+		var bounds = this.getBounds();
+		if (bounds.diff < this.simpleThreshold) {
+			this.loadFeatureData();
+		} else {
+			this.loadGeneData();
+		}
+	},
 
+	drawData: function() {
+		this.viewElement.selectAll(".d3nome-feature-cds rect").remove()
+		this.viewElement.selectAll(".d3nome-feature-utr rect").remove()
+		this.viewElement.selectAll("path.d3nome-feature-intron").remove()
+		this.viewElement.selectAll("g.d3nome-transcript").remove()
+		d3.select("#d3nome-underlay").selectAll(".d3nome-transcript-label").remove()
+
+		var bounds = this.getBounds();
+
+		if (bounds.diff < this.simpleThreshold) {
+			this.drawFeatureData();
+		} else { // actually have another blankThreshold filter here...
+			this.drawGeneData();
+		}
+	},
+
+	loadGeneData: function() {
+		// ... get data using ajax
+
+		console.log("loadGeneData() invoked");
+		var data = [];
+		this.geneData = this.parseGeneData(data);
+	},
+
+	parseGeneData: function(data) {
+		// ... fill out geneData using the data input
+
+		console.log("parseGeneData() invoked");
+		this.geneData = [];
+		this.drawData();
+	},
+
+	drawGeneData: function() {
+		console.log("drawGeneData() invoked");
+		// ... draw simplified gene data view
+	},
+
+	loadFeatureData: function() {
 		var chrID = this.chromosomes[this.selectedChromosome].id
-
-    	var start = Math.round(this.navBoundaries[0]);
-    	var end = Math.round(this.navBoundaries[1]);
+		var bounds = this.getBounds();
 
     	// Add some extra padding to the data window
-    	var diff = end - start;
-    	start -= diff;
-    	end += diff;
+    	var diff = bounds.end - bounds.start;
+    	bounds.start -= diff;
+    	bounds.end += diff;
 
     	// Make sure it falls within the range
-    	if (start < 0) {
-    		start = 0;
+    	if (bounds.start < 0) {
+    		bounds.start = 0;
     	}
     	var chrLen = this.chromosomes[this.selectedChromosome].length;
-    	if (end >= chrLen - 1) {
-    		end = chrLen - 1;
+    	if (bounds.end >= chrLen) {
+    		bounds.end = chrLen;
     	}
 
 		var chrNum = chrID[3];
-		var url = this.config.dataUrl+"?chr="+chrNum+"&start="+start+"&end="+end;
+		var url = this.config.dataUrl+"?chr="+chrNum+"&start="+bounds.start+"&end="+bounds.end;
 
 		$.ajax({
 			url: url,
 			context: this
 		}).done($.proxy(function(results) {
-			this.parseData($.parseJSON(results));
+			this.parseFeatureData($.parseJSON(results));
 		}, this));
 	},
 
 	// Parses the data from the API into a format that can be easily 
 	// understood by the D3 library.
-	parseData: function(data) {
+	parseFeatureData: function(data) {
 
 		// create an empty object to use as a key-value store
 		var transcripts = {};
@@ -611,17 +673,11 @@
 			dataOut.push(transcript);
 		});
 
-		this.data = dataOut;
+		this.featureData = dataOut;
 		this.drawData();
 	},
 
-	drawData: function() {
-		this.viewElement.selectAll(".d3nome-feature-cds rect").remove()
-		this.viewElement.selectAll(".d3nome-feature-utr rect").remove()
-		this.viewElement.selectAll("path.d3nome-feature-intron").remove()
-		this.viewElement.selectAll("g.d3nome-transcript").remove()
-		d3.select("#d3nome-underlay").selectAll(".d3nome-transcript-label").remove()
-
+	drawFeatureData: function() {
 		var element = this.viewElement.selectAll(".d3nome-view")
 
 		var getYPos = $.proxy(function(d) {
@@ -630,14 +686,14 @@
 
 		// Append 1 group element per transcript
 		var transcriptGroups = element
-			.data(this.data).enter()
+			.data(this.featureData).enter()
 			.append('g')
 			.attr('class', "d3nome-transcript")
 
 		// Append text as div to get HTML formatting and nice background
 		d3.select("#d3nome-underlay").selectAll("#d3nome-underlay")
 
-			.data(this.data).enter().append("div")
+			.data(this.featureData).enter().append("div")
 			.attr("class", "d3nome-transcript-label")
 			.attr("data-transcript_id", function(d) { return d.id; })
 			.attr("style", $.proxy(function(d) {
