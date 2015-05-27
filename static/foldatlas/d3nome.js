@@ -423,8 +423,23 @@
 		// fetch int value of chr
 
 		var chrID = this.chromosomes[this.selectedChromosome].id
+
     	var start = Math.round(this.navBoundaries[0]);
     	var end = Math.round(this.navBoundaries[1]);
+
+    	// Add some extra padding to the data window
+    	var diff = end - start;
+    	start -= diff;
+    	end += diff;
+
+    	// Make sure it falls within the range
+    	if (start < 0) {
+    		start = 0;
+    	}
+    	var chrLen = this.chromosomes[this.selectedChromosome].length;
+    	if (end >= chrLen - 1) {
+    		end = chrLen - 1;
+    	}
 
 		var chrNum = chrID[3];
 		var url = this.config.dataUrl+"?chr="+chrNum+"&start="+start+"&end="+end;

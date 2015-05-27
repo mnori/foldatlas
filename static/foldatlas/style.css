@@ -245,7 +245,7 @@ h2 {
 .d3nome-grid path,
 .d3nome-grid line {
 	fill: none;
-	stroke: #aaa;
+	stroke: #d6d6d6;
 	stroke-width: 1px;
 	shape-rendering: crispEdges;
 }
