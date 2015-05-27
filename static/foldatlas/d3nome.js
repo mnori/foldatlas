@@ -27,7 +27,7 @@
 		this.simpleThreshold = 100000;
 
 		// If zoomed out further than this, no data will be shown.
-		this.blankThreshold = 10000000;
+		this.blankThreshold = 5000000;
 
 		// Set this to config.initialBPRange
 		// Storing the extent locally is a hack that kills 2 birds with 1 stone
@@ -469,8 +469,10 @@
 		var bounds = this.getBounds();
 		if (bounds.diff < this.simpleThreshold) {
 			this.loadFeatureData();
-		} else {
+		} else if (bounds.diff >= this.simpleThreshold && bounds.diff < this.blankThreshold) {
 			this.loadGeneData();
+		} else {
+			this.drawData(); // this will draw the blank
 		}
 	},
 
@@ -479,24 +481,55 @@
 		this.viewElement.selectAll(".d3nome-feature-utr rect").remove()
 		this.viewElement.selectAll("path.d3nome-feature-intron").remove()
 		this.viewElement.selectAll("g.d3nome-transcript").remove()
+		this.viewElement.selectAll("text.d3nome-zoomed-out-message").remove()
 		d3.select("#d3nome-underlay").selectAll(".d3nome-transcript-label").remove()
 
 		var bounds = this.getBounds();
 
-		// "Prefer" data sources - use the other if one is missing
-		if (	
-				this.geneData != null && (
-					(bounds.diff >= this.simpleThreshold) ||  // TODO less than blankThreshold
-					(bounds.diff < this.simpleThreshold && this.featureData == null)
-				)) {
-			this.drawGeneData();
-		} else if (
-				this.featureData != null && (
-					(bounds.diff < this.simpleThreshold) || 
-					(bounds.diff >= this.simpleThreshold && this.geneData == null) // TODO less than blankThreshold
-				)) { 
+		if (	this.featureData != null && 
+				bounds.diff < this.simpleThreshold) {
+
 			this.drawFeatureData();
+		} else if (
+				this.geneData != null && 
+				bounds.diff >= this.simpleThreshold && 
+				bounds.diff < this.blankThreshold) {
+
+			this.drawGeneData();
+
+		} else if (bounds.diff >= this.blankThreshold) {
+			this.drawBlankMessage();
+
+		} else {
+			// .. maybs show loading spinner?
 		}
+
+		// // "Prefer" data sources - use the other if one is missing
+		// if (this.geneData != null && (
+		// 			(bounds.diff >= this.simpleThreshold) ||  // TODO less than blankThreshold
+		// 			(bounds.diff < this.simpleThreshold && this.featureData == null)
+		// 		)) {
+		// 	this.drawGeneData();
+		// } else if (
+		// 		this.featureData != null && (
+		// 			(bounds.diff < this.simpleThreshold) || 
+		// 			(bounds.diff >= this.simpleThreshold && this.geneData == null) // TODO less than blankThreshold
+		// 		)) { 
+		// 	this.drawFeatureData();
+		// } 
+	},
+
+	drawBlankMessage: function() {
+		var element = this.viewElement // selectAll(".d3nome-view")
+			.append("text")
+			.attr("class", "d3nome-zoomed-out-message")
+			.attr("x", this.viewDims.x / 2)
+			.attr("y", this.viewDims.y / 2)
+			.attr("text-anchor", "middle")
+			.attr("dominant-baseline", "central") // vertical centering
+			.text("Zoom in to see genes.")
+
+
 	},
 
 	// Loads simplified gene data via ajax

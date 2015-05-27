@@ -269,6 +269,10 @@ h2 {
 	fill: #000;
 }
 
+.d3nome-zoomed-out-message {
+	font: 16px Ubuntu Mono, sans-serif;
+}
+
 /*.d3nome-x .line {
 	fill: none;
 	stroke: blue;

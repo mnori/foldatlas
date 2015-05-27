@@ -35,7 +35,7 @@ def hydrate_db():
 
         # Do alignments so we can see polymorphism
         # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
-        TranscriptAligner().align() 
+        # TranscriptAligner().align() 
 
         print("Hydration Complete.")
 
