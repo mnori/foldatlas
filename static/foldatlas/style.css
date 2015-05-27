@@ -178,7 +178,7 @@ h2 {
 .d3nome-transcript-label {
 	border: 1px solid #666;
 	display: inline-block;
-	background-color: #f6f6f6;
+	background-color: #fff;
 	color: #444;
 	margin-top: 3px;
 	padding: 2px;
@@ -236,6 +236,10 @@ h2 {
 	border-bottom: 1px solid #000;
 	z-index: 10;
 	cursor: s-resize;
+}
+
+.d3nome-grid-bg {
+	fill: #f6f6f6;
 }
 
 .d3nome-grid path,

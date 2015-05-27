@@ -121,6 +121,9 @@
 			this.calcDims();
 			this.setXGrid();
 
+			// draw data so that lines appear in the background
+			this.drawData();
+
 		}, this)});
 	},
 
@@ -305,6 +308,8 @@
 
 	setXGrid: function() {
 		this.viewElement.selectAll(".d3nome-x.d3nome-grid").remove()
+		this.viewElement.selectAll(".d3nome-x.d3nome-grid rect").remove()
+
 		this.viewXGrid = d3.svg.axis()
 		    .scale(this.viewXScale)
 		    .orient("top")
@@ -313,10 +318,18 @@
 		    .tickSize(this.viewDims.y - this.navDims.y)
 		    .outerTickSize(0);
 
+		// using rect gives us a nice background
+		this.viewElement.append("rect")
+			.attr("class", "d3nome-grid-bg")
+			.attr("width", this.viewDims.x)
+			.attr("height",	this.viewDims.y)
+			.attr("x", 0)
+			.attr("y", this.navDims.y + 1)
+
 		this.gridElement = this.viewElement.append("g")
 		    .attr("class", "d3nome-x d3nome-grid")
 		    .attr("transform", "translate("+0+","+(this.viewDims.y + 1)+")")
-		    .call(this.viewXGrid);
+			.call(this.viewXGrid);
 	},
 
 	onBrush: function() {
@@ -588,7 +601,8 @@
 	},
 
 	drawData: function() {
-		this.viewElement.selectAll("rect").remove()
+		this.viewElement.selectAll(".d3nome-feature-cds rect").remove()
+		this.viewElement.selectAll(".d3nome-feature-utr rect").remove()
 		this.viewElement.selectAll("path.d3nome-feature-intron").remove()
 		this.viewElement.selectAll("g.d3nome-transcript").remove()
 		d3.select("#d3nome-underlay").selectAll(".d3nome-transcript-label").remove()
