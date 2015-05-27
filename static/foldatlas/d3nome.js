@@ -7,20 +7,24 @@
 	// config should include chromosome data?
 	init: function(config) {
 
-		this.transcriptHeight = 15;
 		this.labelHeight = 20;
-		this.laneMargin = 10;
+		
 		this.intronBulge = 10;
 		this.intronBulgeOffset = 20;
 
 		// total height of lane excluding the margin
-		this.laneHeight = this.intronBulge + this.transcriptHeight + this.labelHeight
+		this.transcriptHeight = 15;
+		this.transcriptLaneMargin = 10;
+		this.transcriptLaneHeight = this.intronBulge + this.transcriptHeight + this.labelHeight
+
+		this.geneHeight = 15;
+		this.geneLaneMargin = 10;
 
 		this.maxBrushRange = 2500000;
 		this.minBrushRange = 25000;
 
 		// If zoomed out more than this, it will just fetch gene boundaries rather than features
-		this.simpleThreshold = 200000;
+		this.simpleThreshold = 100000;
 
 		// If zoomed out further than this, no data will be shown.
 		this.blankThreshold = 10000000;
@@ -429,6 +433,7 @@
 	    this.navBoxNode.call(this.brush);
 	},
 
+	// Get boundaries specified by the user's zoom
 	getBounds: function() {
 		var start = Math.round(this.navBoundaries[0])
 		var end = Math.round(this.navBoundaries[1])
@@ -437,6 +442,27 @@
 			end: end,
 			diff: end - start
 		}
+	},
+
+	// Get expanded and clipped data boundaries, for API requests
+	getDataBounds: function() {
+		var bounds = this.getBounds();
+		var diff = bounds.diff;
+
+		// Add some extra padding.
+    	bounds.start -= diff;
+    	bounds.end += diff;
+
+    	// Make sure it falls within the range
+    	if (bounds.start < 0) {
+    		bounds.start = 0;
+    	}
+    	var chrLen = this.chromosomes[this.selectedChromosome].length;
+    	if (bounds.end >= chrLen) {
+    		bounds.end = chrLen;
+    	}
+    	bounds.diff = bounds.end - bounds.start;
+    	return bounds;
 	},
 
 	loadData: function() {
@@ -457,54 +483,78 @@
 
 		var bounds = this.getBounds();
 
-		if (bounds.diff < this.simpleThreshold) {
-			this.drawFeatureData();
-		} else { // actually have another blankThreshold filter here...
+		// "Prefer" data sources - use the other if one is missing
+		if (	
+				this.geneData != null && (
+					(bounds.diff >= this.simpleThreshold) ||  // TODO less than blankThreshold
+					(bounds.diff < this.simpleThreshold && this.featureData == null)
+				)) {
 			this.drawGeneData();
+		} else if (
+				this.featureData != null && (
+					(bounds.diff < this.simpleThreshold) || 
+					(bounds.diff >= this.simpleThreshold && this.geneData == null) // TODO less than blankThreshold
+				)) { 
+			this.drawFeatureData();
 		}
 	},
 
+	// Loads simplified gene data via ajax
 	loadGeneData: function() {
-		// ... get data using ajax
+		var chrID = this.chromosomes[this.selectedChromosome].id
+		var chrNum = chrID[3];
+		var bounds = this.getDataBounds();
+		var url = this.config.genesUrl+"?chr="+chrNum+"&start="+bounds.start+"&end="+bounds.end;
 
-		console.log("loadGeneData() invoked");
-		var data = [];
-		this.geneData = this.parseGeneData(data);
+		$.ajax({
+			url: url,
+			context: this
+		}).done($.proxy(function(results) {
+			this.parseGeneData($.parseJSON(results));
+		}, this));
 	},
 
+	// Parses simplified gene data
 	parseGeneData: function(data) {
-		// ... fill out geneData using the data input
-
-		console.log("parseGeneData() invoked");
-		this.geneData = [];
+		// ... must arrange into lanes
+		this.addLaneData(data);
+		this.geneData = data;
 		this.drawData();
 	},
 
 	drawGeneData: function() {
-		console.log("drawGeneData() invoked");
-		// ... draw simplified gene data view
+		var element = this.viewElement.selectAll(".d3nome-view")
+		var getYPos = $.proxy(function(d) {
+
+			// this.geneHeight = 15;
+			// this.geneLaneMargin: 10;
+
+			// d.lane = 0; // temp hack
+			return this.geneLaneMargin + (d.lane * (this.geneHeight + this.geneLaneMargin));
+		}, this);
+
+		var geneGroups = element
+			.data(this.geneData).enter()
+			.append('g')
+			.attr('class', "d3nome-transcript")
+			.append("rect")
+			.attr("class", function(d) { return "d3nome-gene "+d.direction; })
+			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+			.attr("y", $.proxy(function(d, i) { 
+				return this.navDims.y + this.geneLaneMargin + getYPos(d); 
+			}, this))
+			.attr("width", $.proxy(function(d, i) { 
+				return (this.viewXScale(d.end + 1) - this.viewXScale(d.start)); 
+			}, this))
+			.attr("height", this.geneHeight)
+
 	},
 
 	loadFeatureData: function() {
 		var chrID = this.chromosomes[this.selectedChromosome].id
-		var bounds = this.getBounds();
-
-    	// Add some extra padding to the data window
-    	var diff = bounds.end - bounds.start;
-    	bounds.start -= diff;
-    	bounds.end += diff;
-
-    	// Make sure it falls within the range
-    	if (bounds.start < 0) {
-    		bounds.start = 0;
-    	}
-    	var chrLen = this.chromosomes[this.selectedChromosome].length;
-    	if (bounds.end >= chrLen) {
-    		bounds.end = chrLen;
-    	}
-
 		var chrNum = chrID[3];
-		var url = this.config.dataUrl+"?chr="+chrNum+"&start="+bounds.start+"&end="+bounds.end;
+		var bounds = this.getDataBounds();
+		var url = this.config.featuresUrl+"?chr="+chrNum+"&start="+bounds.start+"&end="+bounds.end;
 
 		$.ajax({
 			url: url,
@@ -609,7 +659,8 @@
 						transcriptID: transcriptID,
 						type: "intron",
 						start: prevFeature.end + 1, // offset by 1 since coords are inclusive.
-						end: currFeature.start - 1
+						end: currFeature.start - 1,
+						direction: currFeature.direction
 					});
 				}
 				prevFeature = currFeature;
@@ -625,63 +676,72 @@
 			transcript.features = features;
 		});
 
-		// Figure out whether transcript overlaps another in the given lane
-		var overlaps = function(transcript, lane) {
-			for (var i = 0; i < lane.length; i++) {
-				var otherTranscript = lane[i];
+		// TODO make this more generalised
 
-				// test whether transcript overlaps the other transcript.
-				if (	(	transcript.start 		>= otherTranscript.start && 
-						 	transcript.start 		<= otherTranscript.end) ||
-						(	transcript.end 			>= otherTranscript.start && 
-							transcript.end 			<= otherTranscript.end) ||
-						(	otherTranscript.start 	>= transcript.start  && 
-						 	otherTranscript.start 	<= transcript.end) ||
-						(	otherTranscript.end 	>= transcript.start && 
-						 	otherTranscript.end 	<= transcript.end)) {
+
+		var featuresArray = [];
+		$.each(transcripts, function(transcriptID, transcript) {
+			featuresArray.push(transcript);
+		});
+
+		this.addLaneData(featuresArray);
+
+		var dataOut = [];
+		for (var i = 0; i < featuresArray.length; i++) {
+			var transcript = featuresArray[i];
+			// add lane metadata to each feature
+			for (var j = 0; j < transcript.features.length; j++) {
+				transcript.features[j].lane = transcript.lane;
+			}
+
+			// add transcript to final output
+			dataOut.push(transcript);
+		}
+
+		this.featureData = dataOut;
+		this.drawData();
+	},
+
+	// Add lane data to features objects. The features must contain start and end properties for it to work.
+	addLaneData: function(features) {
+
+		// Figure out whether transcript overlaps another in the given lane
+		var overlaps = function(feature, lane) {
+			for (var i = 0; i < lane.length; i++) {
+				var otherFeature = lane[i];
+
+				// test whether feature overlaps the other feature.
+				if (	feature.end > otherFeature.start && 
+						feature.start < otherFeature.end) {
 					return true;
 				}
 			}
 			return false;
 		}
 
-		// Organise transcripts into "lanes", according to overlaps.
-		var transcriptsByLane = []
-		$.each(transcripts, function(transcriptID, transcript) {
+		// Organise features into "lanes", according to overlaps.
+		var featuresByLane = []
+		for (var i = 0; i < features.length; i++) {
+			var feature = features[i];
 			var laneNum = 0;
 			while(true) {
-				if (transcriptsByLane[laneNum] === undefined) {
-					transcriptsByLane[laneNum] = [];
+				if (featuresByLane[laneNum] === undefined) {
+					featuresByLane[laneNum] = [];
 				}
-				if (!overlaps(transcript, transcriptsByLane[laneNum])) {
-					transcript.lane = laneNum;
-					transcriptsByLane[laneNum].push(transcript);
+				if (!overlaps(feature, featuresByLane[laneNum])) {
+					feature.lane = laneNum;
+					featuresByLane[laneNum].push(feature);
 					break;
 				}
 				laneNum++;
 			}
-		});
-
-		var dataOut = [];
-		$.each(transcripts, function(transcriptID, transcript) {
-			// add lane metadata to the features
-			for (var i = 0; i < transcript.features.length; i++) {
-				transcript.features[i].lane = transcript.lane;
-			}
-
-			// add transcript to final output
-			dataOut.push(transcript);
-		});
-
-		this.featureData = dataOut;
-		this.drawData();
+		}
 	},
 
 	drawFeatureData: function() {
 		var element = this.viewElement.selectAll(".d3nome-view")
-
 		var getYPos = $.proxy(function(d) {
-			return this.laneMargin + (d.lane * (this.laneHeight + this.laneMargin));
+			return this.transcriptLaneMargin + (d.lane * (this.transcriptLaneHeight + this.transcriptLaneMargin));
 		}, this);
 
 		// Append 1 group element per transcript
@@ -698,7 +758,7 @@
 			.attr("data-transcript_id", function(d) { return d.id; })
 			.attr("style", $.proxy(function(d) {
 				var leftVal = this.viewXScale(d.start);
-				var topVal = this.laneMargin + getYPos(d) + this.transcriptHeight;
+				var topVal = this.transcriptLaneMargin + getYPos(d) + this.transcriptHeight;
 				var out = 	"left: "+Math.round(leftVal)+"px; "+
 							"top: "+topVal+"px";
 				return out;
@@ -709,7 +769,6 @@
 		$(".d3nome-transcript-label").bind("click", {self:this}, function(event) {
 			var self = event.data.self;
 			var transcriptID = $(this).data("transcript_id");
-			console.log("transcriptID", transcriptID);
 			self.config.geneClick(transcriptID); // callback
 		})
 
@@ -733,7 +792,7 @@
 			.attr("class", function(d) { return "d3nome-feature-utr "+d.direction; })
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 			.attr("y", $.proxy(function(d, i) { 
-				return this.navDims.y + this.laneMargin + getYPos(d); 
+				return this.navDims.y + this.transcriptLaneMargin + getYPos(d); 
 			}, this))
 			.attr("width", $.proxy(function(d, i) { 
 				// Must add 1 here since boundaries are inclusive.
@@ -749,7 +808,7 @@
 			.attr("class", function(d) { return "d3nome-feature-cds "+d.direction; })
 			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
 			.attr("y", $.proxy(function(d, i) { 
-				return this.navDims.y + this.laneMargin + getYPos(d); 
+				return this.navDims.y + this.transcriptLaneMargin + getYPos(d); 
 			}, this))
 			.attr("width", $.proxy(function(d, i) { 
 				return (this.viewXScale(d.end + 1) - this.viewXScale(d.start)); 
@@ -767,7 +826,7 @@
 				var bulge = this.intronBulge;
 				var bulgeOffset = this.intronBulgeOffset;
 
-				var yOffset = this.navDims.y + this.laneMargin + getYPos(d) + 1;
+				var yOffset = this.navDims.y + this.transcriptLaneMargin + getYPos(d) + 1;
 				var startStr = this.viewXScale(d.start)+" "+yOffset;
 				var endStr = this.viewXScale(d.end + 1)+" "+yOffset;
 
@@ -776,7 +835,7 @@
 
 				return "M"+startStr+" C "+control1+", "+control2+", "+endStr;
 			}, this))
-			.attr("class", "d3nome-feature-intron")
+			.attr("class", function(d) { return "d3nome-feature-intron "+d.direction; })
 	}
 }
 

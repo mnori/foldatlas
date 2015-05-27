@@ -102,8 +102,8 @@ class GenomeBrowser():
                 "WHERE feature.transcript_id = transcript.id "
                 "AND feature.strain_id = '"+settings.reference_strain_id+"'"
                 "AND chromosome_id = '"+chromosome_id+"' "
-                "AND start > '"+str(start)+"' "
-                "AND end < '"+str(end)+"' "
+                "AND end > '"+str(start)+"' "
+                "AND start < '"+str(end)+"' "
                 "GROUP BY transcript.gene_id")
 
         # Add gene rows to the output

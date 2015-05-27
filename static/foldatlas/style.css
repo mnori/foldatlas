@@ -153,7 +153,6 @@ h2 {
 }
 
 .d3nome-feature-utr, .d3nome-feature-cds, .d3nome-feature-intron {
-	stroke: #000;
 	stroke-width: 1px;
 	z-index: 5;
 }
@@ -162,14 +161,21 @@ h2 {
 	shape-rendering: crispEdges;
 }
 
-.d3nome-feature-utr.forward { fill: #ded; }
-.d3nome-feature-utr.reverse { fill: #edd; }
-.d3nome-feature-cds.forward { fill: #3a3; }
-.d3nome-feature-cds.reverse { fill: #a33; }
+.d3nome-feature-utr.forward { fill: #ded;}
+.d3nome-feature-cds.forward { fill: #191;}
 
-.d3nome-feature-intron {
-	fill: none;
+.d3nome-feature-utr.reverse { fill: #edd;}
+.d3nome-feature-cds.reverse { fill: #a33;}
+
+.d3nome-feature-intron { fill: none; }
+.d3nome-feature-utr.forward, .d3nome-feature-cds.forward, .d3nome-feature-intron.forward { stroke: #191; }
+.d3nome-feature-utr.reverse, .d3nome-feature-cds.reverse, .d3nome-feature-intron.reverse { stroke: #a33; }
+
+.d3nome-gene.forward, .d3nome-gene.reverse {
+	stroke-width: 0px;
 }
+.d3nome-gene.forward { fill: #3a3; }
+.d3nome-gene.reverse { fill: #a33; }
 
 .d3nome-transcript-label-container {
 	position: relative;

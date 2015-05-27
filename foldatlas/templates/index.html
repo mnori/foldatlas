@@ -37,7 +37,8 @@
 
                 // define where to get the data from
                 // will call with GET params "chr", "start", and "end".
-                dataUrl: window.foldatlasConfig.appBaseUrl+"/ajax/genome-browser/transcripts",
+                featuresUrl: window.foldatlasConfig.appBaseUrl+"/ajax/genome-browser/transcripts",
+                genesUrl: window.foldatlasConfig.appBaseUrl+"/ajax/genome-browser/genes",
                 chromosomes: [
                     {% for chromosome in chromosomes %}
                     {
