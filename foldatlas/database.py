@@ -19,7 +19,7 @@ Base.query = db_session.query_property()
 
 import models
 
-from models import Strain, Gene, Transcript, Feature, AlignmentEntry, ReactivityMeasurement
+from models import Strain, Gene, Transcript, Feature, AlignmentEntry, ReactivityMeasurement, GeneLocation
 
 def hydrate_db():
     try:
@@ -50,6 +50,7 @@ class SequenceHydrator():
     gene_chunk_size = 2500 
 
     genes_to_write = []
+    gene_locations_to_write = []
     transcripts_to_write = []
     features_to_write = []
 
@@ -60,7 +61,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = None
+    gene_limit = 100
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -175,10 +176,12 @@ class SequenceHydrator():
         self.commit_entities_list(self.genes_to_write, "Genes")
         self.commit_entities_list(self.transcripts_to_write, "Transcripts")
         self.commit_entities_list(self.features_to_write, "Features")
+        self.commit_entities_list(self.gene_locations_to_write, "GeneLocations")
 
         self.genes_to_write = []
         self.transcripts_to_write = []
         self.features_to_write = []
+        self.gene_locations_to_write = []
 
     def commit_entities_list(self, entities, label):
         print("Committing "+label+"...")
@@ -192,7 +195,22 @@ class SequenceHydrator():
         sequence = None
         transcript = None
 
+        gene_id = None
+        min_start = None
+        max_end = None
+
         for feature_row in feature_rows: # Loop through annotation rows in the gff file, all related to the current gene
+
+            # keep track of start and end
+            start = feature_row[3]
+            end = feature_row[4]
+            direction = "forward" if feature_row[6] == "+" else "reverse"
+            chromosome_id = feature_row[0]
+
+            if min_start == None or start < min_start:
+                min_start = start
+            if max_end == None or end > max_end:
+                max_end = end
 
             feature_type = feature_row[2]
             attribs = feature_row[8].strip()
@@ -234,14 +252,25 @@ class SequenceHydrator():
                             transcript_id=transcript_id,
                             type_id=feature_row[2],
                             strain_id=strain_id,
-                            chromosome_id=feature_row[0],
-                            start=feature_row[3],
-                            end=feature_row[4],
-                            direction="forward" if feature_row[6] == "+" else "reverse"
+                            chromosome_id=chromosome_id,
+                            start=start,
+                            end=end,
+                            direction=direction
                         ))
 
                     else:
                         pass # this happens for pseudogenes and TEs - which we aint interested in
+
+        # Add to the gene location cache table
+        self.gene_locations_to_write.append(GeneLocation(
+            gene_id=gene_id, 
+            strain_id=strain_id, 
+            chromosome_id=chromosome_id, 
+            start=min_start, 
+            end=max_end, 
+            direction=direction
+        ))
+
 
     def ensure_unique_transcript_id(self, transcript_id):
         version = 1
@@ -324,6 +353,8 @@ class TranscriptAligner():
 class DmsReactivityHydrator():
 
     def hydrate(self):
+
+        print("Adding reactivities...")
 
         # fetch all of the transcript IDs from the database, store them in a set to check against.
         sql = ("SELECT id FROM transcript ORDER BY id ASC")

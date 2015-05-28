@@ -174,6 +174,38 @@ class Feature(Base):
     def __repr__(self):
         return "<Feature %r>" % (self.id)
 
+# GeneLocation describes the location of a gene for a particular strain. This table is redundant
+# since everything needed is already in the Feature table. But it is cached here for speed.
+class GeneLocation(Base):
+    __tablename__ = "gene_location"
+
+    # This constraint maps the GeneLocation to a unique Chromosome entry.
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["strain_id", "chromosome_id"],
+            ["chromosome.strain_id", "chromosome.chromosome_id"]
+        ),
+    )
+
+    gene_id = Column(String(256), ForeignKey("gene.id"), nullable=False, primary_key=True)
+    strain_id = Column(String(256), ForeignKey("strain.id"), nullable=False, primary_key=True)
+    chromosome_id = chromosome_id = Column(String(256), nullable=False)
+    start = Column(Integer, nullable=False)
+    end = Column(Integer, nullable=False)
+    direction = Column(Enum("forward", "reverse"), nullable=False)
+
+    def __init__(self, gene_id=None, strain_id=None, chromosome_id=None, start=None, end=None, direction=None):
+        self.gene_id = gene_id
+        self.strain_id = strain_id
+        self.chromosome_id = chromosome_id
+        self.start = start
+        self.end = end
+        self.direction = direction
+
+    def __repr__(self):
+        return "<GeneLocation "+self.gene_id+", "+self.strain_id+">";
+
+
 # Represents a single row of ClustalW alignment data. 
 # Each row is a combination of strain and transcript.
 # TODO add type field(s), so we can store splices/unspliced/different methods etc.
