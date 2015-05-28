@@ -151,8 +151,8 @@ class SequenceHydrator():
                     continue
 
                 bits = gff_line.split("\t")
-                feature_type = bits[2]
-                if feature_type == "gene":
+                feature_type = bits[2] # BUG
+                if feature_type == "gene": 
                     
                     if len(feature_rows) > 0: # this is needed to stop it going wrong at the beginning
                         self.hydrate_gene(feature_rows, strain_config["name"])
@@ -251,8 +251,20 @@ class SequenceHydrator():
             feature_type = feature_row[2]
             attribs = feature_row[8].strip()
 
-            if feature_type == "gene": # Handle gene entries
-                gene_id = attribs.split(";")[0].split(":")[1] # grab the gene ID - we'll want this for later
+            # This causes bugs.
+            # if feature_type == "gene": # Handle gene entries
+                # gene_id = attribs.split(";")[0].split(":")[1] # grab the gene ID - we'll want this for later
+
+            new_gene_id = self.find_attribs_value("ID=Gene", attribs)
+            if new_gene_id != None:
+
+                # only deal with proper genes. setting gene_id to None means nothing else will be processed.
+                # so it will essentially skip non-"gene" entries.
+                if feature_type != "gene":
+                    gene_id = None
+                    continue
+
+                gene_id = new_gene_id
 
                 # add the Gene entry - if it hasn't been already
                 if gene_id not in self.genes_seen: 
@@ -260,7 +272,7 @@ class SequenceHydrator():
                     self.genes_to_write.append(gene)
                     self.genes_seen[gene_id] = gene
             
-            else: # Handle transcript entries - only add new ones
+            elif gene_id != None : # Handle transcript entries - if the gene is legit
                 transcript_id = self.find_attribs_value("ID=Transcript", attribs)
                 if transcript_id != None: # it's a transcript entry
 
