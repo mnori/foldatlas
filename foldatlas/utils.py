@@ -1,5 +1,7 @@
 import time
 
+# Useful for tracking down slow code.
+# @author Matthew Norris
 class Timeline():
 
 	def __init__(self, name="Timeline"):
@@ -20,6 +22,7 @@ class Timeline():
 		t_tot = self.entries[len(self.entries) - 1].time - self.entries[0].time
 		print("[TOTAL]: "+str(t_tot)+"")
 
+# Helper class for Timeline
 class TimelineEntry():
 
 	def __init__(self, name):

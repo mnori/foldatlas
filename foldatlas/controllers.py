@@ -112,8 +112,13 @@ class GenomeBrowser():
 
         print(sql)
 
+        tl.log("b")
+
         # Add gene rows to the output
-        results = database.engine.execute(sql)
+        results = database.engine.execute(sql) # this is the slow bit
+
+        tl.log("c")
+
         out = []
         for result in results:
             out.append({ 
@@ -125,9 +130,11 @@ class GenomeBrowser():
                 "strand": 1, # whether it is + or -?? this isn't actually used by the looks of things
             })        
 
+        tl.log("d")
+
         buf = json.dumps(out)
 
-        tl.log("b")
+        tl.log("e")
         tl.dump()
 
         return buf
