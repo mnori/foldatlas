@@ -738,7 +738,7 @@
 	// Add lane data to features objects. The features must contain start and end properties for it to work.
 	addLaneData: function(features) {
 
-		// Figure out whether transcript overlaps another in the given lane
+		// Figure out whether feature overlaps another in the given lane
 		var overlaps = function(feature, lane) {
 			for (var i = 0; i < lane.length; i++) {
 				var otherFeature = lane[i];
