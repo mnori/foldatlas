@@ -23,6 +23,10 @@ from models import Strain, Gene, Transcript, Feature, AlignmentEntry, Reactivity
 
 def hydrate_db():
     try:
+
+        # # TEMP
+        # SequenceHydrator().cache_gene_locations(settings.strains[0])
+
         print("Rebuilding schema...")
         Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(bind=engine)
@@ -50,7 +54,6 @@ class SequenceHydrator():
     gene_chunk_size = 2500 
 
     genes_to_write = []
-    gene_locations_to_write = []
     transcripts_to_write = []
     features_to_write = []
 
@@ -61,7 +64,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = None
+    gene_limit = 2500
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -94,6 +97,8 @@ class SequenceHydrator():
 
         # add genes, transcripts, and feature annotations
         self.hydrate_genes(strain_config)
+
+        self.cache_gene_locations(strain_config)
 
     # Adding chromosomes to the DB is a little bit tricky, since the sequences are huge.
     # Therefore a LOAD DATA INFILE strategy is used to import the data.
@@ -171,15 +176,50 @@ class SequenceHydrator():
         # do the sequences
         print (str(genes_added)+" genes added total")
 
+    # Cache gene locations in a redundant table by looking at the feature locations.
+    def cache_gene_locations(self, strain_config):
+        print("Caching gene locations...")
+        start = 0
+        gene_location_chunk_size = 1000
+        while(True):
+
+            sql = ( "SELECT "
+                    "   transcript.gene_id, "
+                    "   feature.chromosome_id, "
+                    "   feature.direction, "
+                    "   MIN(start) min_start, "
+                    "   MAX(end) max_end "
+                    "FROM feature, transcript "
+                    "WHERE feature.transcript_id = transcript.id "
+                    "AND feature.strain_id =  'Col_0' "
+                    "AND chromosome_id =  'Chr1' "
+                    "GROUP BY transcript.gene_id "
+                    "LIMIT "+str(start)+", "+str(gene_location_chunk_size))
+
+            results = engine.execute(sql)
+            if results.rowcount == 0:
+                break
+            for row in results:
+                
+                db_session.add(GeneLocation(
+                    gene_id=row["gene_id"], 
+                    strain_id=strain_config["name"], 
+                    chromosome_id=row["chromosome_id"], 
+                    start=row["min_start"], 
+                    end=row["max_end"], 
+                    direction=row["direction"]
+                ))
+
+            start += gene_location_chunk_size
+
+        db_session.commit()
 
     def commit_all(self):
         self.commit_entities_list(self.genes_to_write, "Genes")
-        self.commit_entities_list(self.gene_locations_to_write, "GeneLocations")
         self.commit_entities_list(self.transcripts_to_write, "Transcripts")
         self.commit_entities_list(self.features_to_write, "Features")
 
         self.genes_to_write = []
-        self.gene_locations_to_write = []
         self.transcripts_to_write = []
         self.features_to_write = []
         
@@ -207,11 +247,6 @@ class SequenceHydrator():
             direction = "forward" if feature_row[6] == "+" else "reverse"
             chromosome_id = feature_row[0]
 
-            if min_start == None or start < min_start:
-                min_start = start
-            if max_end == None or end > max_end:
-                max_end = end
-
             feature_type = feature_row[2]
             attribs = feature_row[8].strip()
 
@@ -223,7 +258,6 @@ class SequenceHydrator():
                     gene = Gene(gene_id)
                     self.genes_to_write.append(gene)
                     self.genes_seen[gene_id] = gene
-
             
             else: # Handle transcript entries - only add new ones
                 transcript_id = self.find_attribs_value("ID=Transcript", attribs)
@@ -260,17 +294,6 @@ class SequenceHydrator():
 
                     else:
                         pass # this happens for pseudogenes and TEs - which we aint interested in
-
-        # Add to the gene location cache table
-        self.gene_locations_to_write.append(GeneLocation(
-            gene_id=gene_id, 
-            strain_id=strain_id, 
-            chromosome_id=chromosome_id, 
-            start=min_start, 
-            end=max_end, 
-            direction=direction
-        ))
-
 
     def ensure_unique_transcript_id(self, transcript_id):
         version = 1
