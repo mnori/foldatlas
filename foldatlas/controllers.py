@@ -15,28 +15,15 @@ class GenomeBrowser():
         start = int(request.args.get('start'))
         end = int(request.args.get('end'))
 
-        # need to rework this. get gene IDs first, then expand using the gene ID list.
-        # using feature table and start/end, grab the gene IDs that fall within the range.
-        sql = ( "SELECT DISTINCT transcript.gene_id "
-                "FROM feature, transcript "
-                "WHERE strain_id = '"+settings.reference_strain_id+"' "
-                "AND chromosome_id = '"+chromosome_id+"' "
-                "AND end > '"+str(start)+"' "
-                "AND start < '"+str(end)+"' "
-                "AND feature.transcript_id = transcript.id ");
-
-        results = database.engine.execute(sql)
-        gene_ids = [];
-        for result in results:
-            gene_ids.append(result["gene_id"])
-
-        # use the gene IDs to get feature data
-        sql = ( "SELECT * "
-                "FROM transcript, feature "
-                "WHERE transcript.gene_id IN ('"+"','".join(gene_ids)+"') "
-                "AND strain_id = '"+settings.reference_strain_id+"' "
-                "AND chromosome_id = '"+chromosome_id+"' "
-                "AND transcript.id = feature.transcript_id ")
+        # Retrieve features using the gene location cache table
+        sql = ( "SELECT feature.* "
+                "FROM gene_location, transcript, feature "
+                "WHERE gene_location.strain_id = '"+settings.reference_strain_id+"' "
+                "AND gene_location.chromosome_id = '"+chromosome_id+"' "
+                "AND gene_location.end > '"+str(start)+"' "
+                "AND gene_location.start < '"+str(end)+"' "
+                "AND gene_location.gene_id = transcript.gene_id "
+                "AND transcript.id = feature.transcript_id")
 
         results = database.engine.execute(sql)
 
@@ -93,31 +80,18 @@ class GenomeBrowser():
         
         from utils import Timeline
 
-        tl = Timeline("genes")
-
-        tl.log("a")
-
         chromosome_id = "Chr"+str(int(request.args.get('chr'))) # SQL-injection safe
         start = int(request.args.get('start'))
         end = int(request.args.get('end'))
 
-        sql = ( "SELECT *, MIN(start) min_start, MAX(end) max_end "
-                "FROM feature, transcript "
-                "WHERE feature.transcript_id = transcript.id "
-                "AND feature.strain_id = '"+settings.reference_strain_id+"'"
+        # fetch gene data from the location cache table.
+        sql = ( "SELECT * FROM gene_location "
+                "WHERE strain_id = '"+settings.reference_strain_id+"' "
                 "AND chromosome_id = '"+chromosome_id+"' "
                 "AND end > '"+str(start)+"' "
-                "AND start < '"+str(end)+"' "
-                "GROUP BY transcript.gene_id")
+                "AND start < '"+str(end)+"'")
 
-        print(sql)
-
-        tl.log("b")
-
-        # Add gene rows to the output
-        results = database.engine.execute(sql) # this is the slow bit
-
-        tl.log("c")
+        results = database.engine.execute(sql)
 
         out = []
         for result in results:
@@ -125,18 +99,11 @@ class GenomeBrowser():
                 "feature_type": "gene", # without this, it won't draw
                 "direction": result.direction,
                 "id": result.gene_id,
-                "start": result.min_start,
-                "end": result.max_end,
-                "strand": 1, # whether it is + or -?? this isn't actually used by the looks of things
+                "start": result.start,
+                "end": result.end,
             })        
 
-        tl.log("d")
-
         buf = json.dumps(out)
-
-        tl.log("e")
-        tl.dump()
-
         return buf
 
     # Fetch chromosome IDs and their lengths. Used for chromosome menu and also initialising the genome browser.

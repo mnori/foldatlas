@@ -61,7 +61,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = 100
+    gene_limit = None
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -174,15 +174,15 @@ class SequenceHydrator():
 
     def commit_all(self):
         self.commit_entities_list(self.genes_to_write, "Genes")
+        self.commit_entities_list(self.gene_locations_to_write, "GeneLocations")
         self.commit_entities_list(self.transcripts_to_write, "Transcripts")
         self.commit_entities_list(self.features_to_write, "Features")
-        self.commit_entities_list(self.gene_locations_to_write, "GeneLocations")
 
         self.genes_to_write = []
+        self.gene_locations_to_write = []
         self.transcripts_to_write = []
         self.features_to_write = []
-        self.gene_locations_to_write = []
-
+        
     def commit_entities_list(self, entities, label):
         print("Committing "+label+"...")
         for entity in entities:
