@@ -65,12 +65,18 @@ class SequenceHydrator():
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
 
+    # max strains
+    strain_limit = 1
+
     # Use the genome sequence and annotation files to populate the database.
     def hydrate(self):
+        n_strains = 0;
         for strain in settings.strains:
             self.hydrate_strain(strain)
-
-        db_session.commit() # does this do anything?
+            n_strains += 1
+            if n_strains >= self.strain_limit:
+                break
+        db_session.commit()
 
     def hydrate_strain(self, strain_config):
         self.transcript_ids_seen_this_strain = set()

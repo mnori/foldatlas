@@ -91,7 +91,11 @@ class GenomeBrowser():
 
     def get_genes(self, request):
         
-        out = []
+        from utils import Timeline
+
+        tl = Timeline("genes")
+
+        tl.log("a")
 
         chromosome_id = "Chr"+str(int(request.args.get('chr'))) # SQL-injection safe
         start = int(request.args.get('start'))
@@ -106,8 +110,11 @@ class GenomeBrowser():
                 "AND start < '"+str(end)+"' "
                 "GROUP BY transcript.gene_id")
 
+        print(sql)
+
         # Add gene rows to the output
         results = database.engine.execute(sql)
+        out = []
         for result in results:
             out.append({ 
                 "feature_type": "gene", # without this, it won't draw
@@ -118,7 +125,12 @@ class GenomeBrowser():
                 "strand": 1, # whether it is + or -?? this isn't actually used by the looks of things
             })        
 
-        return json.dumps(out)
+        buf = json.dumps(out)
+
+        tl.log("b")
+        tl.dump()
+
+        return buf
 
     # Fetch chromosome IDs and their lengths. Used for chromosome menu and also initialising the genome browser.
     def get_chromosomes(self):

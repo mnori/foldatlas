@@ -27,7 +27,7 @@
 		this.simpleThreshold = 100000;
 
 		// If zoomed out further than this, no data will be shown.
-		this.blankThreshold = 5000000;
+		this.blankThreshold = 2500000;
 
 		// Set this to config.initialBPRange
 		// Storing the extent locally is a hack that kills 2 birds with 1 stone
