@@ -64,10 +64,12 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = 2500
+    gene_limit = None
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
+
+    gene_location_chunk_size = 1000
 
     # max strains
     strain_limit = 1
@@ -180,7 +182,6 @@ class SequenceHydrator():
     def cache_gene_locations(self, strain_config):
         print("Caching gene locations...")
         start = 0
-        gene_location_chunk_size = 1000
         while(True):
 
             sql = ( "SELECT "
@@ -194,7 +195,7 @@ class SequenceHydrator():
                     "AND feature.strain_id =  'Col_0' "
                     "AND chromosome_id =  'Chr1' "
                     "GROUP BY transcript.gene_id "
-                    "LIMIT "+str(start)+", "+str(gene_location_chunk_size))
+                    "LIMIT "+str(start)+", "+str(self.gene_location_chunk_size))
 
             results = engine.execute(sql)
             if results.rowcount == 0:
@@ -210,7 +211,7 @@ class SequenceHydrator():
                     direction=row["direction"]
                 ))
 
-            start += gene_location_chunk_size
+            start += self.gene_location_chunk_size
 
         db_session.commit()
 
