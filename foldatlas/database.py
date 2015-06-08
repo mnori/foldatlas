@@ -39,7 +39,7 @@ def hydrate_db():
 
         # Do alignments so we can see polymorphism
         # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
-        # TranscriptAligner().align() 
+        TranscriptAligner().align() 
 
         print("Hydration Complete.")
 
@@ -64,7 +64,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = None
+    gene_limit = 1000
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -72,7 +72,7 @@ class SequenceHydrator():
     gene_location_chunk_size = 1000
 
     # max strains
-    strain_limit = 1
+    strain_limit = None
 
     # Use the genome sequence and annotation files to populate the database.
     def hydrate(self):
@@ -80,7 +80,7 @@ class SequenceHydrator():
         for strain in settings.strains:
             self.hydrate_strain(strain)
             n_strains += 1
-            if n_strains >= self.strain_limit:
+            if self.strain_limit != None and n_strains >= self.strain_limit:
                 break
         db_session.commit()
 

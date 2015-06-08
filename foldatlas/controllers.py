@@ -23,7 +23,8 @@ class GenomeBrowser():
                 "AND gene_location.end > '"+str(start)+"' "
                 "AND gene_location.start < '"+str(end)+"' "
                 "AND gene_location.gene_id = transcript.gene_id "
-                "AND transcript.id = feature.transcript_id")
+                "AND transcript.id = feature.transcript_id "
+                "AND feature.strain_id = '"+settings.reference_strain_id+"'")
 
         results = database.engine.execute(sql)
 
