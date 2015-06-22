@@ -30,4 +30,3 @@ class TimelineEntry():
 		self.time = time.time()
 
 time.time()
-

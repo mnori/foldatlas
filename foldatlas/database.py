@@ -19,7 +19,7 @@ Base.query = db_session.query_property()
 
 import models
 
-from models import Strain, Gene, Transcript, Feature, AlignmentEntry, ReactivityMeasurement, GeneLocation
+from models import Strain, Gene, Transcript, Feature, AlignmentEntry, NucleotideMeasurement, GeneLocation, Experiment
 
 def hydrate_db():
     try:
@@ -35,7 +35,10 @@ def hydrate_db():
         SequenceHydrator().hydrate() 
 
         # Add DMS reactivities
-        DmsReactivityHydrator().hydrate() 
+        NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
+
+        # Add ribosome profiling
+        NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
 
         # Do alignments so we can see polymorphism
         # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
@@ -64,7 +67,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = 1000
+    gene_limit = 10
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -158,9 +161,9 @@ class SequenceHydrator():
                         self.hydrate_gene(feature_rows, strain_config["name"])
                         genes_added += 1
                         feature_rows = []
+                        if self.gene_limit != None and genes_added >= self.gene_limit:
+                            break
                         if genes_added % 100 == 0:
-                            if self.gene_limit != None and genes_added >= self.gene_limit:
-                                break
                             print (str(genes_added)+" genes processed")
 
                         if genes_added % self.gene_chunk_size == 0: # commit at regular intervals
@@ -386,11 +389,19 @@ class TranscriptAligner():
         return transcript_ids
 
 # Inserts DMS reactivities into the DB.
-class DmsReactivityHydrator():
+class NucleotideMeasurementHydrator():
 
-    def hydrate(self):
+    def hydrate(self, experiment_config):
 
-        print("Adding reactivities...")
+        # Add the experiment
+        experiment = Experiment(
+            type=experiment_config["type"],
+            description=experiment_config["description"]
+        )
+        db_session.add(experiment)
+        db_session.commit() # insert the experiment into the DB.
+
+        print("Inserting data from ["+experiment_config["filepath"]+"] ...")
 
         # fetch all of the transcript IDs from the database, store them in a set to check against.
         sql = ("SELECT id FROM transcript ORDER BY id ASC")
@@ -400,37 +411,35 @@ class DmsReactivityHydrator():
             transcript_ids.add(result["id"])
 
         # Open the DMS reactivities file. These are normalised already.
-        input_file = open(settings.dms_reactivities_filepath, "r")
-        line = input_file.readline()
-        while(True):
-            transcript_id = line.strip()
-            line = input_file.readline().strip()
+        with open(experiment_config["filepath"], "r") as input_file:
+            for line in input_file:
+        
+                bits = line.strip().split("\t")
+                transcript_id = bits[0]
 
-            if line[:2] == "AT": # another transcript id
-                continue;
+                # skip transcripts not already in DB
+                if transcript_id not in transcript_ids:
+                    continue;
 
-            if line == "": # if empty, it means end of file was reached
-                break
+                if len(bits) <= 1: # no measurements present
+                    continue
 
-            # got this far? assume it's reactivities
-            if transcript_id not in transcript_ids:
-                continue;
+                count_strs = bits[1:]
 
-            count_strs = line.split("\t")
-
-            # go through reactivity entries, adding each to the database.
-            position = 0;
-            for count_str in count_strs:
-                position += 1
-                if (count_str != "NA"): # skip adding "NA" entries.
-                    obj = ReactivityMeasurement(
-                        strain_id=settings.reference_strain_id, 
-                        transcript_id=transcript_id, 
-                        position=position, 
-                        reactivity=float(count_str))
-                    db_session.add(obj)        
-            db_session.commit() # insert all the reactivity measurement rows into the DB
-            print("Added ["+transcript_id+"] ("+str(position)+" positions)")
+                # go through reactivity entries, adding each to the database.
+                position = 0;
+                for count_str in count_strs:
+                    position += 1
+                    if (count_str != "NA"): # skip adding "NA" entries.
+                        obj = NucleotideMeasurement(
+                            experiment_id=experiment.id,
+                            strain_id=settings.reference_strain_id, 
+                            transcript_id=transcript_id, 
+                            position=position, 
+                            measurement=float(count_str))
+                        db_session.add(obj)        
+                db_session.commit() # insert all the reactivity measurement rows into the DB
+                print("Added ["+transcript_id+"] ("+str(position)+" positions)")
 
         input_file.close()
 

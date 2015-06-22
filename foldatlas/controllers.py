@@ -2,7 +2,7 @@ from database import db_session;
 from sqlalchemy import and_
 
 import json, database, settings
-from models import Feature, Transcript, AlignmentEntry, ReactivityMeasurement
+from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement
 
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
@@ -130,38 +130,60 @@ class TranscriptView():
 
     def __init__(self, transcript_id):
         self.transcript_id = transcript_id
-        self.reactivities_view = ReactivitiesView(self.transcript_id, settings.reference_strain_id)
+        self.nucleotide_measurement_view = NucleotideMeasurementView(self.transcript_id, settings.reference_strain_id)
         self.alignment_view = AlignmentView(self.transcript_id)
 
-class ReactivitiesView():
+class NucleotideMeasurementView():
 
     def __init__(self, transcript_id, strain_id):
         self.transcript_id = transcript_id
         self.strain_id = strain_id
-        self.build_reactivity_entries()
+        self.build_entries([1, 2])
 
-    def build_reactivity_entries(self):
+    def build_entries(self, experiment_ids):
+
+        # Load experiments
+        experiments = db_session \
+            .query(Experiment) \
+            .filter(Experiment.id.in_(experiment_ids)) \
+            .all()
+
+        # Load measurements
         seq_str = str(Transcript(self.transcript_id).get_sequence(self.strain_id).seq)
-        reactivities = db_session \
-            .query(ReactivityMeasurement) \
+        measurements = db_session \
+            .query(NucleotideMeasurement) \
             .filter(
-                ReactivityMeasurement.strain_id==self.strain_id,
-                ReactivityMeasurement.transcript_id==self.transcript_id
+                NucleotideMeasurement.experiment_id.in_(experiment_ids),
+                NucleotideMeasurement.strain_id==self.strain_id,
+                NucleotideMeasurement.transcript_id==self.transcript_id
             ) \
             .all()
 
-        reactivity_data = []
-        for n in range(len(seq_str)): # initialise the array
-            reactivity_data.append({
-                "position": n,
-                "nuc": seq_str[n],
-                "reactivity": None
-            })
+        data = {}
+        # populate experiment rows
+        for experiment in experiments
+            experiment_data = {
+                "id": experiment.id
+                "type": experiment.type
+                "description": experiment.description
+                "data": []
+            }
+            
+            for n in range(len(seq_str)): # initialise the array
+                experiment_data.append({
+                    "position": n,
+                    "nuc": seq_str[n],
+                    "measurement": None
+                })
+            data[experiment_id] = experiment_data
 
-        for reactivity in reactivities: # add values where present
-            reactivity_data[reactivity.position - 1]["reactivity"] = reactivity.reactivity
+        # add measurements to each experiment
+        for measurement_row in measurements: # add values where present
+            experiment_id = measurement_row.experiment_id
+            pos = measurement_row.position - 1
+            data[experiment_id]["data"][pos]["measurement"] = measurement_row.measurement
 
-        self.reactivity_data_json = json.dumps(reactivity_data)
+        self.data_json = json.dumps(data)
         
 class AlignmentView():
 

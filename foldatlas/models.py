@@ -224,24 +224,44 @@ class AlignmentEntry(Base):
     def __repr__(self):
         return "<AlignmentEntry %r-%r>" % (self.transcript_id, self.strain_id)
 
-# Represents one reactivity measurement, at a particular nucleotide position.
-class ReactivityMeasurement(Base):
-    __tablename__ = "reactivity_measurement"
+class Experiment(Base):
+    __tablename__ = "experiment"
 
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    type = Column(Enum("dms_reactivity", "ribosome_profile"), nullable=False)
+    description = Column(Text, nullable=False)
+
+    def __init__(self, type=None, description=None):
+        self.type = type
+        self.description = description
+
+    def __repr__(self):
+        return "<Experiment %r>" % (self.id)
+
+# Represents one measurement, at a particular nucleotide position.
+class NucleotideMeasurement(Base):
+    __tablename__ = "nucleotide_measurement"
+
+    experiment_id = Column(Integer, ForeignKey("experiment.id"), primary_key=True)
     strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
     transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
-    position = Column(Integer, autoincrement=False, primary_key=True) # if there's no reactivity at a position, there is no corresponding row.
-    reactivity = Column(Float, nullable=False) 
 
-    def __init__(self, strain_id=None, transcript_id=None, position=None, reactivity=None):
+    # if there's no measurement at a position, there is no corresponding row.
+    position = Column(Integer, autoincrement=False, primary_key=True) 
+    measurement = Column(Float, nullable=False) 
 
+    def __init__(self, experiment_id=None, strain_id=None, transcript_id=None, position=None, measurement=None):
+
+        self.experiment_id = experiment_id
         self.strain_id = strain_id
         self.transcript_id = transcript_id
         self.position = position
-        self.reactivity = reactivity
+        self.measurement = measurement
 
     def __repr__(self):
-        return "<ReactivityMeasurement %r-%r-%r>" % (self.strain_id, self.transcript_id, self.position)
+        return "<NucleotideMeasurement %r-%r-%r-%r>" % (
+            self.experiment_id, self.strain_id, self.transcript_id, self.position
+        )
 
     # 
     # strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)

@@ -6,7 +6,7 @@ var BrowserController = Class.extend({
 		this.nucsPerRow = 80;
 		this.staticBase = config.staticBaseUrl;
 		this.reactivities = {}
-		this.drawReactivities();
+		this.drawNucleotideMeasurements();
 	},
 
 	// Jump to a specific transcript page
@@ -20,7 +20,7 @@ var BrowserController = Class.extend({
 			$("#loading-indicator").hide();
 			$("#transcript-data").empty();
 			$("#transcript-data").html(results);
-			this.drawReactivities();
+			this.drawNucleotideMeasurements();
 		});
 	},
 
@@ -35,9 +35,8 @@ var BrowserController = Class.extend({
 	    }
 	},
 
-	getReactivitiesJson: function() {
-		var html = $("#reactivities-json").html();
-
+	getMeasurementJson: function() {
+		var html = $("#nucleotide-measurement-json").html();
 		if (html == undefined) { // this means no reactivity data to show
 			return null;
 		}
@@ -45,10 +44,21 @@ var BrowserController = Class.extend({
 		return json;
 	},
 
-	// Visualises the reactivity data.
-	drawReactivities: function(reactivities) {
+	drawNucleotideMeasurements: function(reactivities) {
+		var data = this.getMeasurementJson()
+		this.drawExperiment(data[1])
+		this.drawExperiment(data[2])
+	},
 
-		var data = this.getReactivitiesJson()
+	// Visualises the reactivity data.
+	drawExperiment: function(data) {
+
+		var buf = 
+			"<h2>"+data[]
+			"<div id=\"\"></div>"
+
+		$("#nucleotide-measurement-charts").append("POO")
+
 		if (data == null) {
 			return;
 		}
