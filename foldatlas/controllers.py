@@ -183,6 +183,8 @@ class NucleotideMeasurementView():
             pos = measurement_row.position - 1
             data[experiment_id]["data"][pos]["measurement"] = measurement_row.measurement
 
+        print(data)
+
         self.data_json = json.dumps(data)
         
 class AlignmentView():

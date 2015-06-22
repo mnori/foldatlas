@@ -46,12 +46,18 @@ var BrowserController = Class.extend({
 
 	drawNucleotideMeasurements: function(reactivities) {
 		var data = this.getMeasurementJson()
-		this.drawExperiment(data[1])
-		this.drawExperiment(data[2])
+		if (data) {
+			this.drawExperiment(data[1])
+			this.drawExperiment(data[2])
+		}
 	},
 
 	// Visualises the measurement data.
 	drawExperiment: function(experiment_data) {
+
+		var yLabelText = (experiment_data["type"] == "dms_reactivity") 
+			? "Reactivity"
+			: "Occupancy";
 
 		// Add header and graph container svg element
 		// Also Add the SVG itself
@@ -206,7 +212,7 @@ var BrowserController = Class.extend({
 		        .attr("x", (-panelYOffset - (panelMargin.top + (panelDims.y / 2))))
 		        .attr("dy", "-2.7em")
 		        .style("text-anchor", "middle")
-		        .text("Reactivity");
+		        .text(yLabelText);
 
 	        // Add length label
 	        var panelDimsX = panelDims.x * (nucsThisRow / this.nucsPerRow);

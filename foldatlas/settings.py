@@ -11,7 +11,7 @@ dms_reactivities_experiment = {
 }
 
 ribosome_profile_experiment = {
-	"filepath": "/vagrant/sauce_data/p_site_counts_all.txt.cds_scaled.txt",
+	"filepath": "/vagrant/sauce_data/p_site_counts_all.txt",
 	"type": "ribosome_profile",
 	"description": "Ribosome occupancies"
 }
