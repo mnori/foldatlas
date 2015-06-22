@@ -37,7 +37,7 @@ var BrowserController = Class.extend({
 
 	getMeasurementJson: function() {
 		var html = $("#nucleotide-measurement-json").html();
-		if (html == undefined) { // this means no reactivity data to show
+		if (html == undefined) { // this means no measurement data to show
 			return null;
 		}
 		var json = $.parseJSON(html);
@@ -50,16 +50,20 @@ var BrowserController = Class.extend({
 		this.drawExperiment(data[2])
 	},
 
-	// Visualises the reactivity data.
-	drawExperiment: function(data) {
+	// Visualises the measurement data.
+	drawExperiment: function(experiment_data) {
 
+		// Add header and graph container svg element
+		// Also Add the SVG itself
+		var chart_id = "nucleotide-measurement-chart_"+experiment_data["id"];
 		var buf = 
-			"<h2>"+data[]
-			"<div id=\"\"></div>"
+			"<h2>"+experiment_data["description"]+"</h2>"+
+			"<svg id=\""+chart_id+"\"></svg>"
 
-		$("#nucleotide-measurement-charts").append("POO")
+		$("#nucleotide-measurement-charts").append(buf)
 
-		if (data == null) {
+		var data = experiment_data["data"]
+		if (data == null) { // can happen
 			return;
 		}
 
@@ -86,7 +90,7 @@ var BrowserController = Class.extend({
 		// 	height = panelTotDims.y - panelMargin.bottom - panelMargin.top;
 
 		// Init the chart's container element
-		var chart = d3.select("#reactivities-chart")
+		var chart = d3.select("#"+chart_id)
 			.attr("width", chartDims.x)
 			.attr("height", chartDims.y)
 
@@ -97,15 +101,15 @@ var BrowserController = Class.extend({
 
 		    // domain describes the range of data to show.
 		    .range([panelDims.y, 0])
-		    .domain([0, d3.max(data, function(d) { return d.reactivity; })]);
+		    .domain([0, d3.max(data, function(d) { return d.measurement; })]);
 
-		// when there is no reactivity data, degrade gracefully
+		// when there is no measurement data, degrade gracefully
 		if (isNaN(yScale.domain()[1])) { 
 			
 			chart.append("text")
 		      .attr("transform", "translate("+(panelTotDims.x / 2)+", "+(panelTotDims.y / 2)+")")
 		      .style("text-anchor", "middle")
-		      .text("No reactivity data");
+		      .text("No measurement data");
 			return;
 		}
 		
@@ -172,7 +176,7 @@ var BrowserController = Class.extend({
 
 				// highlight nucleotides with missing reactivities
 				.attr("class", function(n, i) {
-					return (dataSlice[i].reactivity == null) ? 
+					return (dataSlice[i].measurement == null) ? 
 						"missing-bg" : "not-missing-bg";
 				})
 
@@ -216,7 +220,7 @@ var BrowserController = Class.extend({
 		    // add the actual line chart
 			var lineGen = d3.svg.line()
 			    .x(function(d) { return panelMargin.left + xScale(d.position); })
-			    .y(function(d) { return panelYOffset + panelMargin.top + yScale(d.reactivity); });
+			    .y(function(d) { return panelYOffset + panelMargin.top + yScale(d.measurement); });
 
 	 		chart.append("path")
 				.datum(dataSlice) // get data specific to this row

@@ -2,7 +2,7 @@ from database import db_session;
 from sqlalchemy import and_
 
 import json, database, settings
-from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement
+from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement, Experiment
 
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
@@ -161,21 +161,21 @@ class NucleotideMeasurementView():
 
         data = {}
         # populate experiment rows
-        for experiment in experiments
+        for experiment in experiments:
             experiment_data = {
-                "id": experiment.id
-                "type": experiment.type
-                "description": experiment.description
+                "id": experiment.id,
+                "type": experiment.type,
+                "description": experiment.description,
                 "data": []
             }
             
             for n in range(len(seq_str)): # initialise the array
-                experiment_data.append({
+                experiment_data["data"].append({
                     "position": n,
                     "nuc": seq_str[n],
                     "measurement": None
                 })
-            data[experiment_id] = experiment_data
+            data[experiment.id] = experiment_data
 
         # add measurements to each experiment
         for measurement_row in measurements: # add values where present
