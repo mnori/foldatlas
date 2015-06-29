@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from sys import argv
-from controllers import GenomeBrowser, TranscriptView
+from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher
 
 import settings
 import database
@@ -36,6 +36,10 @@ def get_genes_ajax():
 @app.route("/ajax/genome-browser/transcripts")
 def get_transcripts_ajax():
 	return GenomeBrowser().get_transcripts(request)
+
+@app.route("/ajax/search-transcript/<search_string>")
+def search_transcripts_ajax(search_string):
+	return TranscriptSearcher().search(search_string)
 
 @app.route("/ajax/transcript/<transcript_id>")
 def view_transcript_ajax(transcript_id):

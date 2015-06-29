@@ -129,6 +129,8 @@ class GenomeBrowser():
 class TranscriptView():
 
     def __init__(self, transcript_id):
+
+        # TODO try to fetch transcript ID first, then if it works do the rest of the stuff
         self.transcript_id = transcript_id
         self.nucleotide_measurement_view = NucleotideMeasurementView(self.transcript_id, settings.reference_strain_id)
         self.alignment_view = AlignmentView(self.transcript_id)
@@ -261,3 +263,21 @@ class AlignmentView():
                 break
 
             row_n += 1
+
+class TranscriptSearcher():
+    def search(self, search_string):
+        transcripts = db_session \
+            .query(Transcript) \
+            .filter(Transcript.id.like("%"+search_string+"%")) \
+            .all()
+
+        out = []
+        for transcript in transcripts:
+            out.append(transcript.id)
+
+        return json.dumps(out)
+
+
+
+
+
