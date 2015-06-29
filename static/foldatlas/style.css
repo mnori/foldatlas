@@ -20,6 +20,35 @@ body {
 	border: 1px solid #000;
 	box-shadow: 0px 0px 40px #000;
 	background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* W3C */
+	position: relative;
+}
+
+#search-quick {
+	display: block;
+	font-size: 14px;
+	width: 500px;
+
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	z-index:;
+}
+
+#search-quick > input {
+	border-top: 1px solid #000;
+	border-left: 1px solid #000;
+	border-bottom: 0 none;
+	border-right: 0 none;
+	background-color: rgba(0, 0, 0, 0.5);
+	color: #fff;
+	padding: 5px;
+	font-size: 14px;
+	line-height: 14px;
+
+	width: 200px;
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
 }
 
 #content {
