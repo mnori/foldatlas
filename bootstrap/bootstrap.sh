@@ -20,6 +20,7 @@ function install() {
 	apt-get install -y apache2
 	a2enmod proxy
 	a2enmod proxy_http 
+	a2enmod headers 
 
 	# copy apache config file
 	cp /vagrant/bootstrap/000-default_vagrant.conf /etc/apache2/sites-available/000-default.conf
