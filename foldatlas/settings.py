@@ -5,15 +5,19 @@ database_uri = "mysql+mysqlconnector://root:vagrant@127.0.0.1/foldatlas?charset=
 genomes_sauce_folder = "/vagrant/sauce_data"
 
 dms_reactivities_experiment = {
-	"filepath": "/vagrant/sauce_data/log_react_f_N1A_cdna_n_before.formatted.txt",
+	"experiment_id": 1,
+	"nucleotides_filepath": "/vagrant/sauce_data/log_react_f_N1A_cdna_n_before.formatted.txt",
+	"coverage_filepath": "/vagrant/sauce_data/reactivities_coverage_orig.txt",
 	"type": "dms_reactivity",
 	"description": "DMS reactivities"
 }
 
 ribosome_profile_experiment = {
-	"filepath": "/vagrant/sauce_data/p_site_counts_all.txt",
+	"experiment_id": 2,
+	"nucleotides_filepath": "/vagrant/sauce_data/p_site_counts_all.txt",
+	"coverage_filepath": "/vagrant/sauce_data/riboseq_coverage.txt",
 	"type": "ribosome_profile",
-	"description": "Ribosome occupancies"
+	"description": "Ribosome occupancies",
 }
 
 base_path = "/vagrant/foldatlas"

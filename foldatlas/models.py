@@ -227,11 +227,12 @@ class AlignmentEntry(Base):
 class Experiment(Base):
     __tablename__ = "experiment"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=False)
     type = Column(Enum("dms_reactivity", "ribosome_profile"), nullable=False)
     description = Column(Text, nullable=False)
 
-    def __init__(self, type=None, description=None):
+    def __init__(self, id, type, description):
+        self.id = id
         self.type = type
         self.description = description
 
@@ -262,6 +263,30 @@ class NucleotideMeasurement(Base):
         return "<NucleotideMeasurement %r-%r-%r-%r>" % (
             self.experiment_id, self.strain_id, self.transcript_id, self.position
         )
+
+# Represents a coverage measurement for a single transcript
+class TranscriptCoverage(Base):
+    __tablename__ = "transcript_coverage"
+
+    experiment_id = Column(Integer, ForeignKey("experiment.id"), primary_key=True)
+    strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
+    transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
+    measurement = Column(Float, nullable=False) 
+
+    def __init__(self, experiment_id=None, strain_id=None, transcript_id=None, measurement=None):
+
+        self.experiment_id = experiment_id
+        self.strain_id = strain_id
+        self.transcript_id = transcript_id
+        self.measurement = measurement
+
+    def __repr__(self):
+        return "<NucleotideMeasurement %r-%r-%r>" % (
+            self.experiment_id, self.strain_id, self.transcript_id
+        )
+
+
+
 
     # 
     # strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)

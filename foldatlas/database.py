@@ -19,7 +19,7 @@ Base.query = db_session.query_property()
 
 import models
 
-from models import Strain, Gene, Transcript, Feature, AlignmentEntry, NucleotideMeasurement, GeneLocation, Experiment
+from models import Strain, Gene, Transcript, Feature, AlignmentEntry, NucleotideMeasurement, GeneLocation, Experiment, TranscriptCoverage
 
 def hydrate_db():
     try:
@@ -36,9 +36,11 @@ def hydrate_db():
 
         # Add DMS reactivities
         NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
+        CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
 
         # Add ribosome profiling
         NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
+        CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
 
         # Do alignments so we can see polymorphism
         # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
@@ -67,7 +69,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = 500
+    gene_limit = 10
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -395,23 +397,19 @@ class NucleotideMeasurementHydrator():
 
         # Add the experiment
         experiment = Experiment(
+            id=experiment_config["experiment_id"],
             type=experiment_config["type"],
             description=experiment_config["description"]
         )
         db_session.add(experiment)
         db_session.commit() # insert the experiment into the DB.
 
-        print("Inserting data from ["+experiment_config["filepath"]+"] ...")
+        print("Inserting data from ["+experiment_config["nucleotides_filepath"]+"] ...")
 
-        # fetch all of the transcript IDs from the database, store them in a set to check against.
-        sql = ("SELECT id FROM transcript ORDER BY id ASC")
-        results = engine.execute(sql)
-        transcript_ids = set()
-        for result in results:
-            transcript_ids.add(result["id"])
+        transcript_ids = get_inserted_transcript_ids()
 
         # Open the DMS reactivities file. These are normalised already.
-        with open(experiment_config["filepath"], "r") as input_file:
+        with open(experiment_config["nucleotides_filepath"], "r") as input_file:
             for line in input_file:
         
                 bits = line.strip().split("\t")
@@ -432,16 +430,51 @@ class NucleotideMeasurementHydrator():
                     position += 1
                     if (count_str != "NA"): # skip adding "NA" entries.
                         obj = NucleotideMeasurement(
-                            experiment_id=experiment.id,
+                            experiment_id=experiment_config["experiment_id"],
                             strain_id=settings.reference_strain_id, 
                             transcript_id=transcript_id, 
                             position=position, 
-                            measurement=float(count_str))
+                            measurement=float(count_str)
+                        )
                         db_session.add(obj)        
                 db_session.commit() # insert all the reactivity measurement rows into the DB
                 print("Added ["+transcript_id+"] ("+str(position)+" positions)")
 
         input_file.close()
+
+# fetch all of the transcript IDs from the database, store them in a set to check against.
+def get_inserted_transcript_ids(): 
+    
+    sql = ("SELECT id FROM transcript ORDER BY id ASC")
+    results = engine.execute(sql)
+    transcript_ids = set()
+    for result in results:
+        transcript_ids.add(result["id"])
+
+    return transcript_ids
+
+class CoverageHydrator():
+    def hydrate(self, experiment_config):
+
+        transcript_ids = get_inserted_transcript_ids()
+
+        with open(experiment_config["coverage_filepath"]) as coverage_file:
+            for coverage_line in coverage_file:
+                (transcript_id, coverage) = coverage_line.strip().split("\t")
+
+                # skip transcripts not already in DB
+                if transcript_id not in transcript_ids:
+                    continue;
+
+                obj = TranscriptCoverage(
+                    experiment_id=experiment_config["experiment_id"],
+                    strain_id=settings.reference_strain_id,
+                    transcript_id=transcript_id,
+                    measurement=coverage
+                )
+                db_session.add(obj)
+
+        db_session.commit()
 
 # experiment
 #     id 
