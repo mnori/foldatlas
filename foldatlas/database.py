@@ -458,7 +458,13 @@ class CoverageHydrator():
 
         transcript_ids = get_inserted_transcript_ids()
 
-        with open(experiment_config["coverage_filepath"]) as coverage_file:
+        coverage_filepath = experiment_config["coverage_filepath"]
+
+        if not os.path.isfile(coverage_filepath):
+            print("WARNING: skipped import of missing ["+coverage_filepath+"]")
+            return
+
+        with open(coverage_filepath) as coverage_file:
             for coverage_line in coverage_file:
                 (transcript_id, coverage) = coverage_line.strip().split("\t")
 

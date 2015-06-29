@@ -5,8 +5,9 @@ var BrowserController = Class.extend({
 	init: function(config) {
 		this.nucsPerRow = 80;
 		this.staticBase = config.staticBaseUrl;
-		this.reactivities = {}
+		this.reactivities = {};
 		this.drawNucleotideMeasurements();
+		this.searchController = new SearchController();
 	},
 
 	// Jump to a specific transcript page
@@ -236,7 +237,50 @@ var BrowserController = Class.extend({
 	}
 })
 
+/**
+ * SearchController handles interactivity for the search module shown on the landing page.
+ */
+var SearchController = Class.extend({
 
+	// Constructor
+	init: function() {
+		this.tabElements = []
+		this.initTab($("#search-tab-browser"));
+		this.initTab($("#search-tab-transcript-id"));
+		this.initTab($("#search-tab-coverage"));
+	},
+
+	initTab: function(element) {
+		this.tabElements.push(element);
+		element.click($.proxy(function(element) {
+			var clickedElement = $(element);
+
+			for (var i = 0; i < this.tabElements.length; i++) {
+
+				var currElement = this.tabElements[i];
+				console.log(currElement.attr("id"))
+
+				var currPanelElement = $("#"+currElement.data("ui-id"));
+
+				if (clickedElement.attr("id") != currElement.attr("id")) {
+					currElement.removeClass("active")
+					currPanelElement.hide()
+
+				} else {
+					currElement.addClass("active")
+					currPanelElement.show()
+				}
+			}
+		}, this, element))
+
+		// console.log(panelElement);
+
+		// this.tabElements.push();
+		// element.click(function() {
+		// 	alert("Booom!");
+		// })
+	}
+})
 
 // $("#chromosome-selector").change(function() {
 // 	// TODO reload the page .. difficult / impossible to change the chromosome 
