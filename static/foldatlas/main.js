@@ -365,19 +365,25 @@ var CoverageSearchController = Class.extend({
 		}).done(function(pageNum) {
 			// insert pagination HTML
 			var buf = 
-				"<div id=\"search-coverage-paginator\">" +
-                "    <a href=\"#\" class=\"first\" data-action=\"first\">&laquo;</a>" +
-                "    <a href=\"#\" class=\"previous\" data-action=\"previous\">&lsaquo;</a>" +
-                "    <input type=\"text\" readonly=\"readonly\" data-max-page=\""+pageNum+"\" />" +
-                "    <a href=\"#\" class=\"next\" data-action=\"next\">&rsaquo;</a>" +
-                "    <a href=\"#\" class=\"last\" data-action=\"last\">&raquo;</a>" +
+				"<div id=\"pagination-container\">" +
+				"	<div id=\"search-coverage-paginator\" class=\"pagination\">" +
+                "   	<a href=\"#\" class=\"first\" data-action=\"first\">&laquo;</a>" +
+                "    	<a href=\"#\" class=\"previous\" data-action=\"previous\">&lsaquo;</a>" +
+                "    	<input type=\"text\" readonly=\"readonly\" data-max-page=\""+pageNum+"\" />" +
+                "    	<a href=\"#\" class=\"next\" data-action=\"next\">&rsaquo;</a>" +
+                "    	<a href=\"#\" class=\"last\" data-action=\"last\">&raquo;</a>" +
+                "	</div>" +
                 "</div>" +
 				"<div id=\"search-coverage-data\"><!-- filled by paginator AJAX --></div>";
             $("#search-coverage").html(buf);
 
             // initialise the paginator JS
             $('#search-coverage-paginator').jqPagination({
-			    paged: this.search // page change callback
+
+            	// page change callback
+			    paged: $.proxy(function(pageNum) {
+			    	this.search(pageNum);
+		    	}, this) 
 			});
 
             // retrieve the first page of results.
@@ -390,21 +396,20 @@ var CoverageSearchController = Class.extend({
 		$.ajax({
 			url: "/ajax/search-coverage/"+pageNum,
 			context: this
-		}).done(function(results) {
+		}).done($.proxy(function(results) {
 			$("#search-coverage-data").empty();
 			$("#search-coverage-data").html(results);
 
-			var context = this
-			$(".transcript-id-link").each(function(key, element) {
+			$(".transcript-id-link").each($.proxy(function(key, element) {
 				element = $(element)
-				element.click(function(ev) {
+				element.click($.proxy(function(ev) {
 					ev.preventDefault()
 					element = $(ev.target)
 					var transcript_id = element.html()
-					context.browserController.selectTranscript(transcript_id)
-				});
-			});
-		});
+					this.browserController.selectTranscript(transcript_id)
+				}, this));
+			}, this));
+		}, this));
 	}
 })
 

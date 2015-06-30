@@ -230,12 +230,10 @@ h2 {
 }
 
 table.coverage-table {
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: 30px;
-	margin-bottom: 30px;
+	margin: auto;
 	border-spacing: 0px;
 	border-collapse: collapse;
+	clear: both;
 }
 
 .coverage-table th, .coverage-table td {
@@ -247,6 +245,77 @@ table.coverage-table {
 	background-color: #ddd;
 	border-bottom: 1px solid #000;
 }
+
+/* PAGINATION *********************************************************/
+
+#pagination-container {
+	overflow: hidden;
+	height: 35px;
+	padding-top: 15px;
+}
+
+.pagination {
+	top: auto;
+	bottom: auto;
+	width: 204px;
+	margin: auto;
+	clear: both;
+}
+
+.pagination a {
+  display: block;
+  float: left;
+  width: 20px;
+  height: 20px;
+  outline: none;
+  border-right: 1px solid #CDCDCD;
+  border-left: 1px solid #CDCDCD;
+  color: #555555;
+  vertical-align: middle;
+  text-align: center;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
+  font-family: Times, 'Times New Roman', Georgia, Palatino;
+  /* ATTN: need a better font stack */
+  background-color: #f3f3f3;
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f3f3f3), color-stop(100%, lightgrey));
+  background-image: -webkit-linear-gradient(#f3f3f3, lightgrey);
+  background-image: linear-gradient(#f3f3f3, lightgrey); }
+  .pagination a:hover, .pagination a:focus, .pagination a:active {
+    background-color: #cecece;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e4e4e4), color-stop(100%, #cecece));
+    background-image: -webkit-linear-gradient(#e4e4e4, #cecece);
+    background-image: linear-gradient(#e4e4e4, #cecece); }
+  .pagination a.disabled, .pagination a.disabled:hover, .pagination a.disabled:focus, .pagination a.disabled:active {
+    background-color: #f3f3f3;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f3f3f3), color-stop(100%, lightgrey));
+    background-image: -webkit-linear-gradient(#f3f3f3, lightgrey);
+    background-image: linear-gradient(#f3f3f3, lightgrey);
+    color: #A8A8A8;
+    cursor: default; }
+
+.pagination a:first-child {
+  border: none;
+  border-radius: 2px 0 0 2px; }
+
+.pagination a:last-child {
+  border: none;
+  border-radius: 0 2px 2px 0; }
+
+.pagination input {
+  float: left;
+  margin: 0;
+  padding: 0;
+  width: 120px;
+  height: 20px;
+  outline: none;
+  border: none;
+  vertical-align: middle;
+  text-align: center; }
+
+/* /PAGINATION ********************************************************/
+
 
 /* D3nome-specific *********************************************************************/
 
