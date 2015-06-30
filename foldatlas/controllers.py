@@ -278,12 +278,30 @@ class TranscriptSearcher():
         return json.dumps(out)
 
 class CoverageSearcher():
-    def __init__(self, page_num):
-        self.page_size = 5
-        self.experiment_id = 1 # The experiment ID to sort by.
-        self.coverages = self.find_transcripts(page_num);
+    def __init__(self):
 
-    def find_transcripts(self, page_num):
+        # size of pages
+        self.page_size = 5
+
+        # The experiment ID to sort by. Ideally this should have a value for each
+        # transcript, otherwise there will be some missing transcripts...
+        self.experiment_id = 2
+
+    def fetch_page_count(self):
+        # better to do the imports closer to where they are needed
+        from sqlalchemy import func
+        from math import ceil
+
+        transcript_count = db_session \
+            .query(func.count('*')) \
+            .select_from(TranscriptCoverage) \
+            .filter(TranscriptCoverage.experiment_id==self.experiment_id) \
+            .scalar()
+
+        page_count = ceil(transcript_count / self.page_size)
+        return page_count
+
+    def fetch_transcript_data(self, page_num):
         coverages = db_session \
             .query(TranscriptCoverage) \
             .filter(TranscriptCoverage.experiment_id==self.experiment_id) \

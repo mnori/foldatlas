@@ -45,7 +45,10 @@ def search_transcripts_ajax(search_string):
 
 @app.route("/ajax/search-coverage/<page_num>")
 def search_coverage_ajax(page_num):
-	return render_template("coverage-search.html", searcher=CoverageSearcher(page_num))
+	return render_template(
+		"coverage-search.html", 
+		transcript_data=CoverageSearcher().fetch_transcript_data(page_num)
+	)
 
 @app.route("/ajax/transcript/<transcript_id>")
 def view_transcript_ajax(transcript_id):

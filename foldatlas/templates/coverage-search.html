@@ -1,15 +1,13 @@
-
+<!-- This is the bit loaded by AJAX -->
 <table class="coverage-table">
 	<tr>
 		<th>Transcript ID</th>
 		<th>Coverage per nucleotide</th>
 	</tr>
-{% for row in searcher.coverages %}
+{% for row in ranscript_data %}
 	<tr>
 		<td><a href="#" class="transcript-id-link">{{ row.transcript_id }}</a></td>
 		<td>{{ row.measurement }}</td>
 	</tr>
 {% endfor %}
 </table>
-
-[paginator goes here]

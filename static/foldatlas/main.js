@@ -357,7 +357,34 @@ var TranscriptIDSearchController = Class.extend({
 var CoverageSearchController = Class.extend({
 	init: function(browserController) {
 		this.browserController = browserController;
-		this.search(1);
+
+		// initialise pagination
+		$.ajax({
+			url: "/ajax/search-coverage/"+pageNum,
+			context: this
+
+		}).done(function(pageNum)) {
+			// insert pagination HTML
+			var buf = "
+				<div id=\"search-coverage-data\"><!-- filled by paginator AJAX --></div>
+
+                <div id=\"search-coverage-paginator\">
+                    <a href=\"#\" class=\"first\" data-action=\"first\">&laquo;</a>
+                    <a href=\"#\" class=\"previous\" data-action=\"previous\">&lsaquo;</a>
+                    <input type=\"text\" readonly=\"readonly\" data-max-page=\""+pageNum+"\" />
+                    <a href=\"#\" class=\"next\" data-action=\"next\">&rsaquo;</a>
+                    <a href=\"#\" class=\"last\" data-action=\"last\">&raquo;</a>
+                </div>"
+            $("#search-coverage").html(buf);
+
+            // initialise the paginator JS
+            $('#search-coverage-paginator').jqPagination({
+			    paged: this.search // page change callback
+			});
+
+            // retrieve the first page of results.
+			this.search(1);
+		});
 	},
 	search: function(pageNum) {
 		$.ajax({
@@ -365,10 +392,8 @@ var CoverageSearchController = Class.extend({
 			context: this
 		}).done(function(results) {
 
-			// TODO pass in pagination parameters as well
-
-			$("#search-coverage").empty();
-			$("#search-coverage").html(results);
+			$("#search-coverage-data").empty();
+			$("#search-coverage-data").html(results);
 
 			var context = this
 			$(".transcript-id-link").each(function(key, element) {
