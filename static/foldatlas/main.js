@@ -360,21 +360,19 @@ var CoverageSearchController = Class.extend({
 
 		// initialise pagination
 		$.ajax({
-			url: "/ajax/search-coverage/"+pageNum,
-			context: this
+			url: "/ajax/get-coverage-page-count", context: this
 
-		}).done(function(pageNum)) {
+		}).done(function(pageNum) {
 			// insert pagination HTML
-			var buf = "
-				<div id=\"search-coverage-data\"><!-- filled by paginator AJAX --></div>
-
-                <div id=\"search-coverage-paginator\">
-                    <a href=\"#\" class=\"first\" data-action=\"first\">&laquo;</a>
-                    <a href=\"#\" class=\"previous\" data-action=\"previous\">&lsaquo;</a>
-                    <input type=\"text\" readonly=\"readonly\" data-max-page=\""+pageNum+"\" />
-                    <a href=\"#\" class=\"next\" data-action=\"next\">&rsaquo;</a>
-                    <a href=\"#\" class=\"last\" data-action=\"last\">&raquo;</a>
-                </div>"
+			var buf = 
+				"<div id=\"search-coverage-paginator\">" +
+                "    <a href=\"#\" class=\"first\" data-action=\"first\">&laquo;</a>" +
+                "    <a href=\"#\" class=\"previous\" data-action=\"previous\">&lsaquo;</a>" +
+                "    <input type=\"text\" readonly=\"readonly\" data-max-page=\""+pageNum+"\" />" +
+                "    <a href=\"#\" class=\"next\" data-action=\"next\">&rsaquo;</a>" +
+                "    <a href=\"#\" class=\"last\" data-action=\"last\">&raquo;</a>" +
+                "</div>" +
+				"<div id=\"search-coverage-data\"><!-- filled by paginator AJAX --></div>";
             $("#search-coverage").html(buf);
 
             // initialise the paginator JS
@@ -386,12 +384,13 @@ var CoverageSearchController = Class.extend({
 			this.search(1);
 		});
 	},
+
+	// Grabs transcript coverage data via AJAX and displays it in a div
 	search: function(pageNum) {
 		$.ajax({
 			url: "/ajax/search-coverage/"+pageNum,
 			context: this
 		}).done(function(results) {
-
 			$("#search-coverage-data").empty();
 			$("#search-coverage-data").html(results);
 

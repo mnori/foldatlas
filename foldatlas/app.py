@@ -50,6 +50,10 @@ def search_coverage_ajax(page_num):
 		transcript_data=CoverageSearcher().fetch_transcript_data(page_num)
 	)
 
+@app.route("/ajax/get-coverage-page-count")
+def get_coverage_page_count():
+	return str(CoverageSearcher().fetch_page_count())
+
 @app.route("/ajax/transcript/<transcript_id>")
 def view_transcript_ajax(transcript_id):
 	return render_template("transcript-view.html", transcript_view=TranscriptView(transcript_id))

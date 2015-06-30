@@ -281,7 +281,7 @@ class CoverageSearcher():
     def __init__(self):
 
         # size of pages
-        self.page_size = 5
+        self.page_size = 25
 
         # The experiment ID to sort by. Ideally this should have a value for each
         # transcript, otherwise there will be some missing transcripts...
@@ -306,7 +306,8 @@ class CoverageSearcher():
             .query(TranscriptCoverage) \
             .filter(TranscriptCoverage.experiment_id==self.experiment_id) \
             .order_by(TranscriptCoverage.measurement.desc()) \
-            .limit(self.page_size) \
+            .offset((int(page_num) - 1) * self.page_size) \
+            .limit(str(self.page_size)) \
             .all()
 
         return coverages
