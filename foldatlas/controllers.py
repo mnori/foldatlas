@@ -2,7 +2,7 @@ from database import db_session;
 from sqlalchemy import and_
 
 import json, database, settings
-from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement, Experiment
+from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement, Experiment, TranscriptCoverage
 
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
@@ -277,6 +277,23 @@ class TranscriptSearcher():
 
         return json.dumps(out)
 
+class CoverageSearcher():
+    def __init__(self, page_num):
+        self.sort_by_experiment = 1 ## TODO make this user selectable
+        self.transcripts = find_transcripts(page_num);
+
+    def find_transcripts(self):
+        transcripts = db_session \
+            .query(TranscriptCoverage) \
+            .filter(TranscriptCoverage.experiment_id==self.experiment_id) \
+            .order_by(TranscriptCoverage.measurement.desc()) \
+            .all()
+
+        print(transcripts)
+
+
+
+        
 
 
 

@@ -360,9 +360,13 @@ var CoverageSearchController = Class.extend({
 		this.search(1);
 	},
 	search: function(pageNum) {
-
-		// .. load a page of results
-		alert("Search called with ["+pageNum+"]")
+		$.ajax({
+			url: "/ajax/search-coverage/"+pageNum,
+			context: this
+		}).done(function(results) {
+			$("#search-coverage").empty();
+			$("#search-coverage").html(results);
+		});
 	}
 })
 
