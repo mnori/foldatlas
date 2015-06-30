@@ -229,6 +229,25 @@ h2 {
 	font-size: 18px;
 }
 
+table.coverage-table {
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	border-spacing: 0px;
+	border-collapse: collapse;
+}
+
+.coverage-table th, .coverage-table td {
+	padding: 5px 10px;
+	text-align: left;
+}
+
+.coverage-table th {
+	background-color: #ddd;
+	border-bottom: 1px solid #000;
+}
+
 /* D3nome-specific *********************************************************************/
 
 #d3nome {
