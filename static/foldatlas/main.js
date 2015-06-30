@@ -267,15 +267,20 @@ var SearchController = Class.extend({
 			$("#d3nome").hide();
 		}, this));
 		this.initTabs();
-		this.initTranscriptIDSearch();
+		this.transcriptIDSearchController = new TranscriptIDSearchController(browserController);
+		this.coverageSearchController = null; // initialises when tab is selected
 	},
 
 	initTabs: function() {
 		this.initTab($("#search-tab-transcript-id"));
-		this.initTab($("#search-tab-coverage"));
+		this.initTab($("#search-tab-coverage"), $.proxy(function() {
+			if (this.coverageSearchController == null) {
+				this.coverageSearchController = new CoverageSearchController();
+			}
+		}, this));
 	},
 
-	initTab: function(element) {
+	initTab: function(element, tabClickCallback) {
 		this.tabElements.push(element);
 		element.click($.proxy(function(element) {
 			$("#transcript-data").html("")
@@ -294,10 +299,17 @@ var SearchController = Class.extend({
 					currPanelElement.show()
 				}
 			}
+			if (typeof(tabClickCallback) !== "undefined") {
+				tabClickCallback()
+			}
 		}, this, element))
-	},
+	}
+})
 
-	initTranscriptIDSearch: function() {
+
+var TranscriptIDSearchController = Class.extend({
+	init: function(browserController) {
+		this.browserController = browserController;
 
 		var handle = $.proxy(function() {
 			var term = $("#search-transcript-id-text").val();
@@ -339,6 +351,18 @@ var SearchController = Class.extend({
 			// $("#transcript-data").html(results);
 			// this.drawNucleotideMeasurements();
 		});
+	}
+});
+
+var CoverageSearchController = Class.extend({
+	init: function(browserController) {
+		this.browserController = browserController;
+		this.search(1);
+	},
+	search: function(pageNum) {
+
+		// .. load a page of results
+		alert("Search called with ["+pageNum+"]")
 	}
 })
 
