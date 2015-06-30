@@ -279,22 +279,14 @@ class TranscriptSearcher():
 
 class CoverageSearcher():
     def __init__(self, page_num):
-        self.sort_by_experiment = 1 ## TODO make this user selectable
-        self.transcripts = find_transcripts(page_num);
+        self.experiment_id = 1 # The experiment ID to sort by.
+        self.coverages = self.find_transcripts(page_num);
 
-    def find_transcripts(self):
-        transcripts = db_session \
+    def find_transcripts(self, page_num):
+        coverages = db_session \
             .query(TranscriptCoverage) \
             .filter(TranscriptCoverage.experiment_id==self.experiment_id) \
             .order_by(TranscriptCoverage.measurement.desc()) \
             .all()
 
-        print(transcripts)
-
-
-
-        
-
-
-
-
+        return coverages

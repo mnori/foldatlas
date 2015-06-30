@@ -1,0 +1,15 @@
+
+<table>
+	<tr>
+		<th>Transcript ID</th>
+		<th>Coverage</th>
+	</tr>
+{% for row in searcher.coverages %}
+	<tr>
+		<td>{{ row.transcript_id }}</td>
+		<td>{{ row.measurement }}</td>
+	</tr>
+{% endfor %}
+</table>
+
+[paginator goes here]
