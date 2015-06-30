@@ -267,7 +267,7 @@ var SearchController = Class.extend({
 			$("#d3nome").hide();
 		}, this));
 		this.initTabs();
-		this.transcriptIDSearchController = new TranscriptIDSearchController(browserController);
+		this.transcriptIDSearchController = new TranscriptIDSearchController(this.browserController);
 		this.coverageSearchController = null; // initialises when tab is selected
 	},
 
@@ -275,7 +275,7 @@ var SearchController = Class.extend({
 		this.initTab($("#search-tab-transcript-id"));
 		this.initTab($("#search-tab-coverage"), $.proxy(function() {
 			if (this.coverageSearchController == null) {
-				this.coverageSearchController = new CoverageSearchController();
+				this.coverageSearchController = new CoverageSearchController(this.browserController);
 			}
 		}, this));
 	},
@@ -364,8 +364,22 @@ var CoverageSearchController = Class.extend({
 			url: "/ajax/search-coverage/"+pageNum,
 			context: this
 		}).done(function(results) {
+
+			// TODO pass in pagination parameters as well
+
 			$("#search-coverage").empty();
 			$("#search-coverage").html(results);
+
+			var context = this
+			$(".transcript-id-link").each(function(key, element) {
+				element = $(element)
+				element.click(function(ev) {
+					ev.preventDefault()
+					element = $(ev.target)
+					var transcript_id = element.html()
+					context.browserController.selectTranscript(transcript_id)
+				});
+			});
 		});
 	}
 })
