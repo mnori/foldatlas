@@ -7,7 +7,7 @@ var BrowserController = Class.extend({
 		this.staticBase = config.staticBaseUrl;
 		this.reactivities = {};
 		this.drawNucleotideMeasurements();
-		this.searchController = new SearchController();
+		this.searchController = new SearchController(this);
 	},
 
 	// Jump to a specific transcript page
@@ -243,8 +243,14 @@ var BrowserController = Class.extend({
 var SearchController = Class.extend({
 
 	// Constructor
-	init: function() {
+	init: function(browserController) {
+		this.browserController = browserController;
 		this.tabElements = []
+		this.initTabs();
+		this.initTranscriptIDSearch();
+	},
+
+	initTabs: function() {
 		this.initTab($("#search-tab-browser"));
 		this.initTab($("#search-tab-transcript-id"));
 		this.initTab($("#search-tab-coverage"));
@@ -253,13 +259,11 @@ var SearchController = Class.extend({
 	initTab: function(element) {
 		this.tabElements.push(element);
 		element.click($.proxy(function(element) {
+			$("#transcript-data").html("")
 			var clickedElement = $(element);
 
 			for (var i = 0; i < this.tabElements.length; i++) {
-
 				var currElement = this.tabElements[i];
-				console.log(currElement.attr("id"))
-
 				var currPanelElement = $("#"+currElement.data("ui-id"));
 
 				if (clickedElement.attr("id") != currElement.attr("id")) {
@@ -272,13 +276,50 @@ var SearchController = Class.extend({
 				}
 			}
 		}, this, element))
+	},
 
-		// console.log(panelElement);
+	initTranscriptIDSearch: function() {
 
-		// this.tabElements.push();
-		// element.click(function() {
-		// 	alert("Booom!");
-		// })
+		var handle = $.proxy(function() {
+			var term = $("#search-transcript-id-text").val();
+			this.searchTranscriptID(term)
+		}, this)
+
+		$("#search-transcript-id-submit").click(handle);
+		$('#search-transcript-id-text').on("keypress", $.proxy(function(e) {
+        	if (e.keyCode == 13) handle()
+        }, this));
+	},
+
+	searchTranscriptID: function(term) {
+		$.ajax({
+			url: "/ajax/search-transcript/"+term,
+			context: this
+		}).done(function(results) {
+			results = $.parseJSON(results);		
+
+			if (results.length <= 0) {
+				$("#transcript-data").html("<div class=\"message\">No transcripts found matching \""+term+"\"</div>")
+
+			} else {
+				var exactMatch = false;
+				for (var i = 0; i < results.length; i++) {
+					if (results[i] == term) {
+						// found exact match
+						this.browserController.selectTranscript(term);
+						return;
+					}
+				}
+				this.browserController.selectTranscript(results[0]);
+			}
+
+			// selectTranscript(transcriptID)
+
+			// $("#loading-indicator").hide();
+			// $("#transcript-data").empty();
+			// $("#transcript-data").html(results);
+			// this.drawNucleotideMeasurements();
+		});
 	}
 })
 

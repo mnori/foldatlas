@@ -70,27 +70,32 @@
 
     <div id="header">
         FoldAtlas
-        <div id="search-quick">
-            <input type="text" value="Quick Search" />
-        </div>
+        <!-- <div id="search-quick">
+            <input type="text" id="search-quick-text" value="Quick Search" />
+        </div> -->
     </div>
 
     <div id="content">
 
-        <div id="search">
-            <div class="tab active" id="search-tab-browser" data-ui-id="d3nome"><i class="fa fa-search"></i>&nbsp;Genome</div>
-            <div class="tab" id="search-tab-transcript-id" data-ui-id="search-transcript-id"><i class="fa fa-search"></i>&nbsp;Transcript ID</div>
-            <div class="tab" id="search-tab-coverage" data-ui-id="search-coverage"><i class="fa fa-search"></i>&nbsp;Coverage</div>
+        <div id="search" style="display: none;">
+            <div id="search-tabs" style="display: none;">
+                <div class="tab active" id="search-tab-transcript-id" data-ui-id="search-transcript-id"><i class="fa fa-search"></i>&nbsp;Transcript ID</div>
+                <div class="tab" id="search-tab-coverage" data-ui-id="search-coverage"><i class="fa fa-search"></i>&nbsp;Coverage</div>
+            </div>
+            
+            <div id="search-transcript-id" style="display: none;">
+                <div id="search-transcript-id-container">
+                    <input type="text" id="search-transcript-id-text" />
+                    <input type="submit" id="search-transcript-id-submit" />
+                </div>
+            </div>
+
+            <div id="search-coverage" style="display: none;">Coverage search</div>
         </div>
 
         <!-- this empty div will be filled by d3nome -->
         <!-- it can be hidden by choosing another search method -->
         <div id="d3nome"></div>
-
-        <div id="search-transcript-id" style="display: none;">Transcript ID search</div>
-
-        <div id="search-coverage" style="display: none;">Coverage search</div>
-
 
         <!-- TODO make this reload the page. Dynamically changing the chromosome is not supported. -->    
         <!-- Select your chromosome:     
