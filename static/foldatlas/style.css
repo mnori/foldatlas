@@ -23,6 +23,10 @@ body {
 	position: relative;
 }
 
+#title {
+	cursor: pointer;
+}
+
 #search-tabs {
 	clear: both;
 	position: relative;

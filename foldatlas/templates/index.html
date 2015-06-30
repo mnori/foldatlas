@@ -1,9 +1,14 @@
+{% if search is not defined %}
+    {% set search = False %}
+{% endif %}
+
 <!DOCTYPE HTML>
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-    
+    <title>FoldAtlas</title>
+
     <link rel="stylesheet" type="text/css" href="{{ settings.static_base_url }}/foldatlas/jquery-ui.css" />
     <link rel="stylesheet" type="text/css" href="{{ settings.static_base_url }}/foldatlas/style.css" />
     <link rel="stylesheet" type="text/css" href="{{ settings.static_base_url }}/assets/font-awesome/css/font-awesome.min.css" />
@@ -69,14 +74,13 @@
     <div id="progress"></div>
 
     <div id="header">
-        FoldAtlas
-
+        <span id="title">FoldAtlas</span>
         <a href="#" id="search-button"><i class="fa fa-search"></i>Search</a>
     </div>
 
     <div id="content">
 
-        <div id="search" style="display: none;">
+        <div id="search" {% if not search %}style="display: none;"{% endif %}>
             <div id="search-tabs">
                 <div class="tab active" id="search-tab-transcript-id" data-ui-id="search-transcript-id"><i class="fa fa-search"></i>&nbsp;Transcript ID</div>
                 <div class="tab" id="search-tab-coverage" data-ui-id="search-coverage"><i class="fa fa-search"></i>&nbsp;Coverage</div>
@@ -94,18 +98,7 @@
 
         <!-- this empty div will be filled by d3nome -->
         <!-- it can be hidden by choosing another search method -->
-        <div id="d3nome"></div>
-
-        <!-- TODO make this reload the page. Dynamically changing the chromosome is not supported. -->    
-        <!-- Select your chromosome:     
-        <select id="chromosome-selector">
-            {% for chromosome in chromosomes %}
-                <option value="{{ chromosome.chromosome_id }}">{{ chromosome.chromosome_id }}</option>
-            {% endfor %}
-        </select><br /><br /> -->
-
-        <!-- this empty div will be filled by Genoverse -->
-        <div id="genoverse"></div>
+        <div id="d3nome" {% if search %}style="display: none;"{% endif %}></div>
 
         <!-- Transcript data is added here -->
         <div id="transcript-data">

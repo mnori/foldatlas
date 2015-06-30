@@ -8,6 +8,7 @@ var BrowserController = Class.extend({
 		this.reactivities = {};
 		this.drawNucleotideMeasurements();
 		this.searchController = new SearchController(this);
+		$("#title").click($.proxy(function() { this.goHome(); }, this));
 	},
 
 	// Jump to a specific transcript page
@@ -25,6 +26,15 @@ var BrowserController = Class.extend({
 			$("#transcript-data").html(results);
 			this.drawNucleotideMeasurements();
 		});
+	},
+
+	// Reset to landing page
+	goHome: function() {
+		this.changeUrl("", "/")
+		$("#search").hide()
+		$("#d3nome").show();
+		$("#loading-indicator").hide();
+		$("#transcript-data").empty();
 	},
 
 	// HTML5 change URL method
