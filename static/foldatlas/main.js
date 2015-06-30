@@ -18,6 +18,8 @@ var BrowserController = Class.extend({
 			url: "/ajax/transcript/"+transcriptID,
 			context: this
 		}).done(function(results) {
+			$("#search").hide()
+			$("#d3nome").show();
 			$("#loading-indicator").hide();
 			$("#transcript-data").empty();
 			$("#transcript-data").html(results);
@@ -28,7 +30,7 @@ var BrowserController = Class.extend({
 	// HTML5 change URL method
 	changeUrl: function(title, url) {
 	    if (typeof (history.pushState) != "undefined") {
-	        var obj = { Page: title, Url: url };
+	        var obj = { Page: "FoldAtlas: "+title, Url: url };
 	        history.pushState(obj, obj.Page, obj.Url);
 	    } else {
 	    	// TODO show a prettier warning
@@ -246,12 +248,19 @@ var SearchController = Class.extend({
 	init: function(browserController) {
 		this.browserController = browserController;
 		this.tabElements = []
+
+		$("#search-button").click($.proxy(function(ev) {
+			ev.preventDefault()
+			this.browserController.changeUrl("Search", "/search");
+			$("#transcript-data").empty();
+			$("#search").show()
+			$("#d3nome").hide();
+		}, this));
 		this.initTabs();
 		this.initTranscriptIDSearch();
 	},
 
 	initTabs: function() {
-		this.initTab($("#search-tab-browser"));
 		this.initTab($("#search-tab-transcript-id"));
 		this.initTab($("#search-tab-coverage"));
 	},

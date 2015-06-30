@@ -30,7 +30,7 @@ body {
 	border-bottom: 1px solid #000;
 }
 
-#search > .tab {
+#search-tabs > .tab {
 	display: block;
 	float: left;
 	line-height: 16px;
@@ -50,7 +50,7 @@ body {
 	cursor: pointer;
 }
 
-#search > .tab.active {
+#search-tabs > .tab.active {
 
 	padding: 12px;
 	margin-left: 8px;
@@ -63,28 +63,22 @@ body {
 	cursor: default;
 }
 
-#search-quick {
+#search-button {
 	display: block;
 	font-size: 14px;
-	width: 500px;
+	background-color: rgba(0, 0, 0, 0.5);
+	padding: 10px 15px;
+	color: #fff;
+	text-decoration: none;
+	line-height: 14px;
 
-	position: absolute;
-	bottom: 0px;
-	right: 0px;
-}
-
-#search-quick > input {
+	border-radius: 10px 0px 0px 0px;
 	border-top: 1px solid #000;
 	border-left: 1px solid #000;
 	border-bottom: 0 none;
 	border-right: 0 none;
-	background-color: rgba(0, 0, 0, 0.5);
-	color: #fff;
-	padding: 5px;
-	font-size: 14px;
-	line-height: 14px;
 
-	width: 200px;
+
 	position: absolute;
 	bottom: 0px;
 	right: 0px;
