@@ -1,5 +1,8 @@
 <h1>{{ transcript_view.transcript_id }}</h1>
 
+{% set structure_view = transcript_view.structure_view %}
+{% include "structure-view.html" %}
+
 {% set nucleotide_measurement_view = transcript_view.nucleotide_measurement_view %}
 {% include "nucleotide-measurement-view.html" %}
 

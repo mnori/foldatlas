@@ -27,30 +27,31 @@ from models import Strain, Gene, Transcript, Feature, AlignmentEntry, Nucleotide
 def hydrate_db():
     try:
 
-        # print("Rebuilding schema...")
-        # Base.metadata.drop_all(bind=engine)
-        # Base.metadata.create_all(bind=engine)
+        print("Rebuilding schema...")
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
 
-        # # Add the annotations
-        # SequenceHydrator().hydrate() 
+        # Add the annotations
+        SequenceHydrator().hydrate() 
 
-        # # Add DMS reactivities
-        # NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
-        # CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
+        # Add DMS reactivities
+        NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
+        CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
 
-        # # Add ribosome profiling
-        # NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
-        # CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
+        # Add ribosome profiling
+        NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
+        CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
 
-        # # Do alignments so we can see polymorphism
-        # # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
-        # TranscriptAligner().align() 
+        # Do alignments so we can see polymorphism
+        # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
+        TranscriptAligner().align() 
 
-        # # Import RNA structures
-        # StructureHydrator().hydrate(settings.structures_in_silico)
-        # StructureHydrator().hydrate(settings.structures_in_vivo)
+        # Import RNA structures
+        StructureHydrator().hydrate(settings.structures_in_silico)
+        StructureHydrator().hydrate(settings.structures_in_vivo)
 
         PcaHydrator().hydrate(settings.structures_in_silico)
+        PcaHydrator().hydrate(settings.structures_in_vivo)
 
         print("Hydration Complete.")
 
@@ -614,8 +615,8 @@ class PcaHydrator():
         # Add the PC data to the DB
         for structure_id in structures:
             structure = structures[structure_id]
-            structure.pc_1 = float(pca_results[structure.id][0])
-            structure.pc_2 = float(pca_results[structure.id][1])
+            structure.pc1 = float(pca_results[structure.id][0])
+            structure.pc2 = float(pca_results[structure.id][1])
             db_session.add(structure)
         db_session.commit()
 

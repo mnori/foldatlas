@@ -132,6 +132,7 @@ class TranscriptView():
 
         # TODO try to fetch transcript ID first, then if it works do the rest of the stuff
         self.transcript_id = transcript_id
+        self.structure_view = StructureView(self.transcript_id, settings.reference_strain_id)
         self.nucleotide_measurement_view = NucleotideMeasurementView(self.transcript_id, settings.reference_strain_id)
         self.alignment_view = AlignmentView(self.transcript_id)
 
@@ -196,7 +197,6 @@ class AlignmentView():
         self.build_alignment_entries()
 
     def build_alignment_entries(self):
-
         self.alignment_rows = []
 
         # fetch the alignment rows from the DB, using the ORM
@@ -311,3 +311,53 @@ class CoverageSearcher():
             .all()
 
         return coverages
+
+class StructureView():
+    def __init__(self, transcript_id, strain_id):
+        self.transcript_id = transcript_id
+        self.strain_id = strain_id
+        self.build_entries([3, 4])
+
+    def build_entries(self, experiment_ids):
+
+        from models import Structure
+
+        # Load experiments
+        experiments = db_session \
+            .query(Experiment) \
+            .filter(Experiment.id.in_(experiment_ids)) \
+            .all()
+
+        data = {}
+
+        for experiment in experiments:
+
+            experiment_data = {
+                "id": experiment.id,
+                "type": experiment.type,
+                "description": experiment.description,
+                "data": []
+            }
+
+            # fetch all Structure objects that match the IDs
+            results = db_session \
+                .query(Structure) \
+                .filter(
+                    Structure.experiment_id==experiment.id,
+                    Structure.strain_id==self.strain_id,
+                    Structure.transcript_id==self.transcript_id
+                ) \
+                .all()
+
+            # add the structures to output json
+            for structure in results:
+                experiment_data["data"].append({
+                    "id": structure.id,
+                    "energy": structure.energy,
+                    "pc1": structure.pc1,
+                    "pc2": structure.pc2
+                })
+
+            data[experiment.id] = experiment_data
+
+        self.data_json = json.dumps(data)
