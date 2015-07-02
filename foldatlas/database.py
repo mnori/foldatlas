@@ -20,29 +20,30 @@ Base.query = db_session.query_property()
 
 import models
 
-from models import Strain, Gene, Transcript, Feature, AlignmentEntry, NucleotideMeasurement, GeneLocation, Experiment, TranscriptCoverage
+from models import Strain, Gene, Transcript, Feature, AlignmentEntry, NucleotideMeasurement, \
+    GeneLocation, Experiment, TranscriptCoverage, Structure, StructurePosition
 
 def hydrate_db():
     try:
 
-        # print("Rebuilding schema...")
-        # Base.metadata.drop_all(bind=engine)
-        # Base.metadata.create_all(bind=engine)
+        print("Rebuilding schema...")
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
 
-        # # Add the annotations
-        # SequenceHydrator().hydrate() 
+        # Add the annotations
+        SequenceHydrator().hydrate() 
 
-        # # Add DMS reactivities
-        # NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
-        # CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
+        # Add DMS reactivities
+        NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
+        CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
 
-        # # Add ribosome profiling
-        # NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
-        # CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
+        # Add ribosome profiling
+        NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
+        CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
 
-        # # Do alignments so we can see polymorphism
-        # # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
-        # TranscriptAligner().align() 
+        # Do alignments so we can see polymorphism
+        # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
+        TranscriptAligner().align() 
 
         # Import RNA structures
         StructureHydrator().hydrate(settings.structures_in_silico)
@@ -490,13 +491,13 @@ class StructureHydrator():
     def hydrate(self, experiment_config):
 
         # Add the new experiment row to the DB
-        # experiment = Experiment(
-        #     id=experiment_config["experiment_id"],
-        #     type=experiment_config["type"],
-        #     description=experiment_config["description"]
-        # )
-        # db_session.add(experiment)
-        # db_session.commit() # insert the experiment into the DB.
+        experiment = Experiment(
+            id=experiment_config["experiment_id"],
+            type=experiment_config["type"],
+            description=experiment_config["description"]
+        )
+        db_session.add(experiment)
+        db_session.commit() # insert the experiment into the DB.
 
         print("Importing structures for ["+experiment_config["description"]+"]")
 
@@ -514,33 +515,47 @@ class StructureHydrator():
                 self.parse_ct(structure_filepath, transcript_id, experiment_config)
 
     def parse_ct(self, ct_filepath, transcript_id, experiment_config):
+        n_structs = 0
         with open(ct_filepath) as ct_file:
             for line in ct_file:
                 # if it's an energy line, we're looking at a brand new structure
                 if "ENERGY" in line:
                     # Parse the energy out using regex
                     search = re.search('ENERGY = (-[0-9\.]+)', line)
-                    print("["+search.group(1)+"]")
-                    # structure = add_structure()
+                    energy = search.group(1)
 
+                    # Insert the new structure row
+                    structure = Structure(
+                        experiment_id=experiment_config["experiment_id"],
+                        strain_id=experiment_config["strain_id"],
+                        transcript_id=transcript_id,
+                        energy=energy
+                    )
+                    db_session.add(structure)
 
+                    # insert the experiment into the DB. can now access ID
+                    db_session.commit() 
+                    n_structs += 1
 
+                else:
 
+                    # the .ct format is a bit annoying because it's not tab delimited.
+                    # instead it's delimited by variable numbers of spaces.
 
+                    # calling split() with no parameter makes it split on any length 
+                    # of whitespace - i.e. so that each element is 1 word
+                    bits = line.strip().split()
+                    from_pos = bits[0]
+                    to_pos = bits[4]
+                    letter = bits[1]
 
+                    structure_position = StructurePosition(
+                        structure_id=structure.id,
+                        position=from_pos,
+                        paired_to_position=to_pos,
+                        letter=letter
+                    )
+                    db_session.add(structure_position)
 
-
-
-
-
-# experiment
-#     id 
-#     description
-
-# experiment_transcript 
-#     experiment_id
-#     strain_id
-#     transcript_id
-
-# experiment_transcript_reactivity
-#     - basically the current table
+        db_session.commit() # insert remaining data into DB
+        print ("["+str(n_structs)+"] structures added")

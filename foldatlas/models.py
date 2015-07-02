@@ -296,8 +296,7 @@ class Structure(Base):
     transcript_id = Column(String(256), ForeignKey("transcript.id"), nullable=False)
     energy = Column(Float, nullable=False)
 
-    def __init__(self, id, experiment_id, strain_id, transcript_id, energy):
-        self.id = id
+    def __init__(self, experiment_id, strain_id, transcript_id, energy):
         self.experiment_id = experiment_id
         self.strain_id = strain_id
         self.transcript_id = transcript_id

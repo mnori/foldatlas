@@ -25,7 +25,8 @@ structures_in_silico = {
 	"type": "rna_structure",
 	"description": "In silico structure prediction",
 	"sauce_filepath": "/vagrant/sauce_data/structures/in_silico",
-	"sauce_ext": ".ct"
+	"sauce_ext": ".ct",
+	"strain_id": "Col_0"
 }
 
 structures_in_vivo = {
@@ -33,7 +34,8 @@ structures_in_vivo = {
 	"type": "rna_structure",
 	"description": "In vivo experimental structure prediction",
 	"sauce_filepath": "/vagrant/sauce_data/structures/in_vivo",
-	"sauce_ext": "_con.ct"
+	"sauce_ext": "_con.ct",
+	"strain_id": "Col_0"
 }
 
 base_path = "/vagrant/foldatlas"
