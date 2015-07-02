@@ -20,6 +20,22 @@ ribosome_profile_experiment = {
 	"description": "Ribosome occupancies",
 }
 
+structures_in_silico = {
+	"experiment_id": 3,
+	"type": "rna_structure",
+	"description": "In silico structure prediction",
+	"sauce_filepath": "/vagrant/sauce_data/structures/in_silico",
+	"sauce_ext": ".ct"
+}
+
+structures_in_vivo = {
+	"experiment_id": 4,
+	"type": "rna_structure",
+	"description": "In vivo experimental structure prediction",
+	"sauce_filepath": "/vagrant/sauce_data/structures/in_vivo",
+	"sauce_ext": "_con.ct"
+}
+
 base_path = "/vagrant/foldatlas"
 
 static_base_url = "http://static.foldatlas.dev"

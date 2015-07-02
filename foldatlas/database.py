@@ -11,6 +11,7 @@ from Bio import AlignIO
 
 import settings, os
 import sys
+import re
 
 engine = create_engine(settings.database_uri, convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
@@ -24,27 +25,28 @@ from models import Strain, Gene, Transcript, Feature, AlignmentEntry, Nucleotide
 def hydrate_db():
     try:
 
-        # # TEMP
-        # SequenceHydrator().cache_gene_locations(settings.strains[0])
+        # print("Rebuilding schema...")
+        # Base.metadata.drop_all(bind=engine)
+        # Base.metadata.create_all(bind=engine)
 
-        print("Rebuilding schema...")
-        Base.metadata.drop_all(bind=engine)
-        Base.metadata.create_all(bind=engine)
+        # # Add the annotations
+        # SequenceHydrator().hydrate() 
 
-        # Add the annotations
-        SequenceHydrator().hydrate() 
+        # # Add DMS reactivities
+        # NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
+        # CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
 
-        # Add DMS reactivities
-        NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
-        CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
+        # # Add ribosome profiling
+        # NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
+        # CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
 
-        # Add ribosome profiling
-        NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
-        CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
+        # # Do alignments so we can see polymorphism
+        # # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
+        # TranscriptAligner().align() 
 
-        # Do alignments so we can see polymorphism
-        # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
-        TranscriptAligner().align() 
+        # Import RNA structures
+        StructureHydrator().hydrate(settings.structures_in_silico)
+        StructureHydrator().hydrate(settings.structures_in_vivo)
 
         print("Hydration Complete.")
 
@@ -69,7 +71,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = 100
+    gene_limit = 10
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -81,7 +83,7 @@ class SequenceHydrator():
 
     # Use the genome sequence and annotation files to populate the database.
     def hydrate(self):
-        n_strains = 0;
+        n_strains = 0
         for strain in settings.strains:
             self.hydrate_strain(strain)
             n_strains += 1
@@ -417,7 +419,7 @@ class NucleotideMeasurementHydrator():
 
                 # skip transcripts not already in DB
                 if transcript_id not in transcript_ids:
-                    continue;
+                    continue
 
                 if len(bits) <= 1: # no measurements present
                     continue
@@ -425,7 +427,7 @@ class NucleotideMeasurementHydrator():
                 count_strs = bits[1:]
 
                 # go through reactivity entries, adding each to the database.
-                position = 0;
+                position = 0
                 for count_str in count_strs:
                     position += 1
                     if (count_str != "NA"): # skip adding "NA" entries.
@@ -453,6 +455,7 @@ def get_inserted_transcript_ids():
 
     return transcript_ids
 
+# Loads coverage data from a single file into the database.
 class CoverageHydrator():
     def hydrate(self, experiment_config):
 
@@ -470,7 +473,7 @@ class CoverageHydrator():
 
                 # skip transcripts not already in DB
                 if transcript_id not in transcript_ids:
-                    continue;
+                    continue
 
                 obj = TranscriptCoverage(
                     experiment_id=experiment_config["experiment_id"],
@@ -481,6 +484,54 @@ class CoverageHydrator():
                 db_session.add(obj)
 
         db_session.commit()
+
+class StructureHydrator():
+
+    def hydrate(self, experiment_config):
+
+        # Add the new experiment row to the DB
+        # experiment = Experiment(
+        #     id=experiment_config["experiment_id"],
+        #     type=experiment_config["type"],
+        #     description=experiment_config["description"]
+        # )
+        # db_session.add(experiment)
+        # db_session.commit() # insert the experiment into the DB.
+
+        print("Importing structures for ["+experiment_config["description"]+"]")
+
+        transcript_ids = get_inserted_transcript_ids()
+        for transcript_id in transcript_ids:
+
+            structure_filepath = \
+                experiment_config["sauce_filepath"] + \
+                "/"+transcript_id+experiment_config["sauce_ext"]
+
+            if not os.path.isfile(structure_filepath):
+                print("["+structure_filepath+"] skipped")
+            else:
+                print("["+structure_filepath+"] found")
+                self.parse_ct(structure_filepath, transcript_id, experiment_config)
+
+    def parse_ct(self, ct_filepath, transcript_id, experiment_config):
+        with open(ct_filepath) as ct_file:
+            for line in ct_file:
+                # if it's an energy line, we're looking at a brand new structure
+                if "ENERGY" in line:
+                    # Parse the energy out using regex
+                    search = re.search('ENERGY = (-[0-9\.]+)', line)
+                    print("["+search.group(1)+"]")
+                    # structure = add_structure()
+
+
+
+
+
+
+
+
+
+
 
 # experiment
 #     id 

@@ -228,7 +228,7 @@ class Experiment(Base):
     __tablename__ = "experiment"
 
     id = Column(Integer, primary_key=True, autoincrement=False)
-    type = Column(Enum("dms_reactivity", "ribosome_profile"), nullable=False)
+    type = Column(Enum("dms_reactivity", "ribosome_profile", "rna_structure"), nullable=False)
     description = Column(Text, nullable=False)
 
     def __init__(self, id, type, description):
@@ -285,18 +285,43 @@ class TranscriptCoverage(Base):
             self.experiment_id, self.strain_id, self.transcript_id
         )
 
+# Represents a structure prediction for a single RNA sequence
+class Structure(Base):
 
+    __tablename__ = "structure"
 
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    experiment_id = Column(Integer, ForeignKey("experiment.id"), nullable=False)
+    strain_id = Column(String(256), ForeignKey("strain.id"), nullable=False)
+    transcript_id = Column(String(256), ForeignKey("transcript.id"), nullable=False)
+    energy = Column(Float, nullable=False)
 
-    # 
-    # strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
-    # sequence = Column(Text, nullable=False)
+    def __init__(self, id, experiment_id, strain_id, transcript_id, energy):
+        self.id = id
+        self.experiment_id = experiment_id
+        self.strain_id = strain_id
+        self.transcript_id = transcript_id
+        self.energy = energy
 
-    # def __init__(self, transcript_id=None, strain_id=None, sequence=None):
-    #     self.transcript_id = transcript_id
-    #     self.strain_id = strain_id
-    #     self.sequence = sequence
+    def __repr__(self):
+        return "<Structure %r>" % (self.id)
 
-    # def __repr__(self):
-    #     return "<AlignmentEntry %r-%r>" % (self.transcript_id, self.strain_id)
+# Represents a single position within an RNA sequence structure prediction
+class StructurePosition(Base):
+
+    __tablename__ = "structure_position"
+
+    structure_id = Column(Integer, ForeignKey("structure.id"), primary_key=True)
+    position = Column(Integer, primary_key=True, autoincrement=False)
+    paired_to_position = Column(Integer, nullable=True) # null means unpaired
+    letter = Column(Enum("T", "A", "C", "G"), nullable=False)
+
+    def __init__(self, structure_id, position, paired_to_position, letter):
+        self.structure_id = structure_id
+        self.position = position
+        self.paired_to_position = paired_to_position
+        self.letter = letter
+
+    def __repr__(self):
+        return "<StructurePosition %r-%r>" % (self.structure_id, self.positoin)
 
