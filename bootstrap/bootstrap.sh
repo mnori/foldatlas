@@ -66,9 +66,9 @@ function install() {
 	
 	# lots of scikit dependencies. use apt-get - much faster to grab the binaries
 	# than compile from scratch using pip3
-	apt-get install build-essential python3-dev python3-setuptools 
-	apt-get install libatlas-dev libatlas3gf-base
-	apt-get install python3-numpy python3-scipy
+	apt-get install -y build-essential python3-dev python3-setuptools 
+	apt-get install -y libatlas-dev libatlas3gf-base
+	apt-get install -y python3-numpy python3-scipy
 
 	# must use pip3 for scikit itself
 	pip3 install scikit-learn

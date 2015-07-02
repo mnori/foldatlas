@@ -295,12 +295,16 @@ class Structure(Base):
     strain_id = Column(String(256), ForeignKey("strain.id"), nullable=False)
     transcript_id = Column(String(256), ForeignKey("transcript.id"), nullable=False)
     energy = Column(Float, nullable=False)
+    pc_1 = Column(Float, nullable=False, default=0)
+    pc_2 = Column(Float, nullable=False, default=0)
 
-    def __init__(self, experiment_id, strain_id, transcript_id, energy):
+    def __init__(self, experiment_id, strain_id, transcript_id, energy, pc_1=0, pc_2=0):
         self.experiment_id = experiment_id
         self.strain_id = strain_id
         self.transcript_id = transcript_id
         self.energy = energy
+        self.pc_1 = pc_1
+        self.pc_2 = pc_2
 
     def __repr__(self):
         return "<Structure %r>" % (self.id)
@@ -322,5 +326,5 @@ class StructurePosition(Base):
         self.letter = letter
 
     def __repr__(self):
-        return "<StructurePosition %r-%r>" % (self.structure_id, self.positoin)
+        return "<StructurePosition %r-%r>" % (self.structure_id, self.position)
 

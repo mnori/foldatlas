@@ -8,6 +8,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Align.Applications import ClustalwCommandline
 from Bio import AlignIO
+from sklearn import decomposition
 
 import settings, os
 import sys
@@ -26,28 +27,30 @@ from models import Strain, Gene, Transcript, Feature, AlignmentEntry, Nucleotide
 def hydrate_db():
     try:
 
-        print("Rebuilding schema...")
-        Base.metadata.drop_all(bind=engine)
-        Base.metadata.create_all(bind=engine)
+        # print("Rebuilding schema...")
+        # Base.metadata.drop_all(bind=engine)
+        # Base.metadata.create_all(bind=engine)
 
-        # Add the annotations
-        SequenceHydrator().hydrate() 
+        # # Add the annotations
+        # SequenceHydrator().hydrate() 
 
-        # Add DMS reactivities
-        NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
-        CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
+        # # Add DMS reactivities
+        # NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
+        # CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
 
-        # Add ribosome profiling
-        NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
-        CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
+        # # Add ribosome profiling
+        # NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
+        # CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
 
-        # Do alignments so we can see polymorphism
-        # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
-        TranscriptAligner().align() 
+        # # Do alignments so we can see polymorphism
+        # # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
+        # TranscriptAligner().align() 
 
-        # Import RNA structures
-        StructureHydrator().hydrate(settings.structures_in_silico)
-        StructureHydrator().hydrate(settings.structures_in_vivo)
+        # # Import RNA structures
+        # StructureHydrator().hydrate(settings.structures_in_silico)
+        # StructureHydrator().hydrate(settings.structures_in_vivo)
+
+        PcaHydrator().hydrate(settings.structures_in_silico)
 
         print("Hydration Complete.")
 
@@ -559,3 +562,86 @@ class StructureHydrator():
 
         db_session.commit() # insert remaining data into DB
         print ("["+str(n_structs)+"] structures added")
+
+# Carries out PCA using structures
+class PcaHydrator():
+    def hydrate(self, experiment_config):
+
+        transcript_structures = {}
+
+        # Get all transcript IDs for which there are structures
+        results = db_session \
+            .query(Structure.transcript_id) \
+            .filter(
+                Structure.experiment_id==experiment_config["experiment_id"],
+                Structure.strain_id==experiment_config["strain_id"]
+            ) \
+            .distinct() \
+            .all()
+
+        for result in results:
+            
+            transcript_id = result[0]
+            self.process_transcript_id(experiment_config, transcript_id)
+    
+    def process_transcript_id(self, experiment_config, transcript_id):
+
+        # this is an implicit join - no need to use join() here.
+        results = db_session \
+            .query(Structure, StructurePosition) \
+            .filter(
+                StructurePosition.structure_id==Structure.id,
+                Structure.experiment_id==experiment_config["experiment_id"],
+                Structure.strain_id==experiment_config["strain_id"],
+                Structure.transcript_id==transcript_id
+            ) \
+            .order_by(Structure.id, StructurePosition.position) \
+            .all()
+
+        # Get all the structures and structure_position elements for this transcript_id
+        # Also keep a store of the structure objects
+        structure_vecs = {}
+        structures = {}
+        for structure, structure_position in results:
+            if structure.id not in structure_vecs:
+                structure_vecs[structure.id] = []
+            structure_vecs[structure.id].append(1 if structure_position.paired_to_position != 0 else 0)
+            structures[structure.id] = structure
+
+        # Do PCA using structure vectors
+        pca_results = self.do_pca(structure_vecs)
+
+        # Add the PC data to the DB
+        for structure_id in structures:
+            structure = structures[structure_id]
+            structure.pc_1 = float(pca_results[structure.id][0])
+            structure.pc_2 = float(pca_results[structure.id][1])
+            db_session.add(structure)
+        db_session.commit()
+
+        
+    def do_pca(self, structure_vecs):
+
+        data = list(structure_vecs.values())
+
+        # Do PCA.
+        # Results always listed in the order that they were added.
+        pca = decomposition.PCA(n_components=2)
+        pca.fit(data)
+        results = pca.transform(data)
+
+        # Rearrange the data so that it is keyed by structure ID
+        out = {}
+        i = 0
+        for structure_id in structure_vecs:
+            out[structure_id] = list(results[i])
+            i += 1
+
+        return out
+
+
+
+
+
+
+
