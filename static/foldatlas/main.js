@@ -6,7 +6,7 @@ var BrowserController = Class.extend({
 		this.nucsPerRow = 80;
 		this.staticBase = config.staticBaseUrl;
 		this.reactivities = {};
-		this.drawNucleotideMeasurements();
+		this.drawTranscriptData();
 		this.searchController = new SearchController(this);
 		$("#title").click($.proxy(function() { this.goHome(); }, this));
 	},
@@ -24,7 +24,7 @@ var BrowserController = Class.extend({
 			$("#loading-indicator").hide();
 			$("#transcript-data").empty();
 			$("#transcript-data").html(results);
-			this.drawNucleotideMeasurements();
+			this.drawTranscriptData();
 		});
 	},
 
@@ -48,8 +48,8 @@ var BrowserController = Class.extend({
 	    }
 	},
 
-	getMeasurementJson: function() {
-		var html = $("#nucleotide-measurement-json").html();
+	getJsonFromElement: function(elementID) {
+		var html = $("#"+elementID).html();
 		if (html == undefined) { // this means no measurement data to show
 			return null;
 		}
@@ -57,31 +57,98 @@ var BrowserController = Class.extend({
 		return json;
 	},
 
-	drawNucleotideMeasurements: function(reactivities) {
-		var data = this.getMeasurementJson()
-		if (data) {
-			this.drawExperiment(data[1])
-			this.drawExperiment(data[2])
+	drawTranscriptData: function(reactivities) {
+		var structureData = this.getJsonFromElement("structure-json")
+		if (structureData) {
+			this.drawStructureData(structureData[3]);
+			// this.drawStructureData(structureData[4]);
+		}
+
+		var measurementData = this.getJsonFromElement("nucleotide-measurement-json")
+		if (measurementData) {
+			this.drawNucleotideMeasurement(measurementData[1]);
+			this.drawNucleotideMeasurement(measurementData[2]);
 		}
 	},
 
-	// Visualises the measurement data.
-	drawExperiment: function(experiment_data) {
+	drawStructureData: function(dataIn) {
+		var chart_id = "structure-pca-chart_"+dataIn["id"];
+		var buf = 
+			"<h2>"+dataIn["description"]+"</h2>"+
+			"<svg id=\""+chart_id+"\"></svg>"
 
-		var yLabelText = (experiment_data["type"] == "dms_reactivity") 
+		$("#structure-charts").append(buf)
+		$("#structure-charts").append(JSON.stringify(dataIn))
+
+		dataValues = dataIn["data"];
+
+		var margin = {top: 40, right: 40, bottom: 40, left: 40};
+		var totDims = {x: 500, y: 500};
+		var panelDims = {
+			x: totDims.x - margin.left - margin.right,
+			y: totDims.y - margin.left - margin.right
+		};
+
+		// setup x 
+		var xValue = function(d) { return d.pc1; };
+		var xScale = d3.scale.linear()
+			.range([0, panelDims.x])
+			.domain([
+				d3.min(dataValues, xValue), 
+				d3.max(dataValues, xValue)
+			]);
+		var xMap = function(d) { return xScale(xValue(d)); };
+		var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+		// setup y
+		var yValue = function(d) { return d.pc2; };
+	    var yScale = d3.scale.linear()
+	    	.range([panelDims.y, 0])
+	    	.domain([
+				d3.min(dataValues, yValue),
+				d3.max(dataValues, yValue)
+			])
+
+	    var yMap = function(d) { return yScale(yValue(d));};
+	    var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+		// colour (TODO use energy)
+		// var cValue = function(d) { return d.Manufacturer;},
+		//     color = d3.scale.category10();
+
+		// add the graph canvas to the body of the webpage
+		var svg = d3.select("#"+chart_id)
+		    .attr("width", totDims.x)
+		    .attr("height", totDims.y)
+			.append("g")
+		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		console.log(dataValues);
+
+		// add the tooltip area to the webpage (whocares.jpeg)
+		// var tooltip = d3.select("body").append("div")
+		//     .attr("class", "tooltip")
+		//     .style("opacity", 0);
+
+	},
+
+	// Visualises the measurement data.
+	drawNucleotideMeasurement: function(experimentData) {
+
+		var yLabelText = (experimentData["type"] == "dms_reactivity") 
 			? "Reactivity"
 			: "Occupancy";
 
 		// Add header and graph container svg element
 		// Also Add the SVG itself
-		var chart_id = "nucleotide-measurement-chart_"+experiment_data["id"];
+		var chart_id = "nucleotide-measurement-chart_"+experimentData["id"];
 		var buf = 
-			"<h2>"+experiment_data["description"]+"</h2>"+
+			"<h2>"+experimentData["description"]+"</h2>"+
 			"<svg id=\""+chart_id+"\"></svg>"
 
 		$("#nucleotide-measurement-charts").append(buf)
 
-		var data = experiment_data["data"]
+		var data = experimentData["data"]
 		if (data == null) { // can happen
 			return;
 		}
@@ -349,7 +416,7 @@ var TranscriptIDSearchController = Class.extend({
 			// $("#loading-indicator").hide();
 			// $("#transcript-data").empty();
 			// $("#transcript-data").html(results);
-			// this.drawNucleotideMeasurements();
+			// this.drawTranscriptData();
 		});
 	}
 });
