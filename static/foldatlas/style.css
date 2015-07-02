@@ -246,6 +246,11 @@ table.coverage-table {
 	border-bottom: 1px solid #000;
 }
 
+.structure-pca-chart {
+	margin: auto;
+	display: block;
+}
+
 /* PAGINATION *********************************************************/
 
 #pagination-container {

@@ -61,7 +61,7 @@ var BrowserController = Class.extend({
 		var structureData = this.getJsonFromElement("structure-json")
 		if (structureData) {
 			this.drawStructureData(structureData[3]);
-			// this.drawStructureData(structureData[4]);
+			this.drawStructureData(structureData[4]);
 		}
 
 		var measurementData = this.getJsonFromElement("nucleotide-measurement-json")
@@ -71,15 +71,14 @@ var BrowserController = Class.extend({
 		}
 	},
 
+	// Draws a PCA structure plot
 	drawStructureData: function(dataIn) {
 		var chart_id = "structure-pca-chart_"+dataIn["id"];
 		var buf = 
 			"<h2>"+dataIn["description"]+"</h2>"+
-			"<svg id=\""+chart_id+"\"></svg>"
+			"<svg id=\""+chart_id+"\" class=\"structure-pca-chart\"></svg>"
 
 		$("#structure-charts").append(buf)
-		$("#structure-charts").append(JSON.stringify(dataIn))
-
 		dataValues = dataIn["data"];
 
 		var margin = {top: 40, right: 40, bottom: 40, left: 40};
@@ -88,6 +87,8 @@ var BrowserController = Class.extend({
 			x: totDims.x - margin.left - margin.right,
 			y: totDims.y - margin.left - margin.right
 		};
+
+		var energyValue = function(d) { return d.energy; };
 
 		// setup x 
 		var xValue = function(d) { return d.pc1; };
@@ -112,18 +113,59 @@ var BrowserController = Class.extend({
 	    var yMap = function(d) { return yScale(yValue(d));};
 	    var yAxis = d3.svg.axis().scale(yScale).orient("left");
 
-		// colour (TODO use energy)
-		// var cValue = function(d) { return d.Manufacturer;},
-		//     color = d3.scale.category10();
+		var numColors = 9;
+		var heatmapColour = d3.scale.quantize()
+		  	.domain([
+		  		d3.min(dataValues, energyValue),
+		  		d3.max(dataValues, energyValue),
+		  	])
+		  	.range(colorbrewer.RdYlGn[numColors]);
+
+		  console.log(d3.min(dataValues, energyValue),
+		  		d3.max(dataValues, energyValue));
 
 		// add the graph canvas to the body of the webpage
 		var svg = d3.select("#"+chart_id)
 		    .attr("width", totDims.x)
 		    .attr("height", totDims.y)
-			.append("g")
+		  .append("g")
 		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+		// x-axis
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + panelDims.y + ")")
+			.call(xAxis)
+		  .append("text")
+			.attr("class", "label")
+			.attr("x", panelDims.x)
+			.attr("y", -6)
+			.style("text-anchor", "end")
+			.text("PC 1");
+
+		// y-axis
+		svg.append("g")
+			.attr("class", "y axis")
+			.call(yAxis)
+	      .append("text")
+			.attr("class", "label")
+			.attr("transform", "rotate(-90)")
+			.attr("y", 6)
+			.attr("dy", ".71em")
+			.style("text-anchor", "end")
+			.text("PC 2");
+
 		console.log(dataValues);
+
+		// draw dots
+		svg.selectAll(".dot")
+			.data(dataValues)
+		  .enter().append("circle")
+			.attr("class", "dot")
+			.attr("r", 3.5)
+			.attr("cx", xMap)
+			.attr("cy", yMap)
+			.style("fill", function(d) { return heatmapColour(d.energy); }) 
 
 		// add the tooltip area to the webpage (whocares.jpeg)
 		// var tooltip = d3.select("body").append("div")
@@ -182,9 +224,7 @@ var BrowserController = Class.extend({
 
 		// Define the scales
 		var yScale = d3.scale.linear()
-
 			// range maps to the pixel dimensions.
-
 		    // domain describes the range of data to show.
 		    .range([panelDims.y, 0])
 		    .domain([0, d3.max(data, function(d) { return d.measurement; })]);
