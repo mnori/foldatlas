@@ -75,12 +75,13 @@ var BrowserController = Class.extend({
 	// http://bl.ocks.org/weiglemc/6185069
 	drawStructureData: function(dataIn) {
 
+		var experimentID = dataIn["id"]
 		var padding = 0.05; // % margin around the PCA points
-		var chart_id = "structure-pca-chart_"+dataIn["id"];
+		var chart_id = "structure-pca-chart_"+experimentID;
 		var buf = 
 			"<h2>"+dataIn["description"]+"</h2>"+
 			"<svg id=\""+chart_id+"\" class=\"structure-pca-chart\"></svg>"+
-			"<div id=\"structure-plot_"+dataIn.id+"\"></div>";
+			"<div id=\"structure-plot_"+experimentID+"\"></div>";
 
 		$("#structure-charts").append(buf)
 		dataValues = dataIn["data"];
@@ -197,7 +198,7 @@ var BrowserController = Class.extend({
 					.style("opacity", 0);
 			})
 			.on("click", $.proxy(function(d) {
-				this.selectStructure(d.id);
+				this.selectStructure(experimentID, d.id);
 			}, this));
 
 		// add the tooltip area to the webpage (whocares.jpeg)
@@ -207,7 +208,8 @@ var BrowserController = Class.extend({
 
 	},
 
-	selectStructure: function(structureID) {
+	// TODO get rid of experimentID
+	selectStructure: function(experimentID, structureID) {
 		$.ajax({
 			url: "/ajax/structure-plot/"+structureID, 
 			context: this
@@ -215,7 +217,7 @@ var BrowserController = Class.extend({
 			// insert the data into the div
 
 			console.log("structureID: "+structureID);
-			$("#structure-plot_"+structureID).html(data);
+			$("#structure-plot_"+experimentID).html(data);
 		});
 	},
 
