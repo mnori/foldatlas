@@ -241,6 +241,10 @@ table.coverage-table {
 	text-align: left;
 }
 
+table.coverage-table td.yes {
+	background-color: #beb;
+}
+
 .coverage-table th {
 	background-color: #ddd;
 	border-bottom: 1px solid #000;

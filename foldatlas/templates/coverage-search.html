@@ -3,11 +3,17 @@
 	<tr>
 		<th>Transcript ID</th>
 		<th>Coverage per nucleotide</th>
+		<th>Has structures?</th>
 	</tr>
 {% for row in transcript_data %}
 	<tr>
-		<td><a href="#" class="transcript-id-link">{{ row.transcript_id }}</a></td>
-		<td>{{ row.measurement }}</td>
+		<td><a href="#" class="transcript-id-link">{{ row["coverage"].transcript_id }}</a></td>
+		<td>{{ row["coverage"].measurement }}</td>
+		{% if row["structure"] != None %}
+			<td class="yes">yes</td>
+		{% else %}
+			<td>no</td>
+		{% endif %}
 	</tr>
 {% endfor %}
 </table>

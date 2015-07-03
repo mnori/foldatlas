@@ -76,7 +76,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = 10
+    gene_limit = 100
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None

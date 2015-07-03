@@ -302,15 +302,35 @@ class CoverageSearcher():
         return page_count
 
     def fetch_transcript_data(self, page_num):
-        coverages = db_session \
-            .query(TranscriptCoverage) \
-            .filter(TranscriptCoverage.experiment_id==self.experiment_id) \
+
+        from models import Structure
+
+        results = db_session \
+            .query(
+                TranscriptCoverage
+            ) \
+            .filter(
+                TranscriptCoverage.experiment_id==self.experiment_id
+            ) \
+            .outerjoin((
+                Structure, 
+                Structure.transcript_id==TranscriptCoverage.transcript_id,
+            )) \
+            .add_entity(Structure) \
+            .group_by(TranscriptCoverage.transcript_id) \
             .order_by(TranscriptCoverage.measurement.desc()) \
             .offset((int(page_num) - 1) * self.page_size) \
             .limit(str(self.page_size)) \
             .all()
 
-        return coverages
+        out = []
+        for result in results:
+            out.append({
+                "coverage": result[0],
+                "structure": result[1]
+            })
+
+        return out
 
 class StructureView():
     def __init__(self, transcript_id, strain_id):

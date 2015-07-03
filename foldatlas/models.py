@@ -281,7 +281,7 @@ class TranscriptCoverage(Base):
         self.measurement = measurement
 
     def __repr__(self):
-        return "<NucleotideMeasurement %r-%r-%r>" % (
+        return "<TranscriptCoverage %r-%r-%r>" % (
             self.experiment_id, self.strain_id, self.transcript_id
         )
 
