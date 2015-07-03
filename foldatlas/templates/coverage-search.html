@@ -10,9 +10,9 @@
 		<td><a href="#" class="transcript-id-link">{{ row["coverage"].transcript_id }}</a></td>
 		<td>{{ row["coverage"].measurement }}</td>
 		{% if row["structure"] != None %}
-			<td class="yes">yes</td>
+			<td class="yes"><i class="fa fa-check"></i></td>
 		{% else %}
-			<td>no</td>
+			<td><i class="fa fa-times"></i></td>
 		{% endif %}
 	</tr>
 {% endfor %}

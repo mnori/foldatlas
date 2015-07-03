@@ -75,6 +75,7 @@ var BrowserController = Class.extend({
 	// http://bl.ocks.org/weiglemc/6185069
 	drawStructureData: function(dataIn) {
 
+		var padding = 0.05; // % margin around the PCA points
 		var chart_id = "structure-pca-chart_"+dataIn["id"];
 		var buf = 
 			"<h2>"+dataIn["description"]+"</h2>"+
@@ -83,8 +84,8 @@ var BrowserController = Class.extend({
 		$("#structure-charts").append(buf)
 		dataValues = dataIn["data"];
 
-		var margin = {top: 40, right: 40, bottom: 40, left: 40};
-		var totDims = {x: 500, y: 500};
+		var margin = {top: 10, right: 10, bottom: 40, left: 40};
+		var totDims = {x: 400, y: 400};
 		var panelDims = {
 			x: totDims.x - margin.left - margin.right,
 			y: totDims.y - margin.left - margin.right
@@ -94,22 +95,31 @@ var BrowserController = Class.extend({
 
 		// setup x 
 		var xValue = function(d) { return d.pc1; };
+		var minX = d3.min(dataValues, xValue);
+		var maxX = d3.max(dataValues, xValue);
+		var rangeX = maxX - minX;
+		var padX = rangeX * padding;
 		var xScale = d3.scale.linear()
 			.range([0, panelDims.x])
 			.domain([
-				d3.min(dataValues, xValue), 
-				d3.max(dataValues, xValue)
+				minX - padX,
+				maxX + padX
 			]);
+
 		var xMap = function(d) { return xScale(xValue(d)); };
 		var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
 		// setup y
 		var yValue = function(d) { return d.pc2; };
+		var minY = d3.min(dataValues, yValue);
+		var maxY = d3.max(dataValues, yValue);
+		var rangeY = maxY - minY;
+		var padY = rangeY * padding;
 	    var yScale = d3.scale.linear()
 	    	.range([panelDims.y, 0])
 	    	.domain([
-				d3.min(dataValues, yValue),
-				d3.max(dataValues, yValue)
+				minY - padY,
+				maxY + padY
 			])
 
 	    var yMap = function(d) { return yScale(yValue(d));};
@@ -175,15 +185,20 @@ var BrowserController = Class.extend({
 			.style("fill", function(d) { return heatmapColour(d.energy); }) 
 			.on("mouseover", function(d) {
 				tooltip.transition()
-					.duration(200)
-					.style("opacity", .9);
-				tooltip.html("Energy: "+energyValue(d)+" kcal/mol")
+					.duration(0)
+					.style("opacity", 1);
+				tooltip.html("<i class=\"fa fa-fire\"></i> "+energyValue(d)+" kcal/mol")
 					.style("left", (d3.event.pageX) + "px")
 					.style("top", (d3.event.pageY) + "px");
-			}).on("mouseout", function(d) {
+			})
+			.on("mouseout", function(d) {
 				tooltip.transition()
 					.duration(500)
 					.style("opacity", 0);
+			})
+			.on("click", function(d) {
+				console.log("Clicky!");
+				console.log(d);
 			});
 
 		// add the tooltip area to the webpage (whocares.jpeg)
