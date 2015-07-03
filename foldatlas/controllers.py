@@ -381,3 +381,11 @@ class StructureView():
             data[experiment.id] = experiment_data
 
         self.data_json = json.dumps(data)
+
+class StructurePlotView():
+    def __init__(self, structure_id):
+        self.structure_id = structure_id
+
+    def build_plot(self):
+        pass #
+

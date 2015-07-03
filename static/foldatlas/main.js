@@ -79,7 +79,8 @@ var BrowserController = Class.extend({
 		var chart_id = "structure-pca-chart_"+dataIn["id"];
 		var buf = 
 			"<h2>"+dataIn["description"]+"</h2>"+
-			"<svg id=\""+chart_id+"\" class=\"structure-pca-chart\"></svg>"
+			"<svg id=\""+chart_id+"\" class=\"structure-pca-chart\"></svg>"+
+			"<div id=\"structure-plot_"+dataIn.id+"\"></div>";
 
 		$("#structure-charts").append(buf)
 		dataValues = dataIn["data"];
@@ -135,9 +136,6 @@ var BrowserController = Class.extend({
 		  	])
 		  	.range(colorbrewer.RdYlGn[numColors]);
 
-		  console.log(d3.min(dataValues, energyValue),
-		  		d3.max(dataValues, energyValue));
-
 		// grab the tooltip element
 		var tooltip = d3.select("#structure-pca-chart-tooltip");
 
@@ -172,7 +170,14 @@ var BrowserController = Class.extend({
 			.style("text-anchor", "end")
 			.text("PC 2");
 
-		console.log(dataValues);
+		var showTooltip = function(d) {
+			tooltip.transition()
+				.duration(0)
+				.style("opacity", 1);
+			tooltip.html("<i class=\"fa fa-fire\"></i> "+energyValue(d)+" kcal/mol")
+				.style("left", (d3.event.pageX) + "px")
+				.style("top", (d3.event.pageY) + "px");
+		}
 
 		// draw dots
 		svg.selectAll(".dot")
@@ -183,29 +188,35 @@ var BrowserController = Class.extend({
 			.attr("cx", xMap)
 			.attr("cy", yMap)
 			.style("fill", function(d) { return heatmapColour(d.energy); }) 
-			.on("mouseover", function(d) {
-				tooltip.transition()
-					.duration(0)
-					.style("opacity", 1);
-				tooltip.html("<i class=\"fa fa-fire\"></i> "+energyValue(d)+" kcal/mol")
-					.style("left", (d3.event.pageX) + "px")
-					.style("top", (d3.event.pageY) + "px");
-			})
+			
+			.on("mousemove", showTooltip)
+			.on("mouseover", showTooltip)
 			.on("mouseout", function(d) {
 				tooltip.transition()
-					.duration(500)
+					.duration(200)
 					.style("opacity", 0);
 			})
-			.on("click", function(d) {
-				console.log("Clicky!");
-				console.log(d);
-			});
+			.on("click", $.proxy(function(d) {
+				this.selectStructure(d.id);
+			}, this));
 
 		// add the tooltip area to the webpage (whocares.jpeg)
 		// var tooltip = d3.select("body").append("div")
 		//     .attr("class", "tooltip")
 		//     .style("opacity", 0);
 
+	},
+
+	selectStructure: function(structureID) {
+		$.ajax({
+			url: "/ajax/structure-plot/"+structureID, 
+			context: this
+		}).done(function(data) {
+			// insert the data into the div
+
+			console.log("structureID: "+structureID);
+			$("#structure-plot_"+structureID).html(data);
+		});
 	},
 
 	// Visualises the measurement data.

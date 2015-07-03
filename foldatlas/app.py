@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from sys import argv
-from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, CoverageSearcher
+from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, CoverageSearcher, \
+	StructurePlotView
 
 import settings
 import database
@@ -57,6 +58,10 @@ def get_coverage_page_count():
 @app.route("/ajax/transcript/<transcript_id>")
 def view_transcript_ajax(transcript_id):
 	return render_template("transcript-view.html", transcript_view=TranscriptView(transcript_id))
+
+@app.route("/ajax/structure-plot/<structure_id>")
+def view_structure_ajax(structure_id):
+	return render_template("structure-plot-view.html", structure_plot_view=StructurePlotView(structure_id))
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`
