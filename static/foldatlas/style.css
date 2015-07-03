@@ -5,6 +5,7 @@ body {
 	height: auto;
 	position: relative;
 	background-color: #35a;
+	font-family: Ubuntu, sans-serif;
 }
 
 #header {
@@ -90,7 +91,6 @@ body {
 
 #content {
 	font-size: 16px;
-	font-family: Ubuntu, sans-serif;
 	background-color: #e9e9e9;
 	width: 900px;
 	margin: 0 auto;
@@ -253,6 +253,22 @@ table.coverage-table td.yes {
 .structure-pca-chart {
 	margin: auto;
 	display: block;
+}
+
+#structure-pca-chart-tooltip {
+	border: 1px solid #000;
+	background-color: #fff;
+	position: absolute;
+	padding: 5px 10px;
+	pointer-events: none;
+	opacity: 0;
+	margin: 0 none;
+	z-index: 9000;
+}
+
+.dot {
+	stroke: #000;
+	cursor: pointer;
 }
 
 /* PAGINATION *********************************************************/

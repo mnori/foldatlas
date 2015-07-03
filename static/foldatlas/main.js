@@ -71,8 +71,10 @@ var BrowserController = Class.extend({
 		}
 	},
 
-	// Draws a PCA structure plot
+	// Draws a PCA structure scatter plot
+	// http://bl.ocks.org/weiglemc/6185069
 	drawStructureData: function(dataIn) {
+
 		var chart_id = "structure-pca-chart_"+dataIn["id"];
 		var buf = 
 			"<h2>"+dataIn["description"]+"</h2>"+
@@ -113,6 +115,8 @@ var BrowserController = Class.extend({
 	    var yMap = function(d) { return yScale(yValue(d));};
 	    var yAxis = d3.svg.axis().scale(yScale).orient("left");
 
+	    // Set up a colour scale. it's a bit crap since there are only 9? colours
+	    // TODO moar colours
 		var numColors = 9;
 		var heatmapColour = d3.scale.quantize()
 		  	.domain([
@@ -123,6 +127,9 @@ var BrowserController = Class.extend({
 
 		  console.log(d3.min(dataValues, energyValue),
 		  		d3.max(dataValues, energyValue));
+
+		// grab the tooltip element
+		var tooltip = d3.select("#structure-pca-chart-tooltip");
 
 		// add the graph canvas to the body of the webpage
 		var svg = d3.select("#"+chart_id)
@@ -162,10 +169,22 @@ var BrowserController = Class.extend({
 			.data(dataValues)
 		  .enter().append("circle")
 			.attr("class", "dot")
-			.attr("r", 3.5)
+			.attr("r", 5)
 			.attr("cx", xMap)
 			.attr("cy", yMap)
 			.style("fill", function(d) { return heatmapColour(d.energy); }) 
+			.on("mouseover", function(d) {
+				tooltip.transition()
+					.duration(200)
+					.style("opacity", .9);
+				tooltip.html("Energy: "+energyValue(d)+" kcal/mol")
+					.style("left", (d3.event.pageX) + "px")
+					.style("top", (d3.event.pageY) + "px");
+			}).on("mouseout", function(d) {
+				tooltip.transition()
+					.duration(500)
+					.style("opacity", 0);
+			});
 
 		// add the tooltip area to the webpage (whocares.jpeg)
 		// var tooltip = d3.select("body").append("div")
@@ -452,7 +471,6 @@ var TranscriptIDSearchController = Class.extend({
 			}
 
 			// selectTranscript(transcriptID)
-
 			// $("#loading-indicator").hide();
 			// $("#transcript-data").empty();
 			// $("#transcript-data").html(results);
