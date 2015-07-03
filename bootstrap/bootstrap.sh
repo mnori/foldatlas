@@ -87,6 +87,13 @@ function install() {
 	cd clustalw-2.1-linux-x86_64-libcppstatic/
 	cp clustalw2 /usr/local/bin/clustalw2
 
+
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+	pretty_print "Installing ViennaRNA"
+	sudo apt-add-repository -y ppa:j-4/vienna-rna
+	sudo apt-get -y update
+	sudo apt-get -y install vienna-rna
+
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 	if [ ! -f "/vagrant/sauce_data/foldatlas.sql.tar.gz" ]

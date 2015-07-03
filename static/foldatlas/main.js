@@ -13,19 +13,27 @@ var BrowserController = Class.extend({
 
 	// Jump to a specific transcript page
 	selectTranscript: function(transcriptID) {
-		$("#loading-indicator").show()
+		this.showLoading();
 		this.changeUrl(transcriptID, "/transcript/"+transcriptID)
 		$.ajax({
 			url: "/ajax/transcript/"+transcriptID,
 			context: this
 		}).done(function(results) {
+			this.hideLoading();
 			$("#search").hide()
 			$("#d3nome").show();
-			$("#loading-indicator").hide();
 			$("#transcript-data").empty();
 			$("#transcript-data").html(results);
 			this.drawTranscriptData();
 		});
+	},
+
+	showLoading: function() {
+		$("#loading-indicator").show()
+	},
+
+	hideLoading: function() {
+		$("#loading-indicator").hide()
 	},
 
 	// Reset to landing page
@@ -210,12 +218,12 @@ var BrowserController = Class.extend({
 
 	// TODO get rid of experimentID
 	selectStructure: function(experimentID, structureID) {
+		this.showLoading();
 		$.ajax({
 			url: "/ajax/structure-plot/"+structureID, 
 			context: this
 		}).done(function(data) {
-			// insert the data into the div
-
+			this.hideLoading();
 			console.log("structureID: "+structureID);
 			$("#structure-plot_"+experimentID).html(data);
 		});
@@ -477,12 +485,13 @@ var TranscriptIDSearchController = Class.extend({
 	},
 
 	searchTranscriptID: function(term) {
+		this.browserController.showLoading();
 		$.ajax({
 			url: "/ajax/search-transcript/"+term,
 			context: this
 		}).done(function(results) {
+			this.browserController.hideLoading();
 			results = $.parseJSON(results);		
-
 			if (results.length <= 0) {
 				$("#transcript-data").html("<div class=\"message\">No transcripts found matching \""+term+"\"</div>")
 
@@ -512,10 +521,12 @@ var CoverageSearchController = Class.extend({
 		this.browserController = browserController;
 
 		// initialise pagination
+		this.browserController.showLoading();
 		$.ajax({
 			url: "/ajax/get-coverage-page-count", context: this
 
 		}).done(function(pageNum) {
+			this.browserController.hideLoading();
 			// insert pagination HTML
 			var buf = 
 				"<div id=\"pagination-container\">" +
@@ -546,10 +557,12 @@ var CoverageSearchController = Class.extend({
 
 	// Grabs transcript coverage data via AJAX and displays it in a div
 	search: function(pageNum) {
+		this.browserController.showLoading();
 		$.ajax({
 			url: "/ajax/search-coverage/"+pageNum,
 			context: this
 		}).done($.proxy(function(results) {
+			this.browserController.hideLoading();
 			$("#search-coverage-data").empty();
 			$("#search-coverage-data").html(results);
 
