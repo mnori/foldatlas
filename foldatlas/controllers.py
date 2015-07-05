@@ -388,6 +388,7 @@ class StructureView():
 class StructurePlotView():
     def __init__(self, structure_id):
         self.structure_id = structure_id
+        self.structure_svg = None
         self.build_plot()
 
     def build_plot(self):
@@ -410,7 +411,11 @@ class StructurePlotView():
         os.system("RNAplot < "+dot_bracket_filepath)
 
         # convert the plot to SVG, capturing the SVG string
-        result = subprocess.check_output("pstoedit -f plot-svg rna.ps", shell=True)
+        result = str(subprocess.check_output("pstoedit -f plot-svg rna.ps", shell=True))
+
+        # Chop out some unwanted text
+        result = result[result.find("<svg") : ]
+        result = result[0 : result.find("</svg>")]
 
         # store the SVG so we can show it on the front end
         self.structure_svg = result
