@@ -1,4 +1,4 @@
-import time
+import time, os
 
 # Useful for tracking down slow code.
 # @author Matthew Norris
@@ -29,4 +29,6 @@ class TimelineEntry():
 		self.name = name
 		self.time = time.time()
 
-time.time()
+def ensure_dir(f):
+	if not os.path.exists(f):
+		os.makedirs(f)

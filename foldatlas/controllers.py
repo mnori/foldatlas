@@ -1,8 +1,11 @@
 from database import db_session;
 from sqlalchemy import and_
 
-import json, database, settings
-from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement, Experiment, TranscriptCoverage
+import json, database, settings, uuid, os, subprocess
+from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement, Experiment, \
+    TranscriptCoverage, StructurePosition
+
+from utils import ensure_dir
 
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
@@ -385,7 +388,65 @@ class StructureView():
 class StructurePlotView():
     def __init__(self, structure_id):
         self.structure_id = structure_id
+        self.build_plot()
 
     def build_plot(self):
-        pass #
+        unique_folder = "/tmp/"+str(uuid.uuid4())
 
+        ensure_dir(unique_folder)
+
+        # generate dot bracket file for RNAplot
+        dot_bracket_filepath = unique_folder+"/dotbracket.txt"
+
+        dot_bracket_str = self.build_dot_bracket_str()
+        dot_bracket_file = open(dot_bracket_filepath, "w")
+        dot_bracket_file.write(dot_bracket_str+"\n")
+        dot_bracket_file.close()
+
+        # change to tmp folder
+        os.chdir(unique_folder)
+
+        # use RNAplot to generate the postscript image
+        os.system("RNAplot < "+dot_bracket_filepath)
+
+        # convert the plot to SVG, capturing the SVG string
+        result = subprocess.check_output("pstoedit -f plot-svg rna.ps", shell=True)
+
+        # store the SVG so we can show it on the front end
+        self.structure_svg = result
+
+    def build_dot_bracket_str(self):
+
+        # get all the positions
+        results = db_session \
+            .query(StructurePosition) \
+            .filter(
+                StructurePosition.structure_id==self.structure_id
+            ) \
+            .order_by(StructurePosition.position) \
+            .all()
+
+        # build output string
+        n_reverse = n_forward = 0
+        dot_bracket_str = seq_str = ""
+        for result in results:
+            seq_str += result.letter
+            if result.paired_to_position == 0:
+                dot_bracket_str += "."
+            elif result.paired_to_position < result.position:
+                n_reverse += 1
+                dot_bracket_str += ")"
+            elif result.paired_to_position > result.position:
+                n_forward += 1
+                dot_bracket_str += "("
+            else:
+                # should never happen
+                print("Error: cannot do self pairing!");
+                dot_bracket_str += "."
+
+        print("n_reverse: "+str(n_reverse))
+        print("n_forward: "+str(n_forward))
+
+        return seq_str+"\n"+dot_bracket_str
+
+            

@@ -90,9 +90,13 @@ function install() {
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing ViennaRNA"
-	sudo apt-add-repository -y ppa:j-4/vienna-rna
-	sudo apt-get -y update
-	sudo apt-get -y install vienna-rna
+	apt-add-repository -y ppa:j-4/vienna-rna
+	apt-get -y update
+	apt-get -y install vienna-rna
+
+	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+	pretty_print "Installing pstoedit"
+	apt-get -y install pstoedit
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
