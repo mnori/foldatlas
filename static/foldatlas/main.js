@@ -216,13 +216,16 @@ var BrowserController = Class.extend({
 
 	},
 
-	// TODO get rid of experimentID
+	// TODO get rid of experimentID (just one structure view)
 	selectStructure: function(experimentID, structureID) {
 		this.showLoading();
 		$.ajax({
 			url: "/ajax/structure-plot/"+structureID, 
 			context: this
 		}).done(function(data) {
+
+			// this is where we must insert the data into the right div
+
 			this.hideLoading();
 			console.log("structureID: "+structureID);
 			$("#structure-plot_"+experimentID).html(data);

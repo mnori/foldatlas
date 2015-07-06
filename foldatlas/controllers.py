@@ -385,21 +385,25 @@ class StructureView():
 
         self.data_json = json.dumps(data)
 
+# Plots an RNA structure using the RNAplot program from the ViennaRNA package.
 class StructurePlotView():
     def __init__(self, structure_id):
         self.structure_id = structure_id
-        self.structure_svg = None
         self.build_plot()
 
     def build_plot(self):
         unique_folder = "/tmp/"+str(uuid.uuid4())
-
         ensure_dir(unique_folder)
 
         # generate dot bracket file for RNAplot
         dot_bracket_filepath = unique_folder+"/dotbracket.txt"
+        dot_bracket_data = self.build_dot_bracket()
+        
+        self.dot_bracket_json = json.dumps(dot_bracket_data)
 
-        dot_bracket_str = self.build_dot_bracket_str()
+    # Deprecated method to make Vienna RNAplot image. These plots are a bit shit
+    # compared to those of forna.
+    def get_vienna_svg(self, dot_bracket_str):
         dot_bracket_file = open(dot_bracket_filepath, "w")
         dot_bracket_file.write(dot_bracket_str+"\n")
         dot_bracket_file.close()
@@ -417,10 +421,10 @@ class StructurePlotView():
         result = result[result.find("<svg") : ]
         result = result[0 : result.find("</svg>")]
 
-        # store the SVG so we can show it on the front end
-        self.structure_svg = result
+        # return the SVG so we can show it on the front end
+        return result
 
-    def build_dot_bracket_str(self):
+    def build_dot_bracket(self):
 
         # get all the positions
         results = db_session \
@@ -431,7 +435,7 @@ class StructurePlotView():
             .order_by(StructurePosition.position) \
             .all()
 
-        # build output string
+        # build dot bracket string
         n_reverse = n_forward = 0
         dot_bracket_str = seq_str = ""
         for result in results:
@@ -449,9 +453,13 @@ class StructurePlotView():
                 print("Error: cannot do self pairing!");
                 dot_bracket_str += "."
 
-        print("n_reverse: "+str(n_reverse))
-        print("n_forward: "+str(n_forward))
+        # # these must be indentical!
+        # print("n_reverse: "+str(n_reverse))
+        # print("n_forward: "+str(n_forward))
 
-        return seq_str+"\n"+dot_bracket_str
+        return {
+            "seq": seq_str,
+            "dot_bracket": dot_bracket_str
+        }
 
             
