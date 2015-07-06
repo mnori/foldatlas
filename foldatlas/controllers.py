@@ -1,7 +1,14 @@
 from database import db_session;
 from sqlalchemy import and_
 
-import forgi.graph.bulge_graph as fgb
+# # try to use python2 module in python3
+# from past import autotranslate
+# autotranslate(['forgi'])
+
+# this import is slow. almost certainly due to autotranslate.
+# might have to build a pre-translated version of this module.
+# import forgi.graph.bulge_graph as fgb
+
 import json, database, settings, uuid, os, subprocess
 from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement, Experiment, \
     TranscriptCoverage, StructurePosition
@@ -393,14 +400,13 @@ class StructurePlotView():
         self.build_plot()
 
     def build_plot(self):
-        unique_folder = "/tmp/"+str(uuid.uuid4())
-        ensure_dir(unique_folder)
-
-        # generate dot bracket file for RNAplot
-        dot_bracket_filepath = unique_folder+"/dotbracket.txt"
+        # convert entities to dot bracket string
         data = self.build_dot_bracket()
-        data = self.build_graph_layout(data)
 
+        # use ViennaRNA to get 2d plot coords        
+        data["coords"] = self.get_vienna_layout(data)
+
+        # return the results as a json string
         self.data_json = json.dumps(data)
 
     def build_dot_bracket(self):
@@ -437,52 +443,51 @@ class StructurePlotView():
         # print("n_forward: "+str(n_forward))
 
         return {
-            "structure": dot_bracket_str,
-            "sequence": seq_str.replace("T", "U")
+            "sequence": seq_str.replace("T", "U"),
+            "structure": dot_bracket_str
         }
 
-    
-    def build_graph_layout(self, data):
+        # RNA.cvar.rna_plot_type = 1
+        # coords = RNA.get_xy_coordinates(bp_string)
+        # xs = np.array([coords.get(i).X for i in range(len(bp_string))])
+        # ys = np.array([coords.get(i).Y for i in range(len(bp_string))])
 
-        # convert to a fasta-like text format
-        fasta_text = ">rna\n"+data["structure"]+"\n"+data["sequence"]
+        # return zip(xs,ys)
 
-        # This bit came from the forna library. It generates a layout for the 
-        # RNA graph, which is a starting point for the force directed frontend
+    # Grab 2d coords from viennaRNA
+    # There is a python wrapper that lets you do the coords list grab.
+    # but unfortunately it's python 2 only :(
+    def get_vienna_layout(self, data):
 
-        bg = fgb.BulgeGraph()
-        bg.from_fasta(fasta_text)
-        bp_string = bg.to_dotbracket_string()
+        unique_folder = "/tmp/"+str(uuid.uuid4())
+        ensure_dir(unique_folder)
+        dot_bracket_filepath = unique_folder+"/dotbracket.txt"
 
-        print >>sys.stderr, 'bp_string', bp_string;
-        RNA.cvar.rna_plot_type = 1
-        coords = RNA.get_xy_coordinates(bp_string)
-        xs = np.array([coords.get(i).X for i in range(len(bp_string))])
-        ys = np.array([coords.get(i).Y for i in range(len(bp_string))])
-
-        return zip(xs,ys)
-
-    # Deprecated method to make Vienna RNAplot image. These plots are a bit shit
-    # compared to those of forna.
-    def get_vienna_svg(self, dot_bracket_str):
-        dot_bracket_file = open(dot_bracket_filepath, "w")
-        dot_bracket_file.write(dot_bracket_str+"\n")
-        dot_bracket_file.close()
+        f = open(dot_bracket_filepath, "w")
+        f.write(data["sequence"]+"\n"+data["structure"]+"\n")
+        f.close()
 
         # change to tmp folder
         os.chdir(unique_folder)
 
-        # use RNAplot to generate the postscript image
-        os.system("RNAplot < "+dot_bracket_filepath)
+        # use RNAplot CLI to generate the xrna tab delimited file
+        os.system("RNAplot -o xrna < "+dot_bracket_filepath)
 
-        # convert the plot to SVG, capturing the SVG string
-        result = str(subprocess.check_output("pstoedit -f plot-svg rna.ps", shell=True))
+        # get the coords out by parsing the file
+        coords = []
+        with open(unique_folder+"/rna.ss") as f:
+            for line in f:
+                line = line.strip()
+                if line == "" or line[0] == "#":
+                    continue
 
-        # Chop out some unwanted text
-        result = result[result.find("<svg") : ]
-        result = result[0 : result.find("</svg>")]
+                bits = line.split()
+                x = float(bits[2])
+                y = float(bits[3])
+                coords.append([x, y])
 
-        # return the SVG so we can show it on the front end
-        return result
+        return coords
+        
+        # return result
 
             

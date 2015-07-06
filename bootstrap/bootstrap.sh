@@ -71,11 +71,12 @@ function install() {
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing misc python dependencies"
+	pip3 install future
 	pip3 install biopython
 	pip3 install Flask
 	pip3 install mysql-connector-python --allow-external mysql-connector-python
 	pip3 install Flask-SQLAlchemy
-	pip3 install forgi
+	# pip3 install forgi # autotranslated, for now
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing Clustalw2"
@@ -84,7 +85,6 @@ function install() {
 	tar xvzf clustalw-2.1-linux-x86_64-libcppstatic.tar.gz
 	cd clustalw-2.1-linux-x86_64-libcppstatic/
 	cp clustalw2 /usr/local/bin/clustalw2
-
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing ViennaRNA"
