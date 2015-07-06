@@ -455,27 +455,26 @@ class StructurePlotView():
         # return zip(xs,ys)
 
     # Grab 2d coords from viennaRNA
-    # There is a python wrapper that lets you do the coords list grab.
-    # but unfortunately it's python 2 only :(
+    # There is a python2 wrapper for vienna RNA but not python 3 compatible
     def get_vienna_layout(self, data):
 
-        unique_folder = "/tmp/"+str(uuid.uuid4())
-        ensure_dir(unique_folder)
-        dot_bracket_filepath = unique_folder+"/dotbracket.txt"
+        temp_folder = "/tmp/"+str(uuid.uuid4())
+        ensure_dir(temp_folder)
+        dot_bracket_filepath = temp_folder+"/dotbracket.txt"
 
         f = open(dot_bracket_filepath, "w")
         f.write(data["sequence"]+"\n"+data["structure"]+"\n")
         f.close()
 
         # change to tmp folder
-        os.chdir(unique_folder)
+        os.chdir(temp_folder)
 
         # use RNAplot CLI to generate the xrna tab delimited file
         os.system("RNAplot -o xrna < "+dot_bracket_filepath)
 
         # get the coords out by parsing the file
         coords = []
-        with open(unique_folder+"/rna.ss") as f:
+        with open(temp_folder+"/rna.ss") as f:
             for line in f:
                 line = line.strip()
                 if line == "" or line[0] == "#":
@@ -485,6 +484,8 @@ class StructurePlotView():
                 x = float(bits[2])
                 y = float(bits[3])
                 coords.append([x, y])
+
+        os.system("rm -rf "+temp_folder)
 
         return coords
         

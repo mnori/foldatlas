@@ -113,23 +113,28 @@ var BrowserController = Class.extend({
 		}).done(function(data) {
 			data = JSON.parse(data);
 
-			this.fornaContainer.startAnimation();
-			var options = {
-				"structure": data.structure,
-				"sequence": data.sequence
-			}
-	        this.fornaContainer.addRNA(options.structure, options);
+			g = new RNAGraph(data["sequence"], data["structure"], "rna")
+		        .elementsToJson()
+		        .addPositions('nucleotide', data["coords"])
+		        .addLabels(1) // 1 = start
+		        .reinforceStems()
+		        .reinforceLoops()
+		        .connectFakeNodes();
 
-			// var fornaContainer = new FornaContainer(
-			// 	"#forna-container", {
-			// 		"applyForce": false
-			// 	}
-			// );
+			this.fornaContainer.addRNAJSON(g, true);
+
+
+
+			// old
+
+			// this.fornaContainer.startAnimation();
 			// var options = {
 			// 	"structure": data.structure,
 			// 	"sequence": data.sequence
 			// }
-			// fornaContainer.addRNA(ooptions.structure, options);
+	  //       this.fornaContainer.addRNA(options.structure, options);
+
+
 			this.hideLoading();
 		});
 	},
