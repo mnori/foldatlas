@@ -1,6 +1,7 @@
 from database import db_session;
 from sqlalchemy import and_
 
+import forgi.graph.bulge_graph as fgb
 import json, database, settings, uuid, os, subprocess
 from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement, Experiment, \
     TranscriptCoverage, StructurePosition
@@ -397,32 +398,10 @@ class StructurePlotView():
 
         # generate dot bracket file for RNAplot
         dot_bracket_filepath = unique_folder+"/dotbracket.txt"
-        dot_bracket_data = self.build_dot_bracket()
-        
-        self.dot_bracket_json = json.dumps(dot_bracket_data)
+        data = self.build_dot_bracket()
+        data = self.build_graph_layout(data)
 
-    # Deprecated method to make Vienna RNAplot image. These plots are a bit shit
-    # compared to those of forna.
-    def get_vienna_svg(self, dot_bracket_str):
-        dot_bracket_file = open(dot_bracket_filepath, "w")
-        dot_bracket_file.write(dot_bracket_str+"\n")
-        dot_bracket_file.close()
-
-        # change to tmp folder
-        os.chdir(unique_folder)
-
-        # use RNAplot to generate the postscript image
-        os.system("RNAplot < "+dot_bracket_filepath)
-
-        # convert the plot to SVG, capturing the SVG string
-        result = str(subprocess.check_output("pstoedit -f plot-svg rna.ps", shell=True))
-
-        # Chop out some unwanted text
-        result = result[result.find("<svg") : ]
-        result = result[0 : result.find("</svg>")]
-
-        # return the SVG so we can show it on the front end
-        return result
+        self.data_json = json.dumps(data)
 
     def build_dot_bracket(self):
 
@@ -458,8 +437,52 @@ class StructurePlotView():
         # print("n_forward: "+str(n_forward))
 
         return {
-            "seq": seq_str,
-            "dot_bracket": dot_bracket_str
+            "structure": dot_bracket_str,
+            "sequence": seq_str.replace("T", "U")
         }
+
+    
+    def build_graph_layout(self, data):
+
+        # convert to a fasta-like text format
+        fasta_text = ">rna\n"+data["structure"]+"\n"+data["sequence"]
+
+        # This bit came from the forna library. It generates a layout for the 
+        # RNA graph, which is a starting point for the force directed frontend
+
+        bg = fgb.BulgeGraph()
+        bg.from_fasta(fasta_text)
+        bp_string = bg.to_dotbracket_string()
+
+        print >>sys.stderr, 'bp_string', bp_string;
+        RNA.cvar.rna_plot_type = 1
+        coords = RNA.get_xy_coordinates(bp_string)
+        xs = np.array([coords.get(i).X for i in range(len(bp_string))])
+        ys = np.array([coords.get(i).Y for i in range(len(bp_string))])
+
+        return zip(xs,ys)
+
+    # Deprecated method to make Vienna RNAplot image. These plots are a bit shit
+    # compared to those of forna.
+    def get_vienna_svg(self, dot_bracket_str):
+        dot_bracket_file = open(dot_bracket_filepath, "w")
+        dot_bracket_file.write(dot_bracket_str+"\n")
+        dot_bracket_file.close()
+
+        # change to tmp folder
+        os.chdir(unique_folder)
+
+        # use RNAplot to generate the postscript image
+        os.system("RNAplot < "+dot_bracket_filepath)
+
+        # convert the plot to SVG, capturing the SVG string
+        result = str(subprocess.check_output("pstoedit -f plot-svg rna.ps", shell=True))
+
+        # Chop out some unwanted text
+        result = result[result.find("<svg") : ]
+        result = result[0 : result.find("</svg>")]
+
+        # return the SVG so we can show it on the front end
+        return result
 
             

@@ -61,7 +61,7 @@ def view_transcript_ajax(transcript_id):
 
 @app.route("/ajax/structure-plot/<structure_id>")
 def view_structure_ajax(structure_id):
-	return StructurePlotView(structure_id).dot_bracket_json
+	return StructurePlotView(structure_id).data_json
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`

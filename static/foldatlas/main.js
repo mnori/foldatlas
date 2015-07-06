@@ -3,11 +3,17 @@ var BrowserController = Class.extend({
 
 	// Constructor
 	init: function(config) {
+		this.fornaContainer = null;
+
+		console.log("init() invoked");
+
 		this.nucsPerRow = 80;
 		this.staticBase = config.staticBaseUrl;
 		this.reactivities = {};
 		this.drawTranscriptData();
 		this.searchController = new SearchController(this);
+		
+
 		$("#title").click($.proxy(function() { this.goHome(); }, this));
 	},
 
@@ -68,8 +74,27 @@ var BrowserController = Class.extend({
 	drawTranscriptData: function(reactivities) {
 		var structureData = this.getJsonFromElement("structure-json")
 		if (structureData) {
-			this.drawStructureData(structureData[3]);
-			this.drawStructureData(structureData[4]);
+			this.drawStructurePca(structureData[3]);
+			this.drawStructurePca(structureData[4]);
+		}
+
+		// set up the structure diagram HTML and object
+		var buf = 
+			"<h2>Structure diagram</h2>" +
+			"<div id=\"forna-container\"></div>";
+		$("#structure-charts").append(buf);
+
+		if (this.fornaContainer == null) {
+			this.fornaContainer = new FornaContainer(
+				"#forna-container", {
+					'applyForce': true,
+					'initialSize': [900, 900]
+				}
+			);
+			this.fornaContainer.setFriction(0.35);
+			this.fornaContainer.setCharge(-0.30);
+			this.fornaContainer.setGravity(0);
+			this.fornaContainer.setPseudoknotStrength(0);
 		}
 
 		var measurementData = this.getJsonFromElement("nucleotide-measurement-json")
@@ -79,9 +104,39 @@ var BrowserController = Class.extend({
 		}
 	},
 
+	// TODO get rid of experimentID (just one structure view)
+	selectStructure: function(experimentID, structureID) {
+		this.showLoading();
+		$.ajax({
+			url: "/ajax/structure-plot/"+structureID, 
+			context: this
+		}).done(function(data) {
+			data = JSON.parse(data);
+
+			this.fornaContainer.startAnimation();
+			var options = {
+				"structure": data.structure,
+				"sequence": data.sequence
+			}
+	        this.fornaContainer.addRNA(options.structure, options);
+
+			// var fornaContainer = new FornaContainer(
+			// 	"#forna-container", {
+			// 		"applyForce": false
+			// 	}
+			// );
+			// var options = {
+			// 	"structure": data.structure,
+			// 	"sequence": data.sequence
+			// }
+			// fornaContainer.addRNA(ooptions.structure, options);
+			this.hideLoading();
+		});
+	},
+
 	// Draws a PCA structure scatter plot
 	// http://bl.ocks.org/weiglemc/6185069
-	drawStructureData: function(dataIn) {
+	drawStructurePca: function(dataIn) {
 
 		var experimentID = dataIn["id"]
 		var padding = 0.05; // % margin around the PCA points
@@ -214,22 +269,6 @@ var BrowserController = Class.extend({
 		//     .attr("class", "tooltip")
 		//     .style("opacity", 0);
 
-	},
-
-	// TODO get rid of experimentID (just one structure view)
-	selectStructure: function(experimentID, structureID) {
-		this.showLoading();
-		$.ajax({
-			url: "/ajax/structure-plot/"+structureID, 
-			context: this
-		}).done(function(data) {
-
-			// this is where we must insert the data into the right div
-
-			this.hideLoading();
-			console.log("structureID: "+structureID);
-			$("#structure-plot_"+experimentID).html(data);
-		});
 	},
 
 	// Visualises the measurement data.

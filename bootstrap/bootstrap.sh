@@ -58,10 +58,6 @@ function install() {
 	apt-get install -y python3-pip
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-	pretty_print "Installing BioPython"
-	pip3 install biopython
-
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing sklearn"
 	
 	# lots of scikit dependencies. use apt-get - much faster to grab the binaries
@@ -74,10 +70,12 @@ function install() {
 	pip3 install scikit-learn
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-	pretty_print "Installing Flask"
+	pretty_print "Installing misc python dependencies"
+	pip3 install biopython
 	pip3 install Flask
 	pip3 install mysql-connector-python --allow-external mysql-connector-python
 	pip3 install Flask-SQLAlchemy
+	pip3 install forgi
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing Clustalw2"
