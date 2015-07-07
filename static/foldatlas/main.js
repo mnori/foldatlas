@@ -12,7 +12,6 @@ var BrowserController = Class.extend({
 		this.reactivities = {};
 		this.drawTranscriptData();
 		this.searchController = new SearchController(this);
-		
 
 		$("#title").click($.proxy(function() { this.goHome(); }, this));
 	},
@@ -84,6 +83,9 @@ var BrowserController = Class.extend({
 			"<div id=\"forna-container\"></div>";
 		$("#structure-charts").append(buf);
 
+		// this.structureDiagramController = new StructureDiagramController(
+		// 	this, $("#structure-charts"))
+
 		if (this.fornaContainer == null) {
 			this.fornaContainer = new FornaContainer(
 				"#forna-container", {
@@ -91,8 +93,8 @@ var BrowserController = Class.extend({
 					'initialSize': [900, 900]
 				}
 			);
-			this.fornaContainer.setFriction(0.35);
-			this.fornaContainer.setCharge(-0.30);
+			this.fornaContainer.setFriction(0.5);
+			this.fornaContainer.setCharge(-0.3);
 			this.fornaContainer.setGravity(0);
 			this.fornaContainer.setPseudoknotStrength(0);
 		}
@@ -122,19 +124,6 @@ var BrowserController = Class.extend({
 		        .connectFakeNodes();
 
 			this.fornaContainer.addRNAJSON(g, true);
-
-
-
-			// old
-
-			// this.fornaContainer.startAnimation();
-			// var options = {
-			// 	"structure": data.structure,
-			// 	"sequence": data.sequence
-			// }
-	  //       this.fornaContainer.addRNA(options.structure, options);
-
-
 			this.hideLoading();
 		});
 	},
