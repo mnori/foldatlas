@@ -250,9 +250,32 @@ table.coverage-table td.yes {
 	border-bottom: 1px solid #000;
 }
 
+
+/* STRUCTURE */
+
+#structure-container {
+	position: relative;
+	overflow: hidden;
+	height: 630px;
+}
+
+.structure-pca-container {
+	display: inline-block;
+	clear: both;
+	width: 250px;
+	height: 250px;
+}
+
 .structure-pca-chart {
-	margin: auto;
-	display: block;
+	/* ?? */
+}
+
+#forna-container {
+	position: absolute;
+	width: 630px;
+	height: 630px;
+	top: 0px;
+	right: 0px;
 }
 
 #structure-pca-chart-tooltip {

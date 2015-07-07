@@ -446,6 +446,28 @@ var StructureExplorer = Class.extend({
 		this.drawMfe();
 	},
 
+	// Add RNA diagram HTML
+	initialiseRnaDiagram: function() {
+		// Add structure diagram element
+		var buf = 
+			"<div id=\"forna-container\"></div>";
+
+		$("#structure-container").append(buf);
+
+		if (this.fornaContainer == null) {
+			this.fornaContainer = new FornaContainer(
+				"#forna-container", {
+					'applyForce': false,
+					'initialSize': [650, 650]
+				}
+			);
+			this.fornaContainer.setFriction(0.5);
+			this.fornaContainer.setCharge(-0.3);
+			this.fornaContainer.setGravity(0);
+			this.fornaContainer.setPseudoknotStrength(0);
+		}
+	},
+
 	// Find the structure with the MFE and draw it.
 	drawMfe: function() {
 		var inVivoExperimentID = 4;
@@ -474,16 +496,15 @@ var StructureExplorer = Class.extend({
 	// Draws a PCA structure scatter plot
 	// http://bl.ocks.org/weiglemc/6185069
 	drawStructurePca: function(dataIn) {
-
 		var experimentID = dataIn["id"]
 		var padding = 0.05; // % margin around the PCA points
 		var chart_id = "structure-pca-chart_"+experimentID;
 		var buf = 
-			"<h2>"+dataIn["description"]+"</h2>"+
-			"<svg id=\""+chart_id+"\" class=\"structure-pca-chart\"></svg>"+
-			"<div id=\"structure-plot_"+experimentID+"\"></div>";
+			"<div class=\"structure-pca-container\">"+
+				"<svg id=\""+chart_id+"\" class=\"structure-pca-chart\"></svg>"+
+			"</div>";
 
-		$("#structure-charts").append(buf)
+		$("#structure-container").append(buf)
 		dataValues = dataIn["data"];
 
 		var margin = {top: 10, right: 10, bottom: 20, left: 20};
@@ -606,28 +627,6 @@ var StructureExplorer = Class.extend({
 		//     .attr("class", "tooltip")
 		//     .style("opacity", 0);
 
-	},
-
-	initialiseRnaDiagram: function() {
-		// Add structure diagram element
-		var buf = 
-			"<h2>Structure diagram</h2>" +
-			"<div id=\"forna-container\"></div>";
-
-		$("#structure-charts").append(buf);
-
-		if (this.fornaContainer == null) {
-			this.fornaContainer = new FornaContainer(
-				"#forna-container", {
-					'applyForce': false,
-					'initialSize': [900, 900]
-				}
-			);
-			this.fornaContainer.setFriction(0.5);
-			this.fornaContainer.setCharge(-0.3);
-			this.fornaContainer.setGravity(0);
-			this.fornaContainer.setPseudoknotStrength(0);
-		}
 	},
 
 	drawStructureDiagram: function(structureID) {
