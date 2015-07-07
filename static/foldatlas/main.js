@@ -94,10 +94,10 @@ var BrowserController = Class.extend({
 
 		// Add header and graph container svg element
 		// Also Add the SVG itself
-		var chart_id = "nucleotide-measurement-chart_"+experimentData["id"];
+		var svgID = "nucleotide-measurement-chart_"+experimentData["id"];
 		var buf = 
 			"<h2>"+experimentData["description"]+"</h2>"+
-			"<svg id=\""+chart_id+"\"></svg>"
+			"<svg id=\""+svgID+"\"></svg>"
 
 		$("#nucleotide-measurement-charts").append(buf)
 
@@ -129,7 +129,7 @@ var BrowserController = Class.extend({
 		// 	height = panelTotDims.y - panelMargin.bottom - panelMargin.top;
 
 		// Init the chart's container element
-		var chart = d3.select("#"+chart_id)
+		var chart = d3.select("#"+svgID)
 			.attr("width", chartDims.x)
 			.attr("height", chartDims.y)
 
@@ -448,12 +448,6 @@ var StructureExplorer = Class.extend({
 
 	// Add RNA diagram HTML
 	initialiseRnaDiagram: function() {
-		// Add structure diagram element
-		var buf = 
-			"<div id=\"forna-container\"></div>";
-
-		$("#structure-container").append(buf);
-
 		if (this.fornaContainer == null) {
 			this.fornaContainer = new FornaContainer(
 				"#forna-container", {
@@ -487,24 +481,28 @@ var StructureExplorer = Class.extend({
 	},
 
 	drawStructurePcas: function() {
-		for (var i = 0; i < this.experimentIDs.length; i++) {
-			var experimentID = this.experimentIDs[i];
-			this.drawStructurePca(this.structureData[experimentID]);
-		}
+		this.drawStructurePca(this.structureData[3], "pca-container-in-silico");
+		this.drawStructurePca(this.structureData[4], "pca-container-in-vivo");
 	},
 
 	// Draws a PCA structure scatter plot
 	// http://bl.ocks.org/weiglemc/6185069
-	drawStructurePca: function(dataIn) {
+	drawStructurePca: function(dataIn, elementID) {
+		var svgID = elementID+"-svg";
+
+		console.log("elementID:", elementID);
+		console.log("svgID:", svgID);
+
 		var experimentID = dataIn["id"]
 		var padding = 0.05; // % margin around the PCA points
-		var chart_id = "structure-pca-chart_"+experimentID;
-		var buf = 
-			"<div class=\"structure-pca-container\">"+
-				"<svg id=\""+chart_id+"\" class=\"structure-pca-chart\"></svg>"+
-			"</div>";
+		var buf = "<svg id=\""+svgID+"\" class=\"structure-pca-chart\"></svg>";
 
-		$("#structure-container").append(buf)
+		console.log(buf);
+
+		$("#"+elementID).html(buf)
+
+
+
 		dataValues = dataIn["data"];
 
 		var margin = {top: 10, right: 10, bottom: 20, left: 20};
@@ -562,7 +560,7 @@ var StructureExplorer = Class.extend({
 		var tooltip = d3.select("#structure-pca-chart-tooltip");
 
 		// add the graph canvas to the body of the webpage
-		var svg = d3.select("#"+chart_id)
+		var svg = d3.select("#"+svgID)
 		    .attr("width", totDims.x)
 		    .attr("height", totDims.y)
 		  .append("g")
