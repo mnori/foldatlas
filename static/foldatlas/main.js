@@ -438,17 +438,37 @@ var CoverageSearchController = Class.extend({
 // Class that handles PCA and structure plotting
 var StructureExplorer = Class.extend({
 	init: function(browserController) {
-
 		this.browserController = browserController;
-
+		this.experimentIDs = [3, 4];
+		this.structureData = this.browserController.getJsonFromElement("structure-json")
 		this.drawStructurePcas();
 		this.initialiseRnaDiagram();
+		this.drawMfe();
+	},
+
+	// Find the structure with the MFE and draw it.
+	drawMfe: function() {
+		var inVivoExperimentID = 4;
+		var lowestEntry = null;
+		var structureData = this.structureData[inVivoExperimentID].data
+
+		// Find the in vivo structure with the MFE	
+		for (var j = 0; j < structureData.length; j++) {
+			var currentEntry = structureData[j];
+			if (	lowestEntry == null || 
+					currentEntry["energy"] < lowestEntry["energy"]) {
+
+				lowestEntry = currentEntry;
+			}
+		}
+		this.drawStructureDiagram(lowestEntry["id"]);
 	},
 
 	drawStructurePcas: function() {
-		var structureData = this.browserController.getJsonFromElement("structure-json")
-		this.drawStructurePca(structureData[3]);
-		this.drawStructurePca(structureData[4]);
+		for (var i = 0; i < this.experimentIDs.length; i++) {
+			var experimentID = this.experimentIDs[i];
+			this.drawStructurePca(this.structureData[experimentID]);
+		}
 	},
 
 	// Draws a PCA structure scatter plot
@@ -578,7 +598,7 @@ var StructureExplorer = Class.extend({
 					.style("opacity", 0);
 			})
 			.on("click", $.proxy(function(d) {
-				this.drawRnaDiagram(d.id);
+				this.drawStructureDiagram(d.id);
 			}, this));
 
 		// add the tooltip area to the webpage (whocares.jpeg)
@@ -599,7 +619,7 @@ var StructureExplorer = Class.extend({
 		if (this.fornaContainer == null) {
 			this.fornaContainer = new FornaContainer(
 				"#forna-container", {
-					'applyForce': true,
+					'applyForce': false,
 					'initialSize': [900, 900]
 				}
 			);
@@ -610,7 +630,7 @@ var StructureExplorer = Class.extend({
 		}
 	},
 
-	drawRnaDiagram: function(structureID) {
+	drawStructureDiagram: function(structureID) {
 		this.browserController.showLoading();
 		$.ajax({
 			url: "/ajax/structure-plot/"+structureID, 
