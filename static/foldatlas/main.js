@@ -451,7 +451,7 @@ var StructureExplorer = Class.extend({
 		if (this.fornaContainer == null) {
 			this.fornaContainer = new FornaContainer(
 				"#forna-container", {
-					'applyForce': false,
+					'applyForce': true,
 					'initialSize': [650, 650]
 				}
 			);
@@ -459,7 +459,24 @@ var StructureExplorer = Class.extend({
 			this.fornaContainer.setCharge(-0.3);
 			this.fornaContainer.setGravity(0);
 			this.fornaContainer.setPseudoknotStrength(0);
+			this.fornaContainer.stopAnimation()
 		}
+
+		$("#forna-interact-enable").click($.proxy(function(ev) {
+			ev.preventDefault();
+			this.fornaContainer.startAnimation()
+			$("#forna-interact-disable").show()
+			$("#forna-interact-enable").hide()
+
+
+		}, this));
+
+		$("#forna-interact-disable").click($.proxy(function(ev) {
+			ev.preventDefault();
+			this.fornaContainer.stopAnimation()
+			$("#forna-interact-enable").show()
+			$("#forna-interact-disable").hide()
+		}, this));
 	},
 
 	// Find the structure with the MFE and draw it.
@@ -477,7 +494,7 @@ var StructureExplorer = Class.extend({
 				lowestEntry = currentEntry;
 			}
 		}
-		this.drawStructureDiagram(lowestEntry["id"]);
+		this.drawStructureDiagram(lowestEntry);
 	},
 
 	drawStructurePcas: function() {
@@ -500,8 +517,6 @@ var StructureExplorer = Class.extend({
 		console.log(buf);
 
 		$("#"+elementID).html(buf)
-
-
 
 		dataValues = dataIn["data"];
 
@@ -617,7 +632,7 @@ var StructureExplorer = Class.extend({
 					.style("opacity", 0);
 			})
 			.on("click", $.proxy(function(d) {
-				this.drawStructureDiagram(d.id);
+				this.drawStructureDiagram(d);
 			}, this));
 
 		// add the tooltip area to the webpage (whocares.jpeg)
@@ -627,7 +642,11 @@ var StructureExplorer = Class.extend({
 
 	},
 
-	drawStructureDiagram: function(structureID) {
+	drawStructureDiagram: function(d) {
+		var structureID = d["id"];
+
+		$("#forna-energy").html(d["energy"]);
+
 		this.browserController.showLoading();
 		$.ajax({
 			url: "/ajax/structure-plot/"+structureID, 
