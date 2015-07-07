@@ -77,55 +77,14 @@ var BrowserController = Class.extend({
 			this.drawStructurePca(structureData[4]);
 		}
 
-		// set up the structure diagram HTML and object
-		var buf = 
-			"<h2>Structure diagram</h2>" +
-			"<div id=\"forna-container\"></div>";
-		$("#structure-charts").append(buf);
-
-		// this.structureDiagramController = new StructureDiagramController(
-		// 	this, $("#structure-charts"))
-
-		if (this.fornaContainer == null) {
-			this.fornaContainer = new FornaContainer(
-				"#forna-container", {
-					'applyForce': true,
-					'initialSize': [900, 900]
-				}
-			);
-			this.fornaContainer.setFriction(0.5);
-			this.fornaContainer.setCharge(-0.3);
-			this.fornaContainer.setGravity(0);
-			this.fornaContainer.setPseudoknotStrength(0);
-		}
+		// this should actually be in a constructor
+		this.structureDiagramController = new StructureDiagramController(this)
 
 		var measurementData = this.getJsonFromElement("nucleotide-measurement-json")
 		if (measurementData) {
 			this.drawNucleotideMeasurement(measurementData[1]);
 			this.drawNucleotideMeasurement(measurementData[2]);
 		}
-	},
-
-	// TODO get rid of experimentID (just one structure view)
-	selectStructure: function(experimentID, structureID) {
-		this.showLoading();
-		$.ajax({
-			url: "/ajax/structure-plot/"+structureID, 
-			context: this
-		}).done(function(data) {
-			data = JSON.parse(data);
-
-			g = new RNAGraph(data["sequence"], data["structure"], "rna")
-		        .elementsToJson()
-		        .addPositions('nucleotide', data["coords"])
-		        .addLabels(1) // 1 = start
-		        .reinforceStems()
-		        .reinforceLoops()
-		        .connectFakeNodes();
-
-			this.fornaContainer.addRNAJSON(g, true);
-			this.hideLoading();
-		});
 	},
 
 	// Draws a PCA structure scatter plot
@@ -255,7 +214,7 @@ var BrowserController = Class.extend({
 					.style("opacity", 0);
 			})
 			.on("click", $.proxy(function(d) {
-				this.selectStructure(experimentID, d.id);
+				this.structureDiagramController.selectStructure(d.id);
 			}, this));
 
 		// add the tooltip area to the webpage (whocares.jpeg)
@@ -613,6 +572,57 @@ var CoverageSearchController = Class.extend({
 			}, this));
 		}, this));
 	}
+})
+
+var StructureDiagramController = Class.extend({
+	init: function(browserController) {
+
+		this.browserController = browserController;
+
+		var buf = 
+			"<h2>Structure diagram</h2>" +
+			"<div id=\"forna-container\"></div>";
+
+		$("#structure-charts").append(buf);
+
+		if (this.fornaContainer == null) {
+			this.fornaContainer = new FornaContainer(
+				"#forna-container", {
+					'applyForce': true,
+					'initialSize': [900, 900]
+				}
+			);
+			this.fornaContainer.setFriction(0.5);
+			this.fornaContainer.setCharge(-0.3);
+			this.fornaContainer.setGravity(0);
+			this.fornaContainer.setPseudoknotStrength(0);
+		}
+	},
+
+	// TODO get rid of experimentID (just one structure view)
+	selectStructure: function(structureID) {
+		this.browserController.showLoading();
+		$.ajax({
+			url: "/ajax/structure-plot/"+structureID, 
+			context: this
+		}).done(function(data) {
+			data = JSON.parse(data);
+
+			g = new RNAGraph(data["sequence"], data["structure"], "rna")
+		        .elementsToJson()
+		        .addPositions('nucleotide', data["coords"])
+		        .addLabels(1) // 1 = start
+		        .reinforceStems()
+		        .reinforceLoops()
+		        .connectFakeNodes();
+
+		    this.fornaContainer.clearNodes();
+			this.fornaContainer.addRNAJSON(g, true);
+			this.browserController.hideLoading();
+		});
+	},
+
+
 })
 
 // $("#chromosome-selector").change(function() {
