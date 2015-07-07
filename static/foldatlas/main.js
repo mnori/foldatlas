@@ -72,156 +72,17 @@ var BrowserController = Class.extend({
 
 	drawTranscriptData: function(reactivities) {
 		var structureData = this.getJsonFromElement("structure-json")
-		if (structureData) {
-			this.drawStructurePca(structureData[3]);
-			this.drawStructurePca(structureData[4]);
-		}
 
-		// this should actually be in a constructor
-		this.structureDiagramController = new StructureDiagramController(this)
+		// TODO better way to detect whether there is stuctural data
+		if (structureData) {
+			this.structureExplorer = new StructureExplorer(this)
+		}
 
 		var measurementData = this.getJsonFromElement("nucleotide-measurement-json")
 		if (measurementData) {
 			this.drawNucleotideMeasurement(measurementData[1]);
 			this.drawNucleotideMeasurement(measurementData[2]);
 		}
-	},
-
-	// Draws a PCA structure scatter plot
-	// http://bl.ocks.org/weiglemc/6185069
-	drawStructurePca: function(dataIn) {
-
-		var experimentID = dataIn["id"]
-		var padding = 0.05; // % margin around the PCA points
-		var chart_id = "structure-pca-chart_"+experimentID;
-		var buf = 
-			"<h2>"+dataIn["description"]+"</h2>"+
-			"<svg id=\""+chart_id+"\" class=\"structure-pca-chart\"></svg>"+
-			"<div id=\"structure-plot_"+experimentID+"\"></div>";
-
-		$("#structure-charts").append(buf)
-		dataValues = dataIn["data"];
-
-		var margin = {top: 10, right: 10, bottom: 40, left: 40};
-		var totDims = {x: 400, y: 400};
-		var panelDims = {
-			x: totDims.x - margin.left - margin.right,
-			y: totDims.y - margin.left - margin.right
-		};
-
-		var energyValue = function(d) { return d.energy; };
-
-		// setup x 
-		var xValue = function(d) { return d.pc1; };
-		var minX = d3.min(dataValues, xValue);
-		var maxX = d3.max(dataValues, xValue);
-		var rangeX = maxX - minX;
-		var padX = rangeX * padding;
-		var xScale = d3.scale.linear()
-			.range([0, panelDims.x])
-			.domain([
-				minX - padX,
-				maxX + padX
-			]);
-
-		var xMap = function(d) { return xScale(xValue(d)); };
-		var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
-
-		// setup y
-		var yValue = function(d) { return d.pc2; };
-		var minY = d3.min(dataValues, yValue);
-		var maxY = d3.max(dataValues, yValue);
-		var rangeY = maxY - minY;
-		var padY = rangeY * padding;
-	    var yScale = d3.scale.linear()
-	    	.range([panelDims.y, 0])
-	    	.domain([
-				minY - padY,
-				maxY + padY
-			])
-
-	    var yMap = function(d) { return yScale(yValue(d));};
-	    var yAxis = d3.svg.axis().scale(yScale).orient("left");
-
-	    // Set up a colour scale. it's a bit crap since there are only 9? colours
-	    // TODO moar colours
-		var numColors = 9;
-		var heatmapColour = d3.scale.quantize()
-		  	.domain([
-		  		d3.min(dataValues, energyValue),
-		  		d3.max(dataValues, energyValue),
-		  	])
-		  	.range(colorbrewer.RdYlGn[numColors]);
-
-		// grab the tooltip element
-		var tooltip = d3.select("#structure-pca-chart-tooltip");
-
-		// add the graph canvas to the body of the webpage
-		var svg = d3.select("#"+chart_id)
-		    .attr("width", totDims.x)
-		    .attr("height", totDims.y)
-		  .append("g")
-		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-		// x-axis
-		svg.append("g")
-			.attr("class", "x axis")
-			.attr("transform", "translate(0," + panelDims.y + ")")
-			.call(xAxis)
-		  .append("text")
-			.attr("class", "label")
-			.attr("x", panelDims.x)
-			.attr("y", -6)
-			.style("text-anchor", "end")
-			.text("PC 1");
-
-		// y-axis
-		svg.append("g")
-			.attr("class", "y axis")
-			.call(yAxis)
-	      .append("text")
-			.attr("class", "label")
-			.attr("transform", "rotate(-90)")
-			.attr("y", 6)
-			.attr("dy", ".71em")
-			.style("text-anchor", "end")
-			.text("PC 2");
-
-		var showTooltip = function(d) {
-			tooltip.transition()
-				.duration(0)
-				.style("opacity", 1);
-			tooltip.html("<i class=\"fa fa-fire\"></i> "+energyValue(d)+" kcal/mol")
-				.style("left", (d3.event.pageX) + "px")
-				.style("top", (d3.event.pageY) + "px");
-		}
-
-		// draw dots
-		svg.selectAll(".dot")
-			.data(dataValues)
-		  .enter().append("circle")
-			.attr("class", "dot")
-			.attr("r", 5)
-			.attr("cx", xMap)
-			.attr("cy", yMap)
-			.style("fill", function(d) { return heatmapColour(d.energy); }) 
-			
-			.on("mousemove", showTooltip)
-			.on("mouseover", showTooltip)
-			.on("mouseout", function(d) {
-				tooltip.transition()
-					.duration(200)
-					.style("opacity", 0);
-			})
-			.on("click", $.proxy(function(d) {
-				this.structureDiagramController.selectStructure(d.id);
-			}, this));
-
-		// add the tooltip area to the webpage (whocares.jpeg)
-		// var tooltip = d3.select("body").append("div")
-		//     .attr("class", "tooltip")
-		//     .style("opacity", 0);
-
 	},
 
 	// Visualises the measurement data.
@@ -572,13 +433,163 @@ var CoverageSearchController = Class.extend({
 			}, this));
 		}, this));
 	}
-})
+});
 
-var StructureDiagramController = Class.extend({
+// Class that handles PCA and structure plotting
+var StructureExplorer = Class.extend({
 	init: function(browserController) {
 
 		this.browserController = browserController;
 
+		this.drawStructurePcas();
+		this.initialiseRnaDiagram();
+	},
+
+	drawStructurePcas: function() {
+		var structureData = this.browserController.getJsonFromElement("structure-json")
+		this.drawStructurePca(structureData[3]);
+		this.drawStructurePca(structureData[4]);
+	},
+
+	// Draws a PCA structure scatter plot
+	// http://bl.ocks.org/weiglemc/6185069
+	drawStructurePca: function(dataIn) {
+
+		var experimentID = dataIn["id"]
+		var padding = 0.05; // % margin around the PCA points
+		var chart_id = "structure-pca-chart_"+experimentID;
+		var buf = 
+			"<h2>"+dataIn["description"]+"</h2>"+
+			"<svg id=\""+chart_id+"\" class=\"structure-pca-chart\"></svg>"+
+			"<div id=\"structure-plot_"+experimentID+"\"></div>";
+
+		$("#structure-charts").append(buf)
+		dataValues = dataIn["data"];
+
+		var margin = {top: 10, right: 10, bottom: 20, left: 20};
+		var totDims = {x: 250, y: 250};
+		var panelDims = {
+			x: totDims.x - margin.left - margin.right,
+			y: totDims.y - margin.left - margin.right
+		};
+
+		var energyValue = function(d) { return d.energy; };
+
+		// setup x 
+		var xValue = function(d) { return d.pc1; };
+		var minX = d3.min(dataValues, xValue);
+		var maxX = d3.max(dataValues, xValue);
+		var rangeX = maxX - minX;
+		var padX = rangeX * padding;
+		var xScale = d3.scale.linear()
+			.range([0, panelDims.x])
+			.domain([
+				minX - padX,
+				maxX + padX
+			]);
+
+		var xMap = function(d) { return xScale(xValue(d)); };
+		var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+		// setup y
+		var yValue = function(d) { return d.pc2; };
+		var minY = d3.min(dataValues, yValue);
+		var maxY = d3.max(dataValues, yValue);
+		var rangeY = maxY - minY;
+		var padY = rangeY * padding;
+	    var yScale = d3.scale.linear()
+	    	.range([panelDims.y, 0])
+	    	.domain([
+				minY - padY,
+				maxY + padY
+			])
+
+	    var yMap = function(d) { return yScale(yValue(d));};
+	    var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+	    // Set up a colour scale. it's a bit crap since there are only 9? colours
+	    // TODO moar colours
+		var numColors = 9;
+		var heatmapColour = d3.scale.quantize()
+		  	.domain([
+		  		d3.min(dataValues, energyValue),
+		  		d3.max(dataValues, energyValue),
+		  	])
+		  	.range(colorbrewer.RdYlGn[numColors]);
+
+		// grab the tooltip element
+		var tooltip = d3.select("#structure-pca-chart-tooltip");
+
+		// add the graph canvas to the body of the webpage
+		var svg = d3.select("#"+chart_id)
+		    .attr("width", totDims.x)
+		    .attr("height", totDims.y)
+		  .append("g")
+		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		// x-axis
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + panelDims.y + ")")
+			.call(xAxis)
+		  .append("text")
+			.attr("class", "label")
+			.attr("x", panelDims.x)
+			.attr("y", -6)
+			.style("text-anchor", "end")
+			.text("PC 1");
+
+		// y-axis
+		svg.append("g")
+			.attr("class", "y axis")
+			.call(yAxis)
+	      .append("text")
+			.attr("class", "label")
+			.attr("transform", "rotate(-90)")
+			.attr("y", 6)
+			.attr("dy", ".71em")
+			.style("text-anchor", "end")
+			.text("PC 2");
+
+		var showTooltip = function(d) {
+			tooltip.transition()
+				.duration(0)
+				.style("opacity", 1);
+			tooltip.html("<i class=\"fa fa-fire\"></i> "+energyValue(d)+" kcal/mol")
+				.style("left", (d3.event.pageX) + "px")
+				.style("top", (d3.event.pageY) + "px");
+		}
+
+		// draw dots
+		svg.selectAll(".dot")
+			.data(dataValues)
+		  .enter().append("circle")
+			.attr("class", "dot")
+			.attr("r", 5)
+			.attr("cx", xMap)
+			.attr("cy", yMap)
+			.style("fill", function(d) { return heatmapColour(d.energy); }) 
+			
+			.on("mousemove", showTooltip)
+			.on("mouseover", showTooltip)
+			.on("mouseout", function(d) {
+				tooltip.transition()
+					.duration(200)
+					.style("opacity", 0);
+			})
+			.on("click", $.proxy(function(d) {
+				this.drawRnaDiagram(d.id);
+			}, this));
+
+		// add the tooltip area to the webpage (whocares.jpeg)
+		// var tooltip = d3.select("body").append("div")
+		//     .attr("class", "tooltip")
+		//     .style("opacity", 0);
+
+	},
+
+	initialiseRnaDiagram: function() {
+		// Add structure diagram element
 		var buf = 
 			"<h2>Structure diagram</h2>" +
 			"<div id=\"forna-container\"></div>";
@@ -599,13 +610,15 @@ var StructureDiagramController = Class.extend({
 		}
 	},
 
-	// TODO get rid of experimentID (just one structure view)
-	selectStructure: function(structureID) {
+	drawRnaDiagram: function(structureID) {
 		this.browserController.showLoading();
 		$.ajax({
 			url: "/ajax/structure-plot/"+structureID, 
 			context: this
 		}).done(function(data) {
+
+			// This data includes sequence string, dot bracket structure
+			// and 2d diagram coords.
 			data = JSON.parse(data);
 
 			g = new RNAGraph(data["sequence"], data["structure"], "rna")
@@ -616,14 +629,15 @@ var StructureDiagramController = Class.extend({
 		        .reinforceLoops()
 		        .connectFakeNodes();
 
-		    this.fornaContainer.clearNodes();
-			this.fornaContainer.addRNAJSON(g, true);
+		    this.fornaContainer.clearNodes();// remove the previous diagram
+			this.fornaContainer.addRNAJSON(g, true); // generate new diagram
 			this.browserController.hideLoading();
 		});
-	},
-
-
+	}
 })
+
+
+
 
 // $("#chromosome-selector").change(function() {
 // 	// TODO reload the page .. difficult / impossible to change the chromosome 
