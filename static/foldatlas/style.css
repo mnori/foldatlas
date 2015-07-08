@@ -83,7 +83,7 @@ body {
 	border-bottom: 0 none;
 	border-right: 0 none;
 
-
+	/*float: left;*/
 	position: absolute;
 	bottom: 0px;
 	right: 0px;
@@ -288,9 +288,8 @@ table.coverage-table td.yes {
 }
 
 .forna-interact {
-	position: absolute;
-	top: 0px;
-	left: 0px;
+	float: left;
+	padding: 7px 0px 7px 7px;
 }
 
 .button {

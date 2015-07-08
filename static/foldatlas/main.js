@@ -4,9 +4,6 @@ var BrowserController = Class.extend({
 	// Constructor
 	init: function(config) {
 		this.fornaContainer = null;
-
-		console.log("init() invoked");
-
 		this.nucsPerRow = 80;
 		this.staticBase = config.staticBaseUrl;
 		this.reactivities = {};
@@ -446,7 +443,8 @@ var StructureExplorer = Class.extend({
 		this.drawMfe();
 	},
 
-	// Add RNA diagram HTML
+	// Set up the forna container - this plots the RNA
+	// Also set up button event handlers
 	initialiseRnaDiagram: function() {
 		if (this.fornaContainer == null) {
 			this.fornaContainer = new FornaContainer(
@@ -460,14 +458,7 @@ var StructureExplorer = Class.extend({
 			this.fornaContainer.setGravity(0);
 			this.fornaContainer.setPseudoknotStrength(0);
 			this.fornaContainer.stopAnimation();
-			this.fornaContainer.addCustomColors({
-				color_values: {
-					"": [0, 0.0, 0.25, 0.5, 0.75, 1.0]
-				},
-				domain: [0, 1],
-				range: ["#f00", "#00f", "#0ff"]
-			});
-			this.fornaContainer.changeColorScheme("custom");
+			this.addDmsColours();
 		}
 
 		$("#forna-interact-enable").click($.proxy(function(ev) {
@@ -475,8 +466,6 @@ var StructureExplorer = Class.extend({
 			this.fornaContainer.startAnimation()
 			$("#forna-interact-disable").show()
 			$("#forna-interact-enable").hide()
-
-
 		}, this));
 
 		$("#forna-interact-disable").click($.proxy(function(ev) {
@@ -485,6 +474,72 @@ var StructureExplorer = Class.extend({
 			$("#forna-interact-enable").show()
 			$("#forna-interact-disable").hide()
 		}, this));
+
+		$("#show-dms").click($.proxy(function(ev) {
+			ev.preventDefault();
+			this.addDmsColours();
+		}, this))
+
+		$("#show-ribosome-profiling").click($.proxy(function(ev) {
+			ev.preventDefault();
+			this.addRibosomeProfilingColours();
+		}, this))
+	},
+
+	// DMS colours work great
+	addDmsColours: function() {
+		var measurements = this.getNucleotideMeasurementsFlat(1);
+
+		// manipulate forna into displaying the colours
+		this.fornaContainer.addCustomColors({
+			color_values: {
+				// note - the first position is not actually used.
+				// "": [0, 0, 0.25, 0.5, 0.75, 1.0, null, 1.0]
+				"": measurements
+			},
+			domain: [0, 1],
+			range: ["#4f4", "#f44"]
+		});
+		this.fornaContainer.changeColorScheme("custom");
+	},
+
+	addRibosomeProfilingColours: function() {
+		// problem is that some colours are really hard to make out.
+		// maybe use a log scale to solve this.
+
+		var measurements = this.getNucleotideMeasurementsFlat(2);
+
+		var max = 0;
+		// find max measurement value
+		for (var i = 0; i < measurements.length; i++) {
+			if (measurements[i] > max) {
+				max = measurements[i];
+			}
+		}
+
+		// manipulate forna into displaying the colours
+		this.fornaContainer.addCustomColors({
+			color_values: {
+				// note - the first position is not actually used.
+				// "": [0, 0, 0.25, 0.5, 0.75, 1.0, null, 1.0]
+				"": measurements
+			},
+			domain: [0, max],
+			range: ["#fff", "#f00"]
+		});
+		this.fornaContainer.changeColorScheme("custom");
+	},
+
+	getNucleotideMeasurementsFlat: function(experimentID) {
+		// get the reactivities as a flat array
+		var data = this.browserController
+			.getJsonFromElement("nucleotide-measurement-json")[experimentID].data;
+
+		var measurements = [null]; // first element must be ignored
+		for (var i = 0; i < data.length; i++) {
+			measurements[i + 1] = data[i].measurement;
+		}
+		return measurements;
 	},
 
 	// Find the structure with the MFE and draw it.
@@ -514,15 +569,9 @@ var StructureExplorer = Class.extend({
 	// http://bl.ocks.org/weiglemc/6185069
 	drawStructurePca: function(dataIn, elementID) {
 		var svgID = elementID+"-svg";
-
-		console.log("elementID:", elementID);
-		console.log("svgID:", svgID);
-
 		var experimentID = dataIn["id"]
 		var padding = 0.05; // % margin around the PCA points
 		var buf = "<svg id=\""+svgID+"\" class=\"structure-pca-chart\"></svg>";
-
-		console.log(buf);
 
 		$("#"+elementID).html(buf)
 
