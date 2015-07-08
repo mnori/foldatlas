@@ -459,7 +459,15 @@ var StructureExplorer = Class.extend({
 			this.fornaContainer.setCharge(-0.3);
 			this.fornaContainer.setGravity(0);
 			this.fornaContainer.setPseudoknotStrength(0);
-			this.fornaContainer.stopAnimation()
+			this.fornaContainer.stopAnimation();
+			this.fornaContainer.addCustomColors({
+				color_values: {
+					"": [0, 0.0, 0.25, 0.5, 0.75, 1.0]
+				},
+				domain: [0, 1],
+				range: ["#f00", "#00f", "#0ff"]
+			});
+			this.fornaContainer.changeColorScheme("custom");
 		}
 
 		$("#forna-interact-enable").click($.proxy(function(ev) {
