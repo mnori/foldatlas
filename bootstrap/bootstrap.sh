@@ -11,6 +11,8 @@ function install() {
 
 	pretty_print "PROVISIONING"
 
+	apt-get update
+
 	# Copy handy bash aliases to home folder. Must use explicit home folder path, otherwise 
 	# it'll copy to super user's path instead of vagrant's
 	cp /vagrant/bootstrap/.bash_aliases /home/vagrant/.bash_aliases
@@ -54,7 +56,6 @@ function install() {
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing pip"
-	apt-get update
 	apt-get install -y python3-pip
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

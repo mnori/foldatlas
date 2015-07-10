@@ -492,38 +492,29 @@ var StructureExplorer = Class.extend({
 
 		// manipulate forna into displaying the colours
 		this.fornaContainer.addCustomColors({
-			color_values: {
-				// note - the first position is not actually used.
-				// "": [0, 0, 0.25, 0.5, 0.75, 1.0, null, 1.0]
-				"": measurements
-			},
+			color_values: { "": measurements },
 			domain: [0, 1],
 			range: ["#4f4", "#f44"]
 		});
 		this.fornaContainer.changeColorScheme("custom");
 	},
 
+	// with ribosome, problem is that some colours are really hard to make out.
+	// maybe use a log scale to solve this (flatten things out a bit)
+	// or a user adjustable threshold scale
 	addRibosomeProfilingColours: function() {
-		// problem is that some colours are really hard to make out.
-		// maybe use a log scale to solve this.
-
 		var measurements = this.getNucleotideMeasurementsFlat(2);
 
+		// find max measurement value - use that for max domain
 		var max = 0;
-		// find max measurement value
 		for (var i = 0; i < measurements.length; i++) {
 			if (measurements[i] > max) {
 				max = measurements[i];
 			}
 		}
 
-		// manipulate forna into displaying the colours
 		this.fornaContainer.addCustomColors({
-			color_values: {
-				// note - the first position is not actually used.
-				// "": [0, 0, 0.25, 0.5, 0.75, 1.0, null, 1.0]
-				"": measurements
-			},
+			color_values: { "": measurements },
 			domain: [0, max],
 			range: ["#fff", "#f00"]
 		});
