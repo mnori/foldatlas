@@ -117,6 +117,9 @@ var BrowserController = Class.extend({
 		var panelMargin = {top: 15, right: 60, bottom: 30, left: 70}
 		var panelTotDims = {x: 898, y: 100}
 
+		// for showing length string
+		var lengthOffset = 10
+
 		// dims without margins
 		var panelDims = { 
 			x: panelTotDims.x - panelMargin.left - panelMargin.right,
@@ -147,7 +150,7 @@ var BrowserController = Class.extend({
 		    .scale(xScale)
 		    .orient("bottom")
 		    .ticks(10)
-			.tickFormat(function(d, i) { return data[d].nuc; }) // tells it to use the nucleotide letter
+			// .tickFormat(function(d, i) { return data[d].nuc; }) // tells it to use the nucleotide letter
 
 		var yAxis = d3.svg.axis()
 		    .scale(yScale)
@@ -162,21 +165,19 @@ var BrowserController = Class.extend({
 			.attr("transform", "translate("+panelMargin.left+","+panelMargin.top+")")
 			.call(yAxis);
 
-		// Add x axis label
-	    chart.append("text")
-	        .attr("transform", "translate("+
-	        	(panelMargin.left + (panelDims.x / 2))+","+
-	        	(panelDims.y + panelMargin.top)+
-        	")")
-	        .style("text-anchor", "middle")
-	        .attr("dy", "2.7em")
-	        .text("Position");
+		chart.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate("+
+				panelMargin.left+","+
+				(panelMargin.top + panelDims.y)+
+			")")
+			.call(xAxis);
 
 		// Add y-axis label
 		chart.append("text")
 	        .attr("transform", "rotate(-90)")
 	        .attr("y", panelMargin.left) // this is actually X direction, because we rotated.
-	        .attr("x", (panelMargin.top + (panelDims.y / 2)))
+	        .attr("x", panelMargin.top - panelDims.y)
 	        .attr("dy", "-2.7em")
 	        .style("text-anchor", "middle")
 	        .text(yLabelText);
@@ -184,7 +185,7 @@ var BrowserController = Class.extend({
         // Add length label
         var panelDimsX = panelDims.x;
 		chart.append("text")
-	        .attr("x", panelMargin.left + panelDimsX)
+	        .attr("x", panelMargin.left + panelDimsX + lengthOffset)
 	        .attr("y", panelMargin.top + panelDims.y)
 	        .style("text-anchor", "left")
 	        .attr("dy", "1.3em")
@@ -216,6 +217,9 @@ var BrowserController = Class.extend({
 
 	// Visualises the measurement data.
 	drawNucleotideMeasurementsDetailed: function(svgID, experimentData) {
+
+		// for showing length string
+		var lengthOffset = 10
 
 		var yLabelText = (experimentData["type"] == "dms_reactivity") 
 			? "Reactivity"
@@ -289,7 +293,7 @@ var BrowserController = Class.extend({
 			panelYOffset = rowN * panelTotDims.y;
 
 			// Shows nucleotide numbers
-			var rangeX = parseInt(panelDims.x * ((nucsThisRow - 1) / this.nucsPerRow));
+			var rangeX = parseInt(panelDims.x * (nucsThisRow / this.nucsPerRow));
 
 			var xScale = d3.scale.linear()
 			    .range([0, rangeX], .1) 
@@ -366,7 +370,7 @@ var BrowserController = Class.extend({
 	        // Add length label
 	        var panelDimsX = panelDims.x * (nucsThisRow / this.nucsPerRow);
 			chart.append("text")
-		        .attr("x", panelMargin.left + panelDimsX)
+		        .attr("x", panelMargin.left + panelDimsX + lengthOffset)
 		        .attr("y", panelYOffset + panelMargin.top + panelDims.y)
 		        .style("text-anchor", "left")
 		        .attr("dy", "1.3em")
