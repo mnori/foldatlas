@@ -100,7 +100,7 @@ var BrowserController = Class.extend({
 	},
 
 	// Draw a graph with just 1 row, showing all of the nucleotide measurements
-	// Maybe ditch row by row and make it zoomable? As with the genome browser
+	// on the same row. Could potentially make this zoomable for more awesomeness
 	drawNucleotideMeasurementsOverview: function(svgID, experimentData) {
 		var yLabelText = (experimentData["type"] == "dms_reactivity") 
 			? "Reactivity"
@@ -125,8 +125,8 @@ var BrowserController = Class.extend({
 
 		// Init the chart's container element
 		var chart = d3.select("#"+svgID)
-			.attr("width", panelDims.x)
-			.attr("height", panelDims.y)
+			.attr("width", panelTotDims.x)
+			.attr("height", panelTotDims.y)
 
 		var maxY = d3.max(data, function(d) { return d.measurement; });
 		var maxX = data.length;
@@ -166,7 +166,7 @@ var BrowserController = Class.extend({
 	    chart.append("text")
 	        .attr("transform", "translate("+
 	        	(panelMargin.left + (panelDims.x / 2))+","+
-	        	(panelYOffset + panelDims.y + panelMargin.top)+
+	        	(panelDims.y + panelMargin.top)+
         	")")
 	        .style("text-anchor", "middle")
 	        .attr("dy", "2.7em")
@@ -176,7 +176,7 @@ var BrowserController = Class.extend({
 		chart.append("text")
 	        .attr("transform", "rotate(-90)")
 	        .attr("y", panelMargin.left) // this is actually X direction, because we rotated.
-	        .attr("x", (-panelYOffset - (panelMargin.top + (panelDims.y / 2))))
+	        .attr("x", (panelMargin.top + (panelDims.y / 2)))
 	        .attr("dy", "-2.7em")
 	        .style("text-anchor", "middle")
 	        .text(yLabelText);
@@ -185,22 +185,25 @@ var BrowserController = Class.extend({
         var panelDimsX = panelDims.x;
 		chart.append("text")
 	        .attr("x", panelMargin.left + panelDimsX)
-	        .attr("y", panelYOffset + panelMargin.top + panelDims.y)
+	        .attr("y", panelMargin.top + panelDims.y)
 	        .style("text-anchor", "left")
 	        .attr("dy", "1.3em")
 	        .text(data.length);
 
 		// Draw bars
-		var barWidth = parseInt(panelDims.x / this.nucsPerRow);
+		var barWidth = parseInt(panelDims.x / data.length);
+		if (barWidth < 1) {
+			barWidth = 1;
+		}
 		var bar = chart
-			.selectAll("g.nucleotide-measurement-bar r"+rowN)
+			.selectAll("g.nucleotide-measurement-bar")
 			.data(data).enter()
 			.append("g")
-			.attr("class", "nucleotide-measurement-bar r"+rowN)
+			.attr("class", "nucleotide-measurement-bar")
 			.attr("transform", function(d) { 
 				return "translate("+
 					(panelMargin.left + xScale(d.position) - (barWidth / 2))+","+
-					(panelYOffset + panelMargin.top + yScale(d.measurement))+
+					(panelMargin.top + yScale(d.measurement))+
 				")";
 			});
 
