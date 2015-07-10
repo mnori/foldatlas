@@ -77,26 +77,37 @@ var BrowserController = Class.extend({
 
 		var measurementData = this.getJsonFromElement("nucleotide-measurement-json")
 		if (measurementData) {
-			this.drawNucleotideMeasurement(measurementData[1]);
-			this.drawNucleotideMeasurement(measurementData[2]);
+			this.drawNucleotideMeasurements(measurementData[1]);
+			this.drawNucleotideMeasurements(measurementData[2]);
 		}
 	},
 
+	drawNucleotideMeasurements: function(experimentData) {
+		var detailedID = "nucleotide-measurements-overview_"+experimentData["id"];
+		var overviewID = "nucleotide-measurements-detailed_"+experimentData["id"];
+
+		// Add HTML elements
+		var buf = 
+			"<h2>"+experimentData["description"]+"</h2>"+
+			"<svg id=\""+overviewID+"\"></svg>"+
+			"<svg id=\""+detailedID+"\"></svg>";
+		$("#nucleotide-measurement-charts").append(buf)
+
+		// Draw the charts
+		this.drawNucleotideMeasurementsOverview(overviewID, experimentData);
+		this.drawNucleotideMeasurementsDetailed(detailedID, experimentData);
+	},
+
+	drawNucleotideMeasurementsOverview: function(svgID, experimentData) {
+		console.log("drawNucleotideMeasurementsOverview: "+svgID);
+	},
+
 	// Visualises the measurement data.
-	drawNucleotideMeasurement: function(experimentData) {
+	drawNucleotideMeasurementsDetailed: function(svgID, experimentData) {
 
 		var yLabelText = (experimentData["type"] == "dms_reactivity") 
 			? "Reactivity"
 			: "Occupancy";
-
-		// Add header and graph container svg element
-		// Also Add the SVG itself
-		var svgID = "nucleotide-measurement-chart_"+experimentData["id"];
-		var buf = 
-			"<h2>"+experimentData["description"]+"</h2>"+
-			"<svg id=\""+svgID+"\"></svg>"
-
-		$("#nucleotide-measurement-charts").append(buf)
 
 		var data = experimentData["data"]
 		if (data == null) { // can happen
