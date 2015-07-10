@@ -198,6 +198,10 @@ h2 {
   stroke-width: 1px;
 }
 
+.nucleotide-measurement-bar {
+	fill: #c33;
+}
+
 .missing-bg {
 	fill: #bbb;
 }

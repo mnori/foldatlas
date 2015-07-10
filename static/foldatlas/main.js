@@ -141,12 +141,14 @@ var BrowserController = Class.extend({
 			.attr("width", chartDims.x)
 			.attr("height", chartDims.y)
 
+		var maxY = d3.max(data, function(d) { return d.measurement; });
+
 		// Define the scales
 		var yScale = d3.scale.linear()
 			// range maps to the pixel dimensions.
 		    // domain describes the range of data to show.
 		    .range([panelDims.y, 0])
-		    .domain([0, d3.max(data, function(d) { return d.measurement; })]);
+		    .domain([0, maxY]);
 
 		// when there is no measurement data, degrade gracefully
 		if (isNaN(yScale.domain()[1])) { 
@@ -257,36 +259,28 @@ var BrowserController = Class.extend({
 		        .attr("dy", "1.3em")
 		        .text(end);
 
-			// Bar version
+			// Draw bars
 			var barWidth = parseInt(panelDims.x / this.nucsPerRow);
-
-			// console.log(dataSlice);
 			var bar = chart
 				.selectAll("g.nucleotide-measurement-bar r"+rowN)
 				.data(dataSlice).enter()
 				.append("g")
-				.attr("class", "nucleotide-measurement-bar  r"+rowN)
+				.attr("class", "nucleotide-measurement-bar r"+rowN)
 				.attr("transform", function(d) { 
-
-					console.log("transform invoked");
-					console.log("d", d);
-					// console.log("i", i);
-
-					// console.log(dataSlice[i]);
-					var buf = "translate("+
-						(panelMargin.left + xScale(d.position))+","+
+					return "translate("+
+						(panelMargin.left + xScale(d.position) - (barWidth / 2))+","+
 						(panelYOffset + panelMargin.top + yScale(d.measurement))+
-					")"; 
-					console.log(buf);
-					return buf;
+					")";
 				});
 
 			bar.append("rect")
-				.attr("height", function(d) { return panelMargin.top + yScale(d.measurement); })
+				.attr("height", function(d) { 
+					return yScale(maxY - d.measurement);
+				})
 				.attr("width", barWidth);
 
 
-			// // add the actual line chart
+			// Draw line chart
 			// var lineGen = d3.svg.line()
 			//     .x(function(d) { return panelMargin.left + xScale(d.position); })
 			//     .y(function(d) { return panelYOffset + panelMargin.top + yScale(d.measurement); });
