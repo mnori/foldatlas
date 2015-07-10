@@ -48,6 +48,7 @@ var BrowserController = Class.extend({
 	},
 
 	// HTML5 change URL method
+	// TODO make back button work
 	changeUrl: function(title, url) {
 	    if (typeof (history.pushState) != "undefined") {
 	        var obj = { Page: "FoldAtlas: "+title, Url: url };
@@ -98,8 +99,116 @@ var BrowserController = Class.extend({
 		this.drawNucleotideMeasurementsDetailed(detailedID, experimentData);
 	},
 
+	// Draw a graph with just 1 row, showing all of the nucleotide measurements
+	// Maybe ditch row by row and make it zoomable? As with the genome browser
 	drawNucleotideMeasurementsOverview: function(svgID, experimentData) {
-		console.log("drawNucleotideMeasurementsOverview: "+svgID);
+		var yLabelText = (experimentData["type"] == "dms_reactivity") 
+			? "Reactivity"
+			: "Occupancy";
+
+		var data = experimentData["data"]
+		if (data == null) { // can happen
+			return;
+		}
+
+		var nDataRows = data.length;
+
+		// Define chart dimensions including axis panelMargins
+		var panelMargin = {top: 15, right: 60, bottom: 30, left: 70}
+		var panelTotDims = {x: 898, y: 100}
+
+		// dims without margins
+		var panelDims = { 
+			x: panelTotDims.x - panelMargin.left - panelMargin.right,
+			y: panelTotDims.y - panelMargin.bottom - panelMargin.top
+		}
+
+		// Init the chart's container element
+		var chart = d3.select("#"+svgID)
+			.attr("width", panelDims.x)
+			.attr("height", panelDims.y)
+
+		var maxY = d3.max(data, function(d) { return d.measurement; });
+		var maxX = data.length;
+
+		// Define the scales
+		var yScale = d3.scale.linear()
+			// range maps to the pixel dimensions.
+		    // domain describes the range of data to show.
+		    .range([panelDims.y, 0])
+		    .domain([0, maxY]);
+
+		var xScale = d3.scale.linear()
+			    .range([0, panelDims.x], .1) // what does the .1 do? Add extra space?
+			    .domain([-0.5, (maxX - 1) + 0.5])
+
+	   	// Create axis objects
+		var xAxis = d3.svg.axis()
+		    .scale(xScale)
+		    .orient("bottom")
+		    .ticks(10)
+			.tickFormat(function(d, i) { return data[d].nuc; }) // tells it to use the nucleotide letter
+
+		var yAxis = d3.svg.axis()
+		    .scale(yScale)
+		    .orient("left")
+    		.ticks(3); // how many ticks to show.
+
+    	// need to add a new x axis tick for this thing.
+
+		// Add y-axis objects to the chart
+		chart.append("g")
+			.attr("class", "y axis")
+			.attr("transform", "translate("+panelMargin.left+","+panelMargin.top+")")
+			.call(yAxis);
+
+		// Add x axis label
+	    chart.append("text")
+	        .attr("transform", "translate("+
+	        	(panelMargin.left + (panelDims.x / 2))+","+
+	        	(panelYOffset + panelDims.y + panelMargin.top)+
+        	")")
+	        .style("text-anchor", "middle")
+	        .attr("dy", "2.7em")
+	        .text("Position");
+
+		// Add y-axis label
+		chart.append("text")
+	        .attr("transform", "rotate(-90)")
+	        .attr("y", panelMargin.left) // this is actually X direction, because we rotated.
+	        .attr("x", (-panelYOffset - (panelMargin.top + (panelDims.y / 2))))
+	        .attr("dy", "-2.7em")
+	        .style("text-anchor", "middle")
+	        .text(yLabelText);
+
+        // Add length label
+        var panelDimsX = panelDims.x;
+		chart.append("text")
+	        .attr("x", panelMargin.left + panelDimsX)
+	        .attr("y", panelYOffset + panelMargin.top + panelDims.y)
+	        .style("text-anchor", "left")
+	        .attr("dy", "1.3em")
+	        .text(data.length);
+
+		// Draw bars
+		var barWidth = parseInt(panelDims.x / this.nucsPerRow);
+		var bar = chart
+			.selectAll("g.nucleotide-measurement-bar r"+rowN)
+			.data(data).enter()
+			.append("g")
+			.attr("class", "nucleotide-measurement-bar r"+rowN)
+			.attr("transform", function(d) { 
+				return "translate("+
+					(panelMargin.left + xScale(d.position) - (barWidth / 2))+","+
+					(panelYOffset + panelMargin.top + yScale(d.measurement))+
+				")";
+			});
+
+		bar.append("rect")
+			.attr("height", function(d) { 
+				return yScale(maxY - d.measurement);
+			})
+			.attr("width", barWidth);
 	},
 
 	// Visualises the measurement data.
@@ -151,6 +260,7 @@ var BrowserController = Class.extend({
 		    .domain([0, maxY]);
 
 		// when there is no measurement data, degrade gracefully
+		// TODO get rid of this - handle it higher up
 		if (isNaN(yScale.domain()[1])) { 
 			
 			chart.append("text")
