@@ -185,12 +185,7 @@ var BrowserController = Class.extend({
 			    .scale(xScale)
 			    .orient("bottom")
 			    .ticks(nucsThisRow)
-				.tickFormat(function(d, i) { return data[d].nuc; })
-
-			// xAxis.select("tick")
-			// 	.append("rect")
-			// 	.setAttr("width", 10)
-			// 	.setAttr("height", 10);
+				.tickFormat(function(d, i) { return data[d].nuc; }) // tells it to use the nucleotide letter
 
 			var yAxis = d3.svg.axis()
 			    .scale(yScale)
@@ -262,15 +257,44 @@ var BrowserController = Class.extend({
 		        .attr("dy", "1.3em")
 		        .text(end);
 
-		    // add the actual line chart
-			var lineGen = d3.svg.line()
-			    .x(function(d) { return panelMargin.left + xScale(d.position); })
-			    .y(function(d) { return panelYOffset + panelMargin.top + yScale(d.measurement); });
+			// Bar version
+			var barWidth = parseInt(panelDims.x / this.nucsPerRow);
 
-	 		chart.append("path")
-				.datum(dataSlice) // get data specific to this row
-				.attr("class", "line")
-				.attr("d", lineGen);
+			// console.log(dataSlice);
+			var bar = chart
+				.selectAll("g.nucleotide-measurement-bar r"+rowN)
+				.data(dataSlice).enter()
+				.append("g")
+				.attr("class", "nucleotide-measurement-bar  r"+rowN)
+				.attr("transform", function(d) { 
+
+					console.log("transform invoked");
+					console.log("d", d);
+					// console.log("i", i);
+
+					// console.log(dataSlice[i]);
+					var buf = "translate("+
+						(panelMargin.left + xScale(d.position))+","+
+						(panelYOffset + panelMargin.top + yScale(d.measurement))+
+					")"; 
+					console.log(buf);
+					return buf;
+				});
+
+			bar.append("rect")
+				.attr("height", function(d) { return panelMargin.top + yScale(d.measurement); })
+				.attr("width", barWidth);
+
+
+			// // add the actual line chart
+			// var lineGen = d3.svg.line()
+			//     .x(function(d) { return panelMargin.left + xScale(d.position); })
+			//     .y(function(d) { return panelYOffset + panelMargin.top + yScale(d.measurement); });
+
+	 	// 	chart.append("path")
+			// 	.datum(dataSlice) // get data specific to this row
+			// 	.attr("class", "line")
+			// 	.attr("d", lineGen);
 		} // End looping through chart rows
 	}
 })
