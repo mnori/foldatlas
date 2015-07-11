@@ -87,12 +87,38 @@ var BrowserController = Class.extend({
 		var detailedID = "nucleotide-measurements-overview_"+experimentData["id"];
 		var overviewID = "nucleotide-measurements-detailed_"+experimentData["id"];
 
-		// Add HTML elements
+		var moreDetailID = "more-detail_"+experimentData["id"];
+		var lessDetailID = "less-detail_"+experimentData["id"];
+
+		// Add HTML elements (TODO use template instead?)
 		var buf = 
 			"<h2>"+experimentData["description"]+"</h2>"+
 			"<svg id=\""+overviewID+"\"></svg>"+
-			"<svg id=\""+detailedID+"\"></svg>";
+			"<a href=\"#\" id=\""+moreDetailID+"\" class=\"nucleotide-detail button\">"+
+				"<i class=\"fa fa-arrow-circle-down\"></i>&nbsp;"+
+				"More detail"+
+			"</a>"+
+			"<a href=\"#\" id=\""+lessDetailID+"\" class=\"nucleotide-detail button\" style=\"display: none;\">"+
+			"<i class=\"fa fa-arrow-circle-up\"></i>&nbsp;"+
+				"Less detail"+
+			"</a>"+
+			"<svg style=\"display: none;\" id=\""+detailedID+"\"></svg>";
 		$("#nucleotide-measurement-charts").append(buf)
+
+		// Add button event handlers
+		$("#"+moreDetailID).click($.proxy(function(ev) {
+			ev.preventDefault();
+			$("#"+detailedID).show();
+			$("#"+moreDetailID).hide();
+			$("#"+lessDetailID).show();
+		}, this))
+
+		$("#"+lessDetailID).click($.proxy(function(ev) {
+			ev.preventDefault();
+			$("#"+detailedID).hide();
+			$("#"+moreDetailID).show();
+			$("#"+lessDetailID).hide();
+		}, this))
 
 		// Draw the charts
 		this.drawNucleotideMeasurementsOverview(overviewID, experimentData);

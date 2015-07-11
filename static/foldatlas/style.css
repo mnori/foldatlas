@@ -115,6 +115,7 @@ h2 {
 	margin-right: -32px;
 	padding-left: 30px;
 	text-shadow: 0px 0px 10px #000;
+	text-align: left;
 
 	color: #fff;
 	background-color: #555;
@@ -305,6 +306,14 @@ table.coverage-table td.yes {
 	font-size: 16px;
 	line-height: 15px;
 	text-decoration: none;
+}
+
+#nucleotide-measurement-charts {
+	text-align: center;
+}
+
+.nucleotide-detail.button {
+	display: inline-block;
 }
 
 #structure-pca-chart-tooltip {
