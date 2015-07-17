@@ -443,8 +443,11 @@ var SearchController = Class.extend({
 
 	// Constructor
 	init: function(browserController) {
+
+		console.log("Boo");
+
 		this.browserController = browserController;
-		this.tabElements = []
+		// this.tabElements = []
 
 		$("#search-button").click($.proxy(function(ev) {
 			ev.preventDefault()
@@ -453,24 +456,70 @@ var SearchController = Class.extend({
 			$("#search").show()
 			$("#d3nome").hide();
 		}, this));
-		this.initTabs();
+		// this.initTabs();
+		this.tabController = new TabController([
+			new TabControllerTab("search-tab-transcript-id"),
+			new TabControllerTab("search-tab-coverage", $.proxy(function() {
+				if (this.coverageSearchController == null) {
+					this.coverageSearchController = new CoverageSearchController(this.browserController);
+				}
+			}, this))
+		]);
+
 		this.transcriptIDSearchController = new TranscriptIDSearchController(this.browserController);
 		this.coverageSearchController = null; // initialises when tab is selected
 	},
 
-	initTabs: function() {
-		this.initTab($("#search-tab-transcript-id"));
-		this.initTab($("#search-tab-coverage"), $.proxy(function() {
-			if (this.coverageSearchController == null) {
-				this.coverageSearchController = new CoverageSearchController(this.browserController);
-			}
-		}, this));
-	},
+	// initTabs: function() {
+	// 	this.initTab($("#search-tab-transcript-id"));
+	// 	this.initTab($("#search-tab-coverage"), $.proxy(function() {
+	// 		if (this.coverageSearchController == null) {
+	// 			this.coverageSearchController = new CoverageSearchController(this.browserController);
+	// 		}
+	// 	}, this));
+	// },
 
-	initTab: function(element, tabClickCallback) {
+	// initTab: function(element, tabClickCallback) {
+	// 	this.tabElements.push(element);
+	// 	element.click($.proxy(function(element) {
+	// 		$("#transcript-data").html("")
+	// 		var clickedElement = $(element);
+
+	// 		for (var i = 0; i < this.tabElements.length; i++) {
+	// 			var currElement = this.tabElements[i];
+	// 			var currPanelElement = $("#"+currElement.data("ui-id"));
+
+	// 			if (clickedElement.attr("id") != currElement.attr("id")) {
+	// 				currElement.removeClass("active")
+	// 				currPanelElement.hide()
+
+	// 			} else {
+	// 				currElement.addClass("active")
+	// 				currPanelElement.show()
+	// 			}
+	// 		}
+	// 		if (typeof(tabClickCallback) !== "undefined") {
+	// 			tabClickCallback()
+	// 		}
+	// 	}, this, element))
+	// }
+});
+
+var TabController = Class.extend({
+
+	init: function(tabs) {
+		this.tabElements = [];
+		this.initTabs(tabs);
+	},
+	initTabs: function(tabs) {
+		for (var i = 0; i < tabs.length; i++) {
+			this.initTab(tabs[i]);
+		}
+	},
+	initTab: function(tab) {
+		var element = $("#"+tab.elementID);
 		this.tabElements.push(element);
 		element.click($.proxy(function(element) {
-			$("#transcript-data").html("")
 			var clickedElement = $(element);
 
 			for (var i = 0; i < this.tabElements.length; i++) {
@@ -486,10 +535,20 @@ var SearchController = Class.extend({
 					currPanelElement.show()
 				}
 			}
-			if (typeof(tabClickCallback) !== "undefined") {
-				tabClickCallback()
+			if (tab.clickCallback != null) {
+				tab.clickCallback()
 			}
 		}, this, element))
+	}
+});
+
+var TabControllerTab = Class.extend({
+	init: function(elementID, clickCallback) {
+		// clickCallback is an optional field.
+		clickCallback = typeof clickCallback !== 'undefined' ? clickCallback : null;
+
+		this.elementID = elementID;
+		this.clickCallback = clickCallback;
 	}
 })
 
