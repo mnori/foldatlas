@@ -465,6 +465,9 @@ var TabController = Class.extend({
 	},
 	initTabs: function(tabs) {
 		for (var i = 0; i < tabs.length; i++) {
+			if (i == 0) { // first tab is always selected
+				this.selectedTabID = tabs[i].elementID;
+			}
 			this.initTab(tabs[i]);
 		}
 	},
@@ -474,6 +477,15 @@ var TabController = Class.extend({
 		element.click($.proxy(function(element) {
 			var clickedElement = $(element);
 
+			// make sure clicked tab is not same as current tab
+			var newSelectedTabID = element.attr("id");
+			if (newSelectedTabID == this.selectedTabID) {
+				return;
+			}
+			// keep track of selected tab
+			this.selectedTabID = newSelectedTabID;
+
+			// update the tab CSS classes
 			for (var i = 0; i < this.tabElements.length; i++) {
 				var currElement = this.tabElements[i];
 				var currPanelElement = $("#"+currElement.data("ui-id"));
@@ -487,6 +499,8 @@ var TabController = Class.extend({
 					currPanelElement.show()
 				}
 			}
+
+			// run tab click callback
 			if (tab.clickCallback != null) {
 				tab.clickCallback()
 			}
@@ -613,18 +627,20 @@ var CoverageSearchController = Class.extend({
 var StructureExplorer = Class.extend({
 	init: function(browserController) {
 		this.browserController = browserController;
+
+		var drawStructureF = $.proxy(function() { this.drawStructure(); }, this)
+
 		this.tabController = new TabController([
-			new TabControllerTab("structure-tab-diagram"),
-			new TabControllerTab("structure-tab-circle-plot", $.proxy(function() {
-				// ... add dank code here
-			}, this))
+			new TabControllerTab("structure-tab-diagram", drawStructureF),
+			new TabControllerTab("structure-tab-circle-plot", drawStructureF)
 		]);
 
 		this.experimentIDs = [3, 4];
 		this.structureData = this.browserController.getJsonFromElement("structure-json")
 		this.drawStructurePcas();
 		this.initialiseRnaDiagram();
-		this.drawMfe();
+		this.selectedStructure = null;
+		this.drawStructure();
 	},
 
 	// Set up the forna container - this plots the RNA
@@ -717,8 +733,8 @@ var StructureExplorer = Class.extend({
 		return measurements;
 	},
 
-	// Find the structure with the MFE and draw it.
-	drawMfe: function() {
+	// Get the MFE structure.
+	getMfe: function() {
 		var inVivoExperimentID = 4;
 		var lowestEntry = null;
 		var structureData = this.structureData[inVivoExperimentID].data
@@ -732,7 +748,7 @@ var StructureExplorer = Class.extend({
 				lowestEntry = currentEntry;
 			}
 		}
-		this.drawStructureDiagram(lowestEntry);
+		return lowestEntry;
 	},
 
 	drawStructurePcas: function() {
@@ -864,7 +880,8 @@ var StructureExplorer = Class.extend({
 					.style("opacity", 0);
 			})
 			.on("click", $.proxy(function(d) {
-				this.drawStructureDiagram(d);
+				this.selectedStructure = d;
+				this.drawStructure();
 			}, this));
 
 		// add the tooltip area to the webpage (whocares.jpeg)
@@ -874,10 +891,21 @@ var StructureExplorer = Class.extend({
 
 	},
 
-	drawStructureDiagram: function(d) {
-		var structureID = d["id"];
+	drawStructure: function() {
+		if (this.selectedStructure == null) {
+			this.selectedStructure = this.getMfe();
+		}
 
-		$("#forna-energy").html(d["energy"]);
+		if (this.tabController.selectedTabID == "structure-tab-diagram") {
+			this.drawStructureDiagram();
+		} else {
+			console.log("Draw circle plot here");
+		}
+	},
+
+	drawStructureDiagram: function() {
+		var structureID = this.selectedStructure["id"];
+		$("#forna-energy").html(this.selectedStructure["energy"]);
 
 		this.browserController.showLoading();
 		$.ajax({
