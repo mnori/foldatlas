@@ -3,13 +3,11 @@ var BrowserController = Class.extend({
 
 	// Constructor
 	init: function(config) {
-		this.fornaContainer = null;
 		this.nucsPerRow = 80;
 		this.staticBase = config.staticBaseUrl;
 		this.reactivities = {};
 		this.drawTranscriptData();
 		this.searchController = new SearchController(this);
-
 		$("#title").click($.proxy(function() { this.goHome(); }, this));
 	},
 
@@ -422,16 +420,6 @@ var BrowserController = Class.extend({
 				})
 				.attr("width", barWidth);
 
-
-			// Draw line chart
-			// var lineGen = d3.svg.line()
-			//     .x(function(d) { return panelMargin.left + xScale(d.position); })
-			//     .y(function(d) { return panelYOffset + panelMargin.top + yScale(d.measurement); });
-
-	 	// 	chart.append("path")
-			// 	.datum(dataSlice) // get data specific to this row
-			// 	.attr("class", "line")
-			// 	.attr("d", lineGen);
 		} // End looping through chart rows
 	}
 })
@@ -445,18 +433,16 @@ var SearchController = Class.extend({
 	init: function(browserController) {
 
 		console.log("Boo");
-
 		this.browserController = browserController;
-		// this.tabElements = []
 
 		$("#search-button").click($.proxy(function(ev) {
-			ev.preventDefault()
+ 			ev.preventDefault()
 			this.browserController.changeUrl("Search", "/search");
 			$("#transcript-data").empty();
 			$("#search").show()
 			$("#d3nome").hide();
 		}, this));
-		// this.initTabs();
+
 		this.tabController = new TabController([
 			new TabControllerTab("search-tab-transcript-id"),
 			new TabControllerTab("search-tab-coverage", $.proxy(function() {
@@ -469,40 +455,6 @@ var SearchController = Class.extend({
 		this.transcriptIDSearchController = new TranscriptIDSearchController(this.browserController);
 		this.coverageSearchController = null; // initialises when tab is selected
 	},
-
-	// initTabs: function() {
-	// 	this.initTab($("#search-tab-transcript-id"));
-	// 	this.initTab($("#search-tab-coverage"), $.proxy(function() {
-	// 		if (this.coverageSearchController == null) {
-	// 			this.coverageSearchController = new CoverageSearchController(this.browserController);
-	// 		}
-	// 	}, this));
-	// },
-
-	// initTab: function(element, tabClickCallback) {
-	// 	this.tabElements.push(element);
-	// 	element.click($.proxy(function(element) {
-	// 		$("#transcript-data").html("")
-	// 		var clickedElement = $(element);
-
-	// 		for (var i = 0; i < this.tabElements.length; i++) {
-	// 			var currElement = this.tabElements[i];
-	// 			var currPanelElement = $("#"+currElement.data("ui-id"));
-
-	// 			if (clickedElement.attr("id") != currElement.attr("id")) {
-	// 				currElement.removeClass("active")
-	// 				currPanelElement.hide()
-
-	// 			} else {
-	// 				currElement.addClass("active")
-	// 				currPanelElement.show()
-	// 			}
-	// 		}
-	// 		if (typeof(tabClickCallback) !== "undefined") {
-	// 			tabClickCallback()
-	// 		}
-	// 	}, this, element))
-	// }
 });
 
 var TabController = Class.extend({
@@ -590,12 +542,6 @@ var TranscriptIDSearchController = Class.extend({
 				}
 				this.browserController.selectTranscript(results[0]);
 			}
-
-			// selectTranscript(transcriptID)
-			// $("#loading-indicator").hide();
-			// $("#transcript-data").empty();
-			// $("#transcript-data").html(results);
-			// this.drawTranscriptData();
 		});
 	}
 });
@@ -667,6 +613,13 @@ var CoverageSearchController = Class.extend({
 var StructureExplorer = Class.extend({
 	init: function(browserController) {
 		this.browserController = browserController;
+		this.tabController = new TabController([
+			new TabControllerTab("structure-tab-diagram"),
+			new TabControllerTab("structure-tab-circle-plot", $.proxy(function() {
+				// ... add dank code here
+			}, this))
+		]);
+
 		this.experimentIDs = [3, 4];
 		this.structureData = this.browserController.getJsonFromElement("structure-json")
 		this.drawStructurePcas();
