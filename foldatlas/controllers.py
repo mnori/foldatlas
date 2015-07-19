@@ -394,7 +394,7 @@ class StructureView():
         self.data_json = json.dumps(data)
 
 # Plots an RNA structure using the RNAplot program from the ViennaRNA package.
-class StructurePlotView():
+class StructureDiagramView():
     def __init__(self, structure_id):
         self.structure_id = structure_id
         self.build_plot()
@@ -403,7 +403,7 @@ class StructurePlotView():
         # convert entities to dot bracket string
         data = self.build_dot_bracket()
 
-        # use ViennaRNA to get 2d plot coords        
+        # use ViennaRNA to get 2d plot coords    
         data["coords"] = self.get_vienna_layout(data)
 
         # return the results as a json string
@@ -414,9 +414,7 @@ class StructurePlotView():
         # get all the positions
         results = db_session \
             .query(StructurePosition) \
-            .filter(
-                StructurePosition.structure_id==self.structure_id
-            ) \
+            .filter(StructurePosition.structure_id==self.structure_id) \
             .order_by(StructurePosition.position) \
             .all()
 
@@ -491,4 +489,29 @@ class StructurePlotView():
         
         # return result
 
-            
+
+class StructureCirclePlotView():
+    def __init__(self, structure_id):
+        self.structure_id = structure_id
+        self.get_values()
+
+    def get_values(self):
+        # convert entities to dot bracket string
+        matrix = [];
+
+        # get all the positions
+        results = db_session \
+            .query(StructurePosition) \
+            .filter(StructurePosition.structure_id==self.structure_id) \
+            .order_by(StructurePosition.position) \
+            .all()
+
+        # build the matrix of values
+        n_results = len(results)
+        for result in results:
+            row = [0] * n_results
+            row[result.paired_to_position - 1] = 1
+            matrix.append(row)
+
+        self.data_json = json.dumps(matrix)
+

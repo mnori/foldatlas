@@ -314,18 +314,20 @@ table.coverage-table td.yes {
 	pointer-events: all;
 }
 
-/*.group path {
+.group path {
 	fill-opacity: .5;
 }
  
 path.chord {
-	stroke: #000;
-	stroke-width: .25px;
+	/*stroke: #000;*/
+	/*stroke-width: 1px;*/
 }
  
 #circle:hover path.fade {
 	display: none;
-}*/
+}
+
+/*** /CIRCLE PLOT ***/
 
 .button {
 	margin: 5px;

@@ -907,9 +907,11 @@ var StructureExplorer = Class.extend({
 		var structureID = this.selectedStructure["id"];
 		$("#forna-energy").html(this.selectedStructure["energy"]);
 
+		// this should be done in the constructor really.
+		// or have a getStructure method that attached to the object with a callback
 		this.browserController.showLoading();
 		$.ajax({
-			url: "/ajax/structure-plot/"+structureID, 
+			url: "/ajax/structure-diagram/"+structureID, 
 			context: this
 		}).done(function(data) {
 
@@ -932,61 +934,131 @@ var StructureExplorer = Class.extend({
 	},
 
 	drawCirclePlot: function() {
-		console.log("Draw circle plot here");
+		var structureID = this.selectedStructure["id"];
+		// this should be done in the constructor really.
+		// or have a getStructure method that attached to the object with a callback
+		console.log("Getting data...");
+		this.browserController.showLoading();
+		$.ajax({
+			url: "/ajax/structure-circle-plot/"+structureID, 
+			context: this
+		}).done(function(data) {
 
-		var dims = { x: 630, y: 630 }
+			// // need to generate this from the structure data
+			// var matrix = [
+			// 	[1, 0, 0], // Unpaired - links to itself.
+			// 	[0, 0, 1], // links must be reciprocated in the matrix
+			// 	[0, 1, 0]  // these two are linked together
+			// ];
 
-		outerRadius = Math.min(dims.x, dims.y) / 2 - 10,
-		innerRadius = outerRadius - 24;
+			var matrix = data;
+			console.log("...Got data");
 
-		var arc = d3.svg.arc()
-			.innerRadius(innerRadius)
-			.outerRadius(outerRadius);
+			console.log("1");
 
-		var layout = d3.layout.chord()
-			.padding(.04)
+			var lenMatrix = matrix.length;
 
-		var path = d3.svg.chord()
-			.radius(innerRadius);
+			var getColour = function(position) {
+				// see docs: https://github.com/mbostock/d3/wiki/Colors
+				var hue = (position / lenMatrix) * 360;
+				return d3.hsl(hue, 0.5, 0.75);
+			}
 
-		var svg = d3.select("#circle-plot").append("svg")
-			.attr("width", dims.x)
-			.attr("height", dims.y)
-			.append("g")
-			.attr("id", "circle-svg")
-			.attr("transform", "translate(" + dims.x / 2 + "," + dims.y / 2 + ")");
+			var dims = { x: 630, y: 630 }
 
-		// invisible??
-		svg.append("circle")
-			.attr("r", outerRadius);
+			console.log("2");
 
-		// need to generate this from the structure data
-		var matrix = [
-			[0, 1, 1],
-			[1, 0, 0],
-			[1, 1, 0]
-		];
+			outerRadius = Math.min(dims.x, dims.y) / 2 - 10,
+			innerRadius = outerRadius - 24;
 
-		// Compute the chord layout.
-		layout.matrix(matrix);
+			console.log("3");
 
-		// Add a "group" for each element
-		var group = svg.selectAll(".group")
-			.data(layout.groups)
-			.enter().append("g")
-			.attr("class", "group");
-			// .on("mouseover", mouseover);
+			var arc = d3.svg.arc()
+				.innerRadius(innerRadius)
+				.outerRadius(outerRadius);
 
-		// Add each group arc. These are the shaded areas on the perimiter of the plot.
-		// We'll want to label these with nucleotides
-		var groupPath = group.append("path")
-			.attr("id", function(d, i) { return "group" + i; })
-			.attr("d", arc)
-			.style("fill", function(d, i) { 
-				// return cities[i].color;
-				return "#f00";
-			});
+			console.log("4");
 
+			var layout = d3.layout.chord()
+				.padding(.04)
+
+			console.log("5");
+
+			var path = d3.svg.chord()
+				.radius(innerRadius);
+
+			console.log("6");
+
+			var svg = d3.select("#circle-plot").append("svg")
+				.attr("width", dims.x)
+				.attr("height", dims.y)
+				.append("g")
+				.attr("id", "circle-svg")
+				.attr("transform", "translate(" + dims.x / 2 + "," + dims.y / 2 + ")");
+
+			console.log("7");
+
+			// invisible??
+			svg.append("circle")
+				.attr("r", outerRadius);
+
+			console.log("8");
+
+			// Compute the chord layout.
+			layout.matrix(matrix);
+
+			console.log("9");
+
+			console.log(layout.groups);
+
+			// Add a "group" for each element
+			var group = svg.selectAll(".group")
+				.data(layout.groups)
+				.enter().append("g")
+				.attr("class", "group");
+				// .on("mouseover", mouseover);
+
+			console.log("10");
+
+			// Add each group arc. These are the shaded areas on the perimiter of the plot.
+			// We'll want to label these with nucleotide info
+			var groupPath = group.append("path")
+				.attr("id", function(d, i) { return "group" + i; })
+				.attr("d", arc)
+				.style("fill", function(d, i) { 
+					// return cities[i].color;
+					// colour it by the nucleotide
+					return "#f00";
+				});
+
+			// Add a text label to each group arc.
+			var groupText = group.append("text")
+				.attr("x", 6)
+				.attr("dy", 15);
+			groupText.append("textPath")
+				.attr("xlink:href", function(d, i) { return "#group" + i; })
+				.text(function(d, i) { 
+					return ":D";
+					// return cities[i].name; 
+				});
+
+			// Add the chords.
+			var chord = svg.selectAll(".chord")
+				.data(layout.chords)
+				.enter().append("path")
+				.attr("class", "chord")
+				.style("fill", function(d) { 
+					if (d.source == d.target) {
+						return "#fff";
+					} else {
+						var colour = getColour(d.source.index)
+						return colour;
+					}
+				})
+				.attr("d", path);
+
+			this.browserController.hideLoading();
+		});
 	}
 })
 
