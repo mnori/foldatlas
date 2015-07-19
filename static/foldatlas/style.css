@@ -301,6 +301,32 @@ table.coverage-table td.yes {
 	padding: 7px 0px 7px 7px;
 }
 
+/*** CIRCLE PLOT ***/
+
+#circle-plot {
+	width: 630px;
+	height: 630px;
+}
+
+
+#circle-svg circle {
+	fill: none;
+	pointer-events: all;
+}
+
+/*.group path {
+	fill-opacity: .5;
+}
+ 
+path.chord {
+	stroke: #000;
+	stroke-width: .25px;
+}
+ 
+#circle:hover path.fade {
+	display: none;
+}*/
+
 .button {
 	margin: 5px;
 	padding: 7px;

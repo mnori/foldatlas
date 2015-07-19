@@ -899,7 +899,7 @@ var StructureExplorer = Class.extend({
 		if (this.tabController.selectedTabID == "structure-tab-diagram") {
 			this.drawStructureDiagram();
 		} else {
-			console.log("Draw circle plot here");
+			this.drawCirclePlot();
 		}
 	},
 
@@ -929,6 +929,64 @@ var StructureExplorer = Class.extend({
 			this.fornaContainer.addRNAJSON(g, true); // generate new diagram
 			this.browserController.hideLoading();
 		});
+	},
+
+	drawCirclePlot: function() {
+		console.log("Draw circle plot here");
+
+		var dims = { x: 630, y: 630 }
+
+		outerRadius = Math.min(dims.x, dims.y) / 2 - 10,
+		innerRadius = outerRadius - 24;
+
+		var arc = d3.svg.arc()
+			.innerRadius(innerRadius)
+			.outerRadius(outerRadius);
+
+		var layout = d3.layout.chord()
+			.padding(.04)
+
+		var path = d3.svg.chord()
+			.radius(innerRadius);
+
+		var svg = d3.select("#circle-plot").append("svg")
+			.attr("width", dims.x)
+			.attr("height", dims.y)
+			.append("g")
+			.attr("id", "circle-svg")
+			.attr("transform", "translate(" + dims.x / 2 + "," + dims.y / 2 + ")");
+
+		// invisible??
+		svg.append("circle")
+			.attr("r", outerRadius);
+
+		// need to generate this from the structure data
+		var matrix = [
+			[0, 1, 1],
+			[1, 0, 0],
+			[1, 1, 0]
+		];
+
+		// Compute the chord layout.
+		layout.matrix(matrix);
+
+		// Add a "group" for each element
+		var group = svg.selectAll(".group")
+			.data(layout.groups)
+			.enter().append("g")
+			.attr("class", "group");
+			// .on("mouseover", mouseover);
+
+		// Add each group arc. These are the shaded areas on the perimiter of the plot.
+		// We'll want to label these with nucleotides
+		var groupPath = group.append("path")
+			.attr("id", function(d, i) { return "group" + i; })
+			.attr("d", arc)
+			.style("fill", function(d, i) { 
+				// return cities[i].color;
+				return "#f00";
+			});
+
 	}
 })
 
