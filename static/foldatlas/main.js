@@ -944,6 +944,8 @@ var StructureExplorer = Class.extend({
 			context: this
 		}).done(function(data) {
 
+			data = JSON.parse(data);
+
 			// // need to generate this from the structure data
 			// var matrix = [
 			// 	[1, 0, 0], // Unpaired - links to itself.
