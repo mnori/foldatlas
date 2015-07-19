@@ -317,10 +317,14 @@ table.coverage-table td.yes {
 .group path {
 	fill-opacity: .5;
 }
- 
+
 path.chord {
-	/*stroke: #000;*/
-	/*stroke-width: 1px;*/
+	/*stroke: #000;
+	stroke-width: .5px;*/
+	opacity: 0.5;
+}
+path.chord-invisible {
+	visibility: hidden;
 }
  
 #circle:hover path.fade {

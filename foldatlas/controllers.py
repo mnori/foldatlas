@@ -506,11 +506,19 @@ class StructureCirclePlotView():
             .order_by(StructurePosition.position) \
             .all()
 
-        # build the matrix of values
+        # build the matrix of values that d3.chord understands
+        # probably more efficient to make the client do this, by passing in the 
+        # 2xn array there
         n_results = len(results)
         for result in results:
+
+            if result.paired_to_position == 0:
+                paired_to = result.position
+            else:
+                paired_to = result.paired_to_position
+
             row = [0] * n_results
-            row[result.paired_to_position - 1] = 1
+            row[paired_to - 1] = 1
             matrix.append(row)
 
         self.data_json = json.dumps(matrix)

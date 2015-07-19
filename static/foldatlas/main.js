@@ -944,52 +944,32 @@ var StructureExplorer = Class.extend({
 			context: this
 		}).done(function(data) {
 
+			$("#circle-plot").empty();
+
 			data = JSON.parse(data);
 
-			// // need to generate this from the structure data
-			// var matrix = [
-			// 	[1, 0, 0], // Unpaired - links to itself.
-			// 	[0, 0, 1], // links must be reciprocated in the matrix
-			// 	[0, 1, 0]  // these two are linked together
-			// ];
-
 			var matrix = data;
-			console.log("...Got data");
-
-			console.log("1");
-
 			var lenMatrix = matrix.length;
 
 			var getColour = function(position) {
 				// see docs: https://github.com/mbostock/d3/wiki/Colors
 				var hue = (position / lenMatrix) * 360;
-				return d3.hsl(hue, 0.5, 0.75);
+				return d3.hsl(hue, 0.3, 0.75);
 			}
 
 			var dims = { x: 630, y: 630 }
-
-			console.log("2");
-
 			outerRadius = Math.min(dims.x, dims.y) / 2 - 10,
 			innerRadius = outerRadius - 24;
-
-			console.log("3");
 
 			var arc = d3.svg.arc()
 				.innerRadius(innerRadius)
 				.outerRadius(outerRadius);
 
-			console.log("4");
-
 			var layout = d3.layout.chord()
 				.padding(.04)
 
-			console.log("5");
-
 			var path = d3.svg.chord()
 				.radius(innerRadius);
-
-			console.log("6");
 
 			var svg = d3.select("#circle-plot").append("svg")
 				.attr("width", dims.x)
@@ -998,20 +978,12 @@ var StructureExplorer = Class.extend({
 				.attr("id", "circle-svg")
 				.attr("transform", "translate(" + dims.x / 2 + "," + dims.y / 2 + ")");
 
-			console.log("7");
-
 			// invisible??
 			svg.append("circle")
 				.attr("r", outerRadius);
 
-			console.log("8");
-
 			// Compute the chord layout.
 			layout.matrix(matrix);
-
-			console.log("9");
-
-			console.log(layout.groups);
 
 			// Add a "group" for each element
 			var group = svg.selectAll(".group")
@@ -1019,8 +991,6 @@ var StructureExplorer = Class.extend({
 				.enter().append("g")
 				.attr("class", "group");
 				// .on("mouseover", mouseover);
-
-			console.log("10");
 
 			// Add each group arc. These are the shaded areas on the perimiter of the plot.
 			// We'll want to label these with nucleotide info
@@ -1040,7 +1010,7 @@ var StructureExplorer = Class.extend({
 			groupText.append("textPath")
 				.attr("xlink:href", function(d, i) { return "#group" + i; })
 				.text(function(d, i) { 
-					return ":D";
+					return ".";
 					// return cities[i].name; 
 				});
 
@@ -1048,14 +1018,16 @@ var StructureExplorer = Class.extend({
 			var chord = svg.selectAll(".chord")
 				.data(layout.chords)
 				.enter().append("path")
-				.attr("class", "chord")
-				.style("fill", function(d) { 
+				.attr("class", function(d) {
 					if (d.source == d.target) {
-						return "#fff";
+						return "chord-invisible";
 					} else {
-						var colour = getColour(d.source.index)
-						return colour;
+						return "chord";
 					}
+				})
+				.style("fill", function(d) { 
+					var colour = getColour(d.source.index)
+					return colour;
 				})
 				.attr("d", path);
 
