@@ -965,11 +965,15 @@ var StructureExplorer = Class.extend({
 				.innerRadius(innerRadius)
 				.outerRadius(outerRadius);
 
-			var layout = d3.layout.chord()
-				.padding(.04)
+			// var layout = d3.layout.chord()
+			// 	.padding(.04)
 
-			var path = d3.svg.chord()
-				.radius(innerRadius);
+			var layout = d3.layout.bundle()
+
+			// var path = d3.svg.chord()
+			// 	.radius(innerRadius);
+
+			var path = d3.svg.line.radial();
 
 			var svg = d3.select("#circle-plot").append("svg")
 				.attr("width", dims.x)
