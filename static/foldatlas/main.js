@@ -967,7 +967,7 @@ var StructureExplorer = Class.extend({
 
 			var line = d3.svg.line.radial()
 			    .interpolate("bundle")
-			    .tension(0.25)
+			    .tension(0.15)
 			    .radius(function(d) { return d.y; })
 			    .angle(function(d) { return d.x / 180 * Math.PI; });
 
@@ -976,6 +976,9 @@ var StructureExplorer = Class.extend({
 			    .attr("height", diameter)
 			  .append("g")
 			    .attr("transform", "translate(" + radius + "," + radius + ")");
+
+			svg.append("circle")
+    			.attr("r", radius);
 
 			var link = svg.append("g").selectAll(".circleplot-link"),
 			    node = svg.append("g").selectAll(".circleplot-node");
@@ -1005,12 +1008,12 @@ var StructureExplorer = Class.extend({
 
 			this.browserController.hideLoading();
 
+			// reorganise the data a bit
 			function prepareData(rawData) {
 				map = {
 					name: "",
 					children: [],
 				};
-
 				for (var i = 0; i < rawData.length; i++) {
 					map.children[i] = {
 						key: i, // TODO is this needed?
@@ -1024,6 +1027,7 @@ var StructureExplorer = Class.extend({
 				return map;
 			}
 
+			// make links between nodes
 			function prepareLinks(nodes) {
 				var map = {},
 				links = [];
