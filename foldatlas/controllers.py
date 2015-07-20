@@ -507,16 +507,17 @@ class StructureCirclePlotView():
             .all()
 
         # build the output. backward facing links are left blank
+        # results must be shifted back to array indexes, since they start at 1 in the DB.
         for result in results:
             if      result.paired_to_position == None or \
                     result.paired_to_position < result.position:
 
                 link = None
             else:
-                link = result.paired_to_position
+                link = result.paired_to_position - 1
 
             out.append({
-                "name": str(result.position),
+                "name": str(result.position - 1),
                 "label": result.letter,
                 "link": link
             })
