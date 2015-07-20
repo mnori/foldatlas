@@ -303,17 +303,22 @@ table.coverage-table td.yes {
 
 /*** CIRCLE PLOT ***/
 
-.circleplot-node {
+/*.circleplot-node {
   font: 300 11px "Ubuntu Mono", Helvetica, Arial, sans-serif;
   fill: #777;
   cursor: pointer;
-}
+}*/
 
 .circleplot-link {
   stroke: #000;
   stroke-opacity: .4;
   fill: none;
   pointer-events: none;
+}
+
+.circleplot-circle {
+	stroke: #000;
+	fill: #fff;
 }
 
 /*** /CIRCLE PLOT ***/

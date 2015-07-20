@@ -947,6 +947,7 @@ var StructureExplorer = Class.extend({
 			$("#circle-plot").empty();
 			data = JSON.parse(data);
 
+			var nTicks = 10;
 			var lenMatrix = data.length;
 			var getColour = function(position) {
 				// see docs: https://github.com/mbostock/d3/wiki/Colors
@@ -978,7 +979,8 @@ var StructureExplorer = Class.extend({
 			    .attr("transform", "translate(" + radius + "," + radius + ")");
 
 			svg.append("circle")
-    			.attr("r", radius);
+				.attr("class", "circleplot-circle")
+    			.attr("r", innerRadius);
 
 			var link = svg.append("g").selectAll(".circleplot-link"),
 			    node = svg.append("g").selectAll(".circleplot-node");
@@ -997,14 +999,35 @@ var StructureExplorer = Class.extend({
 					return getColour(d[0].key);
 				});
 
+			// svg.append("text")
+			//     .attr("x", radius + 6)
+			//     .attr("dy", ".35em")
+			//     .style("text-anchor", function(d) { return null; })
+			//     .attr("transform", function(d) { return d < 270 && d > 90 ? "rotate(180 " + (radius + 6) + ",0)" : null; })
+			//     .text(function(d) { return "test" + "°"; });
+
+			// this used to display text for each node. but there are too many nodes
+			// to show each nucleotide.
+
+			var tickWidth = Math.floor(data.length / nTicks);
+
 			node = node
-				.data(nodes.filter(function(n) { return !n.children; }))
+				.data(nodes.filter(function(n) { 
+					// can probs mess around here to get a nice label
+					return 	!n.children && 
+							n.key % tickWidth == 0 && // only show ticks
+							n.key / tickWidth != nTicks; // don't show last tick
+				}))
 				.enter().append("text")
 				.attr("class", "circleplot-node")
 				.attr("dy", ".31em")
-				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+				.attr("transform", function(d) { 
+					return 	"rotate(" + (d.x - 90) + ")"+
+							"translate(" + (d.y + 8) + ",0)"+
+							"rotate(90)"
+				})
 				.style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-				.text(function(d) { return d.label; })
+				.text(function(d) { return d.key + 1; })
 
 			this.browserController.hideLoading();
 
