@@ -80,12 +80,8 @@ var link = svg.append("g").selectAll(".link"),
 d3.json("data.json", function(error, classes) {
   if (error) throw error;
 
-  var nodes = cluster.nodes(packageHierarchy(classes)),
-      links = packageImports(nodes);
-
-  console.log(links);
-
-  console.log(bundle(links));
+  var nodes = cluster.nodes(structureData(classes)),
+      links = prepareLinks(nodes);
 
   link = link
       .data(bundle(links))
@@ -101,7 +97,7 @@ d3.json("data.json", function(error, classes) {
       .attr("dy", ".31em")
       .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
       .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-      .text(function(d) { return d.key; })
+      .text(function(d) { return d.label; })
       .on("mouseover", mouseovered)
       .on("mouseout", mouseouted);
 });
@@ -133,35 +129,28 @@ function mouseouted(d) {
 
 d3.select(self.frameElement).style("height", diameter + "px");
 
-// Lazily construct the package hierarchy from class names.
-function packageHierarchy(classes) {
-  var map = {};
+// 
+function structureData(rawData) {
+  map = {
+    name: "",
+    children: [],
+  };
 
-  function find(name, data) {
-    var node = map[name], i;
-    if (!node) {
-      node = map[name] = data || {name: name, children: []};
-      if (name.length) {
-        node.parent = find(name.substring(0, i = name.lastIndexOf(".")));
-        node.parent.children.push(node);
-        node.key = name.substring(i + 1);
-      }
+  for (var i = 0; i < rawData.length; i++) {
+    map.children[i] = {
+      key: ""+i,
+      link: rawData[i].link,
+      name: ""+i, // rawData[i].label,
+      label: rawData[i].label,
+      parent: map
     }
-    return node;
   }
 
-  classes.forEach(function(d) {
-    find(d.name, d);
-  });
-
-  return map[""];
+  return map;
 }
 
 // Return a list of imports for the given array of nodes.
-function packageImports(nodes) {
-
-  console.log("nodes", nodes);
-
+function prepareLinks(nodes) {
   var map = {},
       links = [];
 

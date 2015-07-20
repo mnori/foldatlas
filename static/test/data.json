@@ -1,6 +1,6 @@
 [
-{"name":"0", "link":3},
-{"name":"1", "link":2},
-{"name":"2", "link":null},
-{"name":"3", "link":null}
+{"name":"0", "label":"bob", "link":3},
+{"name":"1", "label":"mark", "link":2},
+{"name":"2", "label":"lucy", "link":null},
+{"name":"3", "label":"matilda", "link":null}
 ]
