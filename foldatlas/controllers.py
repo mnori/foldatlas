@@ -497,7 +497,7 @@ class StructureCirclePlotView():
 
     def get_values(self):
         # convert entities to dot bracket string
-        matrix = [];
+        out = [];
 
         # get all the positions
         results = db_session \
@@ -507,7 +507,21 @@ class StructureCirclePlotView():
             .all()
 
         # build the output. backward facing links are left blank
-               
+        for result in results:
+            if      result.paired_to_position == None or \
+                    result.paired_to_position < result.position:
+
+                link = None
+            else:
+                link = result.paired_to_position
+
+            out.append({
+                "name": str(result.position),
+                "label": result.letter,
+                "link": link
+            })
+
+        self.data_json = json.dumps(out)
 
         # # build the matrix of values that d3.chord understands
         # # probably more efficient to make the client do this, by passing in the 

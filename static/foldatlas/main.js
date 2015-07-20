@@ -947,8 +947,6 @@ var StructureExplorer = Class.extend({
 			$("#circle-plot").empty();
 			data = JSON.parse(data);
 
-			console.log(data);
-
 			var lenMatrix = data.length;
 			var getColour = function(position) {
 				// see docs: https://github.com/mbostock/d3/wiki/Colors
@@ -956,9 +954,112 @@ var StructureExplorer = Class.extend({
 				return d3.hsl(hue, 0.3, 0.75);
 			}
 
-			// .. add dank code here
+			var diameter = 630,
+			    radius = diameter / 2,
+			    innerRadius = radius - 20;
+
+			var cluster = d3.layout.cluster()
+			    .size([360, innerRadius])
+			    .sort(null)
+			    .value(function(d) { return d.size; });
+
+			var bundle = d3.layout.bundle();
+
+			var line = d3.svg.line.radial()
+			    .interpolate("bundle")
+			    .tension(0.25)
+			    .radius(function(d) { return d.y; })
+			    .angle(function(d) { return d.x / 180 * Math.PI; });
+
+			var svg = d3.select("#circle-plot").append("svg")
+			    .attr("width", diameter)
+			    .attr("height", diameter)
+			  .append("g")
+			    .attr("transform", "translate(" + radius + "," + radius + ")");
+
+			var link = svg.append("g").selectAll(".circleplot-link"),
+			    node = svg.append("g").selectAll(".circleplot-node");
+
+
+			var nodes = cluster.nodes(prepareData(data)),
+				links = prepareLinks(nodes);
+
+			link = link
+				.data(bundle(links))
+				.enter().append("path")
+				.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
+				.attr("class", "circleplot-link")
+				.attr("d", line);
+
+			node = node
+				.data(nodes.filter(function(n) { return !n.children; }))
+				.enter().append("text")
+				.attr("class", "circleplot-node")
+				.attr("dy", ".31em")
+				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+				.style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+				.text(function(d) { return d.label; })
+				.on("mouseover", mouseovered)
+				.on("mouseout", mouseouted);
 
 			this.browserController.hideLoading();
+
+			function mouseovered(d) {
+				console.log("mouse over!");
+				node.each(function(n) { n.target = n.source = false; });
+
+				link
+					.classed("circleplot-link--selected", function(l) { 
+						if (l.target === d || l.source == d) { return l.source.source = true; }
+					})
+					.filter(function(l) { return l.target === d || l.source === d; })
+					.each(function() { this.parentNode.appendChild(this); });
+
+				node
+					.classed("circleplot-node--selected", function(n) { return n.target || n.source; })
+			}
+
+			function mouseouted(d) {
+				link.classed("circleplot-link--selected", false)
+				node.classed("circleplot-node--selected", false)
+			}
+
+			function prepareData(rawData) {
+				map = {
+					name: "",
+					children: [],
+				};
+
+				for (var i = 0; i < rawData.length; i++) {
+					map.children[i] = {
+						key: i, // TODO is this needed?
+						link: rawData[i].link,
+						name: i,
+						label: rawData[i].label,
+						parent: map
+					}
+				}
+
+				return map;
+			}
+
+			function prepareLinks(nodes) {
+				var map = {},
+				links = [];
+				nodes.forEach(function(d) {
+					map[d.name] = d;
+				});
+				nodes.forEach(function(d) {
+					if (d.link != null) {
+						links.push({
+							source: map[d.name], 
+							target: map[d.link]
+						});
+					};
+				});
+				return links;
+			}
+
 
 			// VV old chord diagram code
 

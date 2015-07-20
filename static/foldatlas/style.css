@@ -303,32 +303,31 @@ table.coverage-table td.yes {
 
 /*** CIRCLE PLOT ***/
 
-#circle-plot {
-	width: 630px;
-	height: 630px;
+.circleplot-node {
+  font: 300 11px "Ubuntu Mono", Helvetica, Arial, sans-serif;
+  fill: #777;
+  cursor: pointer;
 }
 
-
-#circle-svg circle {
-	fill: none;
-	pointer-events: all;
+.circleplot-node:hover {
+  fill: #000;
 }
 
-.group path {
-	fill-opacity: .5;
+.circleplot-link {
+  stroke: #000;
+  stroke-opacity: .4;
+  fill: none;
+  pointer-events: none;
 }
 
-path.chord {
-	/*stroke: #000;
-	stroke-width: .5px;*/
-	opacity: 0.5;
+.circleplot-node:hover,
+.circleplot-node--selected {
+  font-weight: 700;
 }
-path.chord-invisible {
-	visibility: hidden;
-}
- 
-#circle:hover path.fade {
-	display: none;
+
+.circleplot-link--selected {
+  stroke-opacity: 1;
+  stroke-width: 2px;
 }
 
 /*** /CIRCLE PLOT ***/
