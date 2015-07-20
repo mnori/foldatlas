@@ -309,25 +309,11 @@ table.coverage-table td.yes {
   cursor: pointer;
 }
 
-.circleplot-node:hover {
-  fill: #000;
-}
-
 .circleplot-link {
   stroke: #000;
   stroke-opacity: .4;
   fill: none;
   pointer-events: none;
-}
-
-.circleplot-node:hover,
-.circleplot-node--selected {
-  font-weight: 700;
-}
-
-.circleplot-link--selected {
-  stroke-opacity: 1;
-  stroke-width: 2px;
 }
 
 /*** /CIRCLE PLOT ***/

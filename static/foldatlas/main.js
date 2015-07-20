@@ -951,7 +951,7 @@ var StructureExplorer = Class.extend({
 			var getColour = function(position) {
 				// see docs: https://github.com/mbostock/d3/wiki/Colors
 				var hue = (position / lenMatrix) * 360;
-				return d3.hsl(hue, 0.3, 0.75);
+				return d3.hsl(hue, 1, 0.35);
 			}
 
 			var diameter = 630,
@@ -989,7 +989,10 @@ var StructureExplorer = Class.extend({
 				.enter().append("path")
 				.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
 				.attr("class", "circleplot-link")
-				.attr("d", line);
+				.attr("d", line)
+				.style("stroke", function(d) {
+					return getColour(d[0].key);
+				});
 
 			node = node
 				.data(nodes.filter(function(n) { return !n.children; }))
@@ -999,30 +1002,8 @@ var StructureExplorer = Class.extend({
 				.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
 				.style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
 				.text(function(d) { return d.label; })
-				.on("mouseover", mouseovered)
-				.on("mouseout", mouseouted);
 
 			this.browserController.hideLoading();
-
-			function mouseovered(d) {
-				console.log("mouse over!");
-				node.each(function(n) { n.target = n.source = false; });
-
-				link
-					.classed("circleplot-link--selected", function(l) { 
-						if (l.target === d || l.source == d) { return l.source.source = true; }
-					})
-					.filter(function(l) { return l.target === d || l.source === d; })
-					.each(function() { this.parentNode.appendChild(this); });
-
-				node
-					.classed("circleplot-node--selected", function(n) { return n.target || n.source; })
-			}
-
-			function mouseouted(d) {
-				link.classed("circleplot-link--selected", false)
-				node.classed("circleplot-node--selected", false)
-			}
 
 			function prepareData(rawData) {
 				map = {
@@ -1059,90 +1040,6 @@ var StructureExplorer = Class.extend({
 				});
 				return links;
 			}
-
-
-			// VV old chord diagram code
-
-			// var matrix = data;
-			// var dims = { x: 630, y: 630 }
-			// outerRadius = Math.min(dims.x, dims.y) / 2 - 10,
-			// innerRadius = outerRadius - 24;
-
-			// var arc = d3.svg.arc()
-			// 	.innerRadius(innerRadius)
-			// 	.outerRadius(outerRadius);
-
-			// // var layout = d3.layout.chord()
-			// // 	.padding(.04)
-
-			// var layout = d3.layout.bundle()
-
-			// // var path = d3.svg.chord()
-			// // 	.radius(innerRadius);
-
-			// var path = d3.svg.line.radial();
-
-			// var svg = d3.select("#circle-plot").append("svg")
-			// 	.attr("width", dims.x)
-			// 	.attr("height", dims.y)
-			// 	.append("g")
-			// 	.attr("id", "circle-svg")
-			// 	.attr("transform", "translate(" + dims.x / 2 + "," + dims.y / 2 + ")");
-
-			// // invisible??
-			// svg.append("circle")
-			// 	.attr("r", outerRadius);
-
-			// // Compute the chord layout.
-			// layout.matrix(matrix);
-
-			// // Add a "group" for each element
-			// var group = svg.selectAll(".group")
-			// 	.data(layout.groups)
-			// 	.enter().append("g")
-			// 	.attr("class", "group");
-			// 	// .on("mouseover", mouseover);
-
-			// // Add each group arc. These are the shaded areas on the perimiter of the plot.
-			// // We'll want to label these with nucleotide info
-			// var groupPath = group.append("path")
-			// 	.attr("id", function(d, i) { return "group" + i; })
-			// 	.attr("d", arc)
-			// 	.style("fill", function(d, i) { 
-			// 		// return cities[i].color;
-			// 		// colour it by the nucleotide
-			// 		return "#f00";
-			// 	});
-
-			// // Add a text label to each group arc.
-			// var groupText = group.append("text")
-			// 	.attr("x", 6)
-			// 	.attr("dy", 15);
-			// groupText.append("textPath")
-			// 	.attr("xlink:href", function(d, i) { return "#group" + i; })
-			// 	.text(function(d, i) { 
-			// 		return ".";
-			// 		// return cities[i].name; 
-			// 	});
-
-			// // Add the chords.
-			// var chord = svg.selectAll(".chord")
-			// 	.data(layout.chords)
-			// 	.enter().append("path")
-			// 	.attr("class", function(d) {
-			// 		if (d.source == d.target) {
-			// 			return "chord-invisible";
-			// 		} else {
-			// 			return "chord";
-			// 		}
-			// 	})
-			// 	.style("fill", function(d) { 
-			// 		var colour = getColour(d.source.index)
-			// 		return colour;
-			// 	})
-			// 	.attr("d", path);
-
-			// this.browserController.hideLoading();
 		});
 	}
 })
