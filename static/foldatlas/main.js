@@ -1016,8 +1016,8 @@ var StructureExplorer = Class.extend({
 			// Retrieve tick values to compare
 			var tickValues = axis.scale().ticks(axis.ticks()[0])
 
-			// Build some node groups and move them to the right spots, with the correct
-			// rotations and translations
+			// Build some tick node groups and move them to the right spots, with the 
+			// correct rotations and translations
 			ticks = node
 				.data(nodes.filter(function(n) { 
 					// this ensures ticks start at 1 and then goes up in (e.g.) 
