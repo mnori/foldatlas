@@ -948,16 +948,19 @@ var StructureExplorer = Class.extend({
 			data = JSON.parse(data);
 
 			var nTicks = 10;
-			var lenMatrix = data.length;
+			var nNucs = data.length;
 			var getColour = function(position) {
 				// see docs: https://github.com/mbostock/d3/wiki/Colors
-				var hue = (position / lenMatrix) * 360;
+				var hue = (position / nNucs) * 360;
 				return d3.hsl(hue, 1, 0.35);
 			}
 
-			var diameter = 630,
+			var svgDims = 630,
+				diameter = 550,
 			    radius = diameter / 2,
-			    innerRadius = radius - 20;
+			    innerRadius = radius - 18;
+
+			var offset = (svgDims - diameter) / 2
 
 			var cluster = d3.layout.cluster()
 			    .size([360, innerRadius])
@@ -973,10 +976,14 @@ var StructureExplorer = Class.extend({
 			    .angle(function(d) { return d.x / 180 * Math.PI; });
 
 			var svg = d3.select("#circle-plot").append("svg")
-			    .attr("width", diameter)
-			    .attr("height", diameter)
+			    .attr("width", svgDims)
+			    .attr("height", svgDims)
 			  .append("g")
-			    .attr("transform", "translate(" + radius + "," + radius + ")");
+			    .attr("transform", "translate(" + (radius + offset) + "," + (radius + offset) + ")");
+
+			// svg.append("circle")
+			// 	.attr("class", "circleplot-circle")
+   //  			.attr("r", radius);
 
 			svg.append("circle")
 				.attr("class", "circleplot-circle")
@@ -999,35 +1006,48 @@ var StructureExplorer = Class.extend({
 					return getColour(d[0].key);
 				});
 
-			// svg.append("text")
-			//     .attr("x", radius + 6)
-			//     .attr("dy", ".35em")
-			//     .style("text-anchor", function(d) { return null; })
-			//     .attr("transform", function(d) { return d < 270 && d > 90 ? "rotate(180 " + (radius + 6) + ",0)" : null; })
-			//     .text(function(d) { return "test" + "°"; });
-
-			// this used to display text for each node. but there are too many nodes
-			// to show each nucleotide.
-
 			var tickWidth = Math.floor(data.length / nTicks);
 
-			node = node
+			// Calculate ticks by building a throwaway axis
+			var axis = d3.svg.axis()
+				.scale(d3.scale.linear().domain([0, nNucs]))
+				.ticks(10);
+
+			// Retrieve tick values to compare
+			var tickValues = axis.scale().ticks(axis.ticks()[0])
+
+			// Build some node groups and move them to the right spots, with the correct
+			// rotations and translations
+			ticks = node
 				.data(nodes.filter(function(n) { 
-					// can probs mess around here to get a nice label
-					return 	!n.children && 
-							n.key % tickWidth == 0 && // only show ticks
-							n.key / tickWidth != nTicks; // don't show last tick
+					// this ensures ticks start at 1 and then goes up in (e.g.) 
+					// 100 nuc intervals
+					var key = n.key + 1
+					if (key == 1) key = 0;
+					return !n.children && tickValues.indexOf(key) > -1;
 				}))
-				.enter().append("text")
-				.attr("class", "circleplot-node")
-				.attr("dy", ".31em")
+				.enter().append("g")
 				.attr("transform", function(d) { 
 					return 	"rotate(" + (d.x - 90) + ")"+
-							"translate(" + (d.y + 8) + ",0)"+
+							"translate(" + (d.y) + ",0)"+
 							"rotate(90)"
 				})
-				.style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+
+			// Attach a text label to each node
+			ticks.append("text")
+				.attr("class", "circleplot-node")
+				.attr("dy", ".31em")
+				.attr("transform", function(d) { return "translate(0, -15)"; })
+				.style("text-anchor", function(d) {
+					return "middle"
+				})
+
 				.text(function(d) { return d.key + 1; })
+
+			// Attach a tick line to each tick node
+			ticks.append("path")
+				.attr("class", "circleplot-tick")
+				.attr("d", "M 0 -6 L 0 6")
 
 			this.browserController.hideLoading();
 
