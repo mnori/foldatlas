@@ -465,7 +465,7 @@ var TabController = Class.extend({
 	},
 	initTabs: function(tabs) {
 		for (var i = 0; i < tabs.length; i++) {
-			if (i == 0) { // first tab is always selected
+			if (i == 0) { // first tab is always selected on init
 				this.selectedTabID = tabs[i].elementID;
 			}
 			this.initTab(tabs[i]);
@@ -631,8 +631,8 @@ var StructureExplorer = Class.extend({
 		var drawStructureF = $.proxy(function() { this.drawStructure(); }, this)
 
 		this.tabController = new TabController([
-			new TabControllerTab("structure-tab-diagram", drawStructureF),
-			new TabControllerTab("structure-tab-circle-plot", drawStructureF)
+			new TabControllerTab("structure-tab-circle-plot", drawStructureF),
+			new TabControllerTab("structure-tab-diagram", drawStructureF)
 		]);
 
 		this.experimentIDs = [3, 4];
