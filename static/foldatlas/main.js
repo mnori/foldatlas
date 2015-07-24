@@ -573,15 +573,13 @@ var CoverageSearchController = Class.extend({
 			this.browserController.hideLoading();
 			// insert pagination HTML
 			var buf = 
-				"<div id=\"pagination-container\">" +
 				"	<div id=\"search-coverage-paginator\" class=\"pagination\">" +
-                "   	<a href=\"#\" class=\"first\" data-action=\"first\">&laquo;</a>" +
-                "    	<a href=\"#\" class=\"previous\" data-action=\"previous\">&lsaquo;</a>" +
-                "    	<input type=\"text\" readonly=\"readonly\" data-max-page=\""+pageNum+"\" />" +
-                "    	<a href=\"#\" class=\"next\" data-action=\"next\">&rsaquo;</a>" +
-                "    	<a href=\"#\" class=\"last\" data-action=\"last\">&raquo;</a>" +
+                		"<a href=\"#\" class=\"button\" data-action=\"first\">&laquo;</a>" +
+                		"<a href=\"#\" class=\"button\" data-action=\"previous\">&lsaquo;</a>" +
+                		"<input type=\"text\" class=\"pagination-status\" readonly=\"readonly\" data-max-page=\""+pageNum+"\" />" +
+                		"<a href=\"#\" class=\"button\" data-action=\"next\">&rsaquo;</a>" +
+                		"<a href=\"#\" class=\"button\" data-action=\"last\">&raquo;</a>" +
                 "	</div>" +
-                "</div>" +
 				"<div id=\"search-coverage-data\"><!-- filled by paginator AJAX --></div>";
             $("#search-coverage").html(buf);
 

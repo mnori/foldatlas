@@ -321,31 +321,33 @@ table.coverage-table td.yes {
 
 /*** /CIRCLE PLOT ***/
 
+/*** BUTTONS ***/
+
 .button {
 	margin: 5px;
 	padding: 7px;
 	border: 1px solid #888;
-	background-color: #eee;
 	color: #000;
 	font-size: 16px;
 	line-height: 15px;
 	text-decoration: none;
-	background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 100%);
+	background-color: #f0f0f0;
 }
 
 .button:hover {
-	background-color: #f9f9f9;
 	border: 1px solid #666;
+	background-color: #fff;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.15) 100%);
 }
 
 .button:active, .button.pressed {
 	border: 1px solid #666;
 	padding: 9px 7px 5px 7px;
-	background-color: #f9f9f9;
 	box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.5);
+	background-color: #fff;
 }
 
-
+/*** /BUTTONS ***/
 
 #nucleotide-measurement-charts {
 	text-align: center;
@@ -373,71 +375,34 @@ table.coverage-table td.yes {
 
 /* PAGINATION *********************************************************/
 
-#pagination-container {
-	overflow: hidden;
-	height: 35px;
-	padding-top: 15px;
+#search-coverage-paginator {
+	margin-top: 10px;
+	margin-bottom: 10px;
 }
 
 .pagination {
-	top: auto;
-	bottom: auto;
-	width: 204px;
-	margin: auto;
-	clear: both;
+	text-align: center;
 }
 
-.pagination a {
-  display: block;
-  float: left;
-  width: 20px;
-  height: 20px;
-  outline: none;
-  border-right: 1px solid #CDCDCD;
-  border-left: 1px solid #CDCDCD;
-  color: #555555;
-  vertical-align: middle;
-  text-align: center;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 16px;
-  font-family: Times, 'Times New Roman', Georgia, Palatino;
-  /* ATTN: need a better font stack */
-  background-color: #f3f3f3;
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f3f3f3), color-stop(100%, lightgrey));
-  background-image: -webkit-linear-gradient(#f3f3f3, lightgrey);
-  background-image: linear-gradient(#f3f3f3, lightgrey); }
-  .pagination a:hover, .pagination a:focus, .pagination a:active {
-    background-color: #cecece;
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e4e4e4), color-stop(100%, #cecece));
-    background-image: -webkit-linear-gradient(#e4e4e4, #cecece);
-    background-image: linear-gradient(#e4e4e4, #cecece); }
-  .pagination a.disabled, .pagination a.disabled:hover, .pagination a.disabled:focus, .pagination a.disabled:active {
-    background-color: #f3f3f3;
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f3f3f3), color-stop(100%, lightgrey));
-    background-image: -webkit-linear-gradient(#f3f3f3, lightgrey);
-    background-image: linear-gradient(#f3f3f3, lightgrey);
-    color: #A8A8A8;
-    cursor: default; }
+.pagination > .button {
+	margin: 0px 3px 0px 3px;
+	display: inline-block;
+	font-size: 18px;
+	width: 30px;
+	vertical-align: bottom; /** fixes vertical positioning movement **/
+}
 
-.pagination a:first-child {
-  border: none;
-  border-radius: 2px 0 0 2px; }
+.pagination-status {
+	width: 100px;
+	margin: 0px 3px 0px 3px;
+	text-align: center;
+	padding: 5px;
+	line-height: 19px;
+	border: 1px solid #888;
+	background-color: none;
+}
 
-.pagination a:last-child {
-  border: none;
-  border-radius: 0 2px 2px 0; }
 
-.pagination input {
-  float: left;
-  margin: 0;
-  padding: 0;
-  width: 120px;
-  height: 20px;
-  outline: none;
-  border: none;
-  vertical-align: middle;
-  text-align: center; }
 
 /* /PAGINATION ********************************************************/
 
