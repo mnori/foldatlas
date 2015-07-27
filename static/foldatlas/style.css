@@ -260,14 +260,14 @@ h2 {
 	border: 1px solid #888;
 }
 
-/*** /TRANSCRIPT ID SEARCH ***/
-
-.message {
+#search-transcript-id-message {
 	padding: 20px;
 	background-color: #ffa;
 	border: 1px solid #000;
 	font-size: 18px;
 }
+
+/*** /TRANSCRIPT ID SEARCH ***/
 
 table.coverage-table {
 	margin: auto;

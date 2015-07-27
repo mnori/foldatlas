@@ -539,6 +539,7 @@ var TranscriptIDSearchController = Class.extend({
 
 	searchTranscriptID: function(term) {
 		this.browserController.showLoading();
+		$("#search-transcript-id-message").hide();
 		$.ajax({
 			url: "/ajax/search-transcript/"+term,
 			context: this
@@ -557,7 +558,8 @@ var TranscriptIDSearchController = Class.extend({
 
 		}).error(function() {
 			this.browserController.hideLoading();
-			$("#transcript-data").html("<div class=\"message\">No transcripts found matching \""+term+"\"</div>")
+			$("#search-transcript-id-message").html("No transcripts found matching \""+term+"\"")
+			$("#search-transcript-id-message").show();
 		});
 	}
 });
