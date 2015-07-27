@@ -238,13 +238,21 @@ h2 {
 
 #search-transcript-id {
 	width: 100%;
-	height: 100px;
-	text-align: center;
 }
 
 #search-transcript-id-container {
 	margin-top: 39px;
-	text-align: center
+	margin-bottom: 39px;
+	text-align: center;
+}
+
+#search-transcript-id-message {
+	padding: 20px;
+	background-color: #ffa;
+	border: 1px solid #000;
+	font-size: 18px;
+	float: center;
+	clear: both;
 }
 
 #search-transcript-id-text, #search-transcript-id-submit {
@@ -258,13 +266,6 @@ h2 {
 #search-transcript-id-text {
 	padding: 7px;
 	border: 1px solid #888;
-}
-
-#search-transcript-id-message {
-	padding: 20px;
-	background-color: #ffa;
-	border: 1px solid #000;
-	font-size: 18px;
 }
 
 /*** /TRANSCRIPT ID SEARCH ***/
@@ -337,7 +338,7 @@ table.coverage-table td.yes {
 
 .forna-interact {
 	float: left;
-	padding: 7px 0px 7px 7px;
+	/*padding: 7px 0px 7px 7px;*/
 }
 
 /*** CIRCLE PLOT ***/
