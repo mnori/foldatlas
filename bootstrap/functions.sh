@@ -18,6 +18,11 @@ function import_db() {
 	pretty_print "Importing database"
 	cd /vagrant/sauce_data/
 	tar xvzf foldatlas.sql.tar.gz
+
+	# stops mysql crashing out on import
+	echo "SET GLOBAL max_allowed_packet=1073741824;" | mysql -u root -pvagrant
+
+	# does the actual import
 	mysql -uroot -pvagrant foldatlas < foldatlas.sql
 	rm foldatlas.sql
 }
