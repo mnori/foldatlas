@@ -277,10 +277,15 @@ class AlignmentView():
 
 class TranscriptSearcher():
     def search(self, search_string):
+        from flask import abort
+
         transcripts = db_session \
             .query(Transcript) \
             .filter(Transcript.id.like("%"+search_string+"%")) \
             .all()
+
+        if len(transcripts) == 0: # no transcripts found
+            abort(404)
 
         out = []
         for transcript in transcripts:

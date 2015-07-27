@@ -523,7 +523,10 @@ var TranscriptIDSearchController = Class.extend({
 	init: function(browserController) {
 		this.browserController = browserController;
 
-		var handle = $.proxy(function() {
+		var handle = $.proxy(function(ev) {
+			if (typeof(ev) !== "undefined") {
+				ev.preventDefault();
+			}
 			var term = $("#search-transcript-id-text").val();
 			this.searchTranscriptID(term)
 		}, this)
@@ -542,20 +545,19 @@ var TranscriptIDSearchController = Class.extend({
 		}).done(function(results) {
 			this.browserController.hideLoading();
 			results = $.parseJSON(results);		
-			if (results.length <= 0) {
-				$("#transcript-data").html("<div class=\"message\">No transcripts found matching \""+term+"\"</div>")
-
-			} else {
-				var exactMatch = false;
-				for (var i = 0; i < results.length; i++) {
-					if (results[i] == term) {
-						// found exact match
-						this.browserController.selectTranscript(term);
-						return;
-					}
+			var exactMatch = false;
+			for (var i = 0; i < results.length; i++) {
+				if (results[i] == term) {
+					// found exact match
+					this.browserController.selectTranscript(term);
+					return;
 				}
-				this.browserController.selectTranscript(results[0]);
 			}
+			this.browserController.selectTranscript(results[0]);
+
+		}).error(function() {
+			this.browserController.hideLoading();
+			$("#transcript-data").html("<div class=\"message\">No transcripts found matching \""+term+"\"</div>")
 		});
 	}
 });
