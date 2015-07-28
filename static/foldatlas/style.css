@@ -12,7 +12,7 @@ body {
 
 .button {
 	margin: 5px;
-	padding: 7px;
+	padding: 7px 10px;
 	border: 1px solid #888;
 	color: #000;
 	font-size: 16px;
@@ -23,7 +23,7 @@ body {
 
 .button:active, .button.pressed {
 	border: 1px solid #666;
-	padding: 9px 7px 5px 7px;
+	padding: 9px 10px 5px 10px;
 	box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.5);
 	/*background-color: #fff;*/
 }

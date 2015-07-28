@@ -9,6 +9,27 @@ var BrowserController = Class.extend({
 		this.drawTranscriptData();
 		this.searchController = new SearchController(this);
 		$("#title").click($.proxy(function() { this.goHome(); }, this));
+
+		// Detect back/forward buttons
+		// We must react by changing the page for each type of URL
+		$(window).on("popstate", function(event) {
+			var location = document.location;
+			// clearly works. now how do we sort out each page change?
+			// Gotta come up with an elegant strategy
+		});
+
+	},
+
+	// HTML5 change URL method
+	// TODO make back button work
+	changeUrl: function(title, url) {
+	    if (typeof (history.pushState) != "undefined") {
+	        var obj = { Page: "FoldAtlas: "+title, Url: url };
+	        history.pushState(obj, obj.Page, obj.Url);
+	    } else {
+	    	// TODO show a prettier warning
+	        alert("Your browser does not support HTML5. Please upgrade it.");
+	    }
 	},
 
 	// Jump to a specific transcript page
@@ -43,18 +64,6 @@ var BrowserController = Class.extend({
 		$("#d3nome").show();
 		$("#loading-indicator").hide();
 		$("#transcript-data").empty();
-	},
-
-	// HTML5 change URL method
-	// TODO make back button work
-	changeUrl: function(title, url) {
-	    if (typeof (history.pushState) != "undefined") {
-	        var obj = { Page: "FoldAtlas: "+title, Url: url };
-	        history.pushState(obj, obj.Page, obj.Url);
-	    } else {
-	    	// TODO show a prettier warning
-	        alert("Your browser does not support HTML5. Please upgrade it.");
-	    }
 	},
 
 	getJsonFromElement: function(elementID) {
@@ -639,6 +648,9 @@ var StructureExplorer = Class.extend({
 
 		this.experimentIDs = [3, 4];
 		this.structureData = this.browserController.getJsonFromElement("structure-json")
+
+		console.log(this.structureData);
+
 		this.drawStructurePcas();
 		this.initialiseRnaDiagram();
 		this.selectedStructure = null;
