@@ -347,9 +347,6 @@ class CoverageSearcher():
 
         out = []
         for result in results:
-
-            print(result[2])
-
             out.append({
                 "coverage": result[0],
                 "structure": result[3],
