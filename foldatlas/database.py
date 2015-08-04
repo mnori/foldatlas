@@ -50,6 +50,7 @@ def hydrate_db():
         StructureHydrator().hydrate(settings.structures_in_silico)
         StructureHydrator().hydrate(settings.structures_in_vivo)
 
+        # Do PCA analysis on the structures
         PcaHydrator().hydrate(settings.structures_in_silico)
         PcaHydrator().hydrate(settings.structures_in_vivo)
 
@@ -76,7 +77,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = 100
+    gene_limit = 250
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -523,10 +524,17 @@ class StructureHydrator():
         with open(ct_filepath) as ct_file:
             for line in ct_file:
                 # if it's an energy line, we're looking at a brand new structure
-                if "ENERGY" in line:
+
+                bits = line.strip().split()
+
+                if len(bits) != 6: # brand new structure
                     # Parse the energy out using regex
                     search = re.search('ENERGY = (-[0-9\.]+)', line)
-                    energy = search.group(1)
+
+                    if search == None:
+                        # No energy data - for some reason this happens for some structures.
+                        # If this happens, just ignore the entire ct file by returning
+                        return
 
                     # Insert the new structure row
                     structure = Structure(
@@ -542,13 +550,14 @@ class StructureHydrator():
                     n_structs += 1
 
                 else:
-
                     # the .ct format is a bit annoying because it's not tab delimited.
                     # instead it's delimited by variable numbers of spaces.
 
                     # calling split() with no parameter makes it split on any length 
                     # of whitespace - i.e. so that each element is 1 word
-                    bits = line.strip().split()
+
+                    print("["+line+"]");
+                    
                     from_pos = bits[0]
                     to_pos = bits[4]
                     letter = bits[1]
