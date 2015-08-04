@@ -319,14 +319,20 @@ class CoverageSearcher():
 
     def fetch_transcript_data(self, page_num):
 
-        from models import Structure
+        from sqlalchemy import func
+        from models import Structure, GeneLocation
 
         results = db_session \
             .query(
-                TranscriptCoverage
+                TranscriptCoverage,
+                Transcript,
+                GeneLocation
             ) \
             .filter(
-                TranscriptCoverage.experiment_id==self.experiment_id
+                TranscriptCoverage.experiment_id==self.experiment_id,
+                Transcript.id==TranscriptCoverage.transcript_id,
+                Transcript.gene_id==GeneLocation.gene_id,
+                GeneLocation.strain_id==settings.reference_strain_id
             ) \
             .outerjoin((
                 Structure, 
@@ -341,9 +347,13 @@ class CoverageSearcher():
 
         out = []
         for result in results:
+
+            print(result[2])
+
             out.append({
                 "coverage": result[0],
-                "structure": result[1]
+                "structure": result[3],
+                "gene_length": (result[2].end - result[2].start) + 1
             })
 
         return out

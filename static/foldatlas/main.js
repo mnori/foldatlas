@@ -14,7 +14,6 @@ var BrowserController = Class.extend({
 		// We must react by changing the page for each type of URL
 		$(window).on("popstate", $.proxy(function(event) {
 			var url = document.location;
-			console.log("BACK FORWARD: ["+url+"]")
 			this.onBackForward(url);
 		}, this));
 
@@ -24,8 +23,6 @@ var BrowserController = Class.extend({
 
 	// This countains all the dynamic URL mappings to JS and titles
 	routeUrl: function(urlIn) {
-		console.log("Trying to route: ["+urlIn+"]");
-
 		urlIn = ""+urlIn;
 
 		if (urlIn.indexOf("/search") != -1) {
@@ -45,12 +42,10 @@ var BrowserController = Class.extend({
 
 	onBackForward: function(url) {
 		this.routeUrl(url);
-		// this.changeUrl(url);
 	},
 
 	// Call this within the JS to change the page.
 	jumpTo: function(url) {
-		console.log("jumpTo: ["+url+"]")
 		this.routeUrl(url); // and execute the associated JS
 		this.changeUrl(url); // must change the URL bar
 	},
@@ -696,8 +691,6 @@ var StructureExplorer = Class.extend({
 		this.experimentIDs = [3, 4];
 		this.structureData = this.browserController.getJsonFromElement("structure-json")
 
-		console.log(this.structureData);
-
 		this.drawStructurePcas();
 		this.initialiseRnaDiagram();
 		this.selectedStructure = null;
@@ -998,7 +991,6 @@ var StructureExplorer = Class.extend({
 		var structureID = this.selectedStructure["id"];
 		// this should be done in the constructor really.
 		// or have a getStructure method that attached to the object with a callback
-		console.log("Getting data...");
 		this.browserController.showLoading();
 		$.ajax({
 			url: "/ajax/structure-circle-plot/"+structureID, 
@@ -1151,11 +1143,3 @@ var StructureExplorer = Class.extend({
 		});
 	}
 })
-
-
-
-
-// $("#chromosome-selector").change(function() {
-// 	// TODO reload the page .. difficult / impossible to change the chromosome 
-// 	// ... 
-// });
