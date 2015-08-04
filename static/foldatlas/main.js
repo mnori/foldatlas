@@ -12,30 +12,69 @@ var BrowserController = Class.extend({
 
 		// Detect back/forward buttons
 		// We must react by changing the page for each type of URL
-		$(window).on("popstate", function(event) {
-			var location = document.location;
-			// clearly works. now how do we sort out each page change?
-			// Gotta come up with an elegant strategy
-		});
+		$(window).on("popstate", $.proxy(function(event) {
+			var url = document.location;
+			console.log("BACK FORWARD: ["+url+"]")
+			this.onBackForward(url);
+		}, this));
 
 	},
 
+	// URLS //////////////////////////////////////////////////////////
+
+	// This countains all the dynamic URL mappings to JS and titles
+	routeUrl: function(urlIn) {
+		console.log("Trying to route: ["+urlIn+"]");
+
+		urlIn = ""+urlIn;
+
+		if (urlIn.indexOf("/search") != -1) {
+			this.searchController.show();
+			document.title = "FoldAtlas: Search";
+
+		} else if (urlIn.indexOf("/transcript/") != -1) {
+			var transcriptID = urlIn.split("/").pop();
+			this.selectTranscript(transcriptID);
+			document.title = "FoldAtlas: "+transcriptID;
+
+		} else { // url not recognised - assume we need to go home
+			this.goHome();
+			document.title = "FoldAtlas";
+		}
+	},
+
+	onBackForward: function(url) {
+		this.routeUrl(url);
+		// this.changeUrl(url);
+	},
+
+	// Call this within the JS to change the page.
+	jumpTo: function(url) {
+		console.log("jumpTo: ["+url+"]")
+		this.routeUrl(url); // and execute the associated JS
+		this.changeUrl(url); // must change the URL bar
+	},
+
 	// HTML5 change URL method
-	// TODO make back button work
-	changeUrl: function(title, url) {
+	changeUrl: function(url, title) {
 	    if (typeof (history.pushState) != "undefined") {
-	        var obj = { Page: "FoldAtlas: "+title, Url: url };
+	    	// the title was already changed in routeUrl so we can just fetch it out here.
+	        var obj = {
+	        	Page: document.title,
+	        	Url: url
+	        };
 	        history.pushState(obj, obj.Page, obj.Url);
 	    } else {
-	    	// TODO show a prettier warning
 	        alert("Your browser does not support HTML5. Please upgrade it.");
 	    }
 	},
 
+	// /URLS /////////////////////////////////////////////////////////
+
 	// Jump to a specific transcript page
 	selectTranscript: function(transcriptID) {
 		this.showLoading();
-		this.changeUrl(transcriptID, "/transcript/"+transcriptID)
+		// this.changeUrl("/transcript/"+transcriptID, transcriptID)
 		$.ajax({
 			url: "/ajax/transcript/"+transcriptID,
 			context: this
@@ -59,7 +98,6 @@ var BrowserController = Class.extend({
 
 	// Reset to landing page
 	goHome: function() {
-		this.changeUrl("", "/")
 		$("#search").hide()
 		$("#d3nome").show();
 		$("#loading-indicator").hide();
@@ -440,16 +478,16 @@ var SearchController = Class.extend({
 
 	// Constructor
 	init: function(browserController) {
-
-		console.log("Boo");
 		this.browserController = browserController;
 
 		$("#search-button").click($.proxy(function(ev) {
  			ev.preventDefault()
-			this.browserController.changeUrl("Search", "/search");
-			$("#transcript-data").empty();
-			$("#search").show()
-			$("#d3nome").hide();
+
+ 			this.browserController.jumpTo("/search");
+			// this.browserController.changeUrl("/search", "Search");
+			// $("#transcript-data").empty();
+			// $("#search").show()
+			// $("#d3nome").hide();
 		}, this));
 
 		this.tabController = new TabController([
@@ -464,6 +502,12 @@ var SearchController = Class.extend({
 		this.transcriptIDSearchController = new TranscriptIDSearchController(this.browserController);
 		this.coverageSearchController = null; // initialises when tab is selected
 	},
+
+	show: function() {
+		$("#transcript-data").empty();
+		$("#search").show()
+		$("#d3nome").hide();
+	}
 });
 
 var TabController = Class.extend({
@@ -559,11 +603,13 @@ var TranscriptIDSearchController = Class.extend({
 			for (var i = 0; i < results.length; i++) {
 				if (results[i] == term) {
 					// found exact match
-					this.browserController.selectTranscript(term);
+					this.browserController.jumpTo("/transcript/"+term);
+					// this.browserController.selectTranscript(term);
 					return;
 				}
 			}
-			this.browserController.selectTranscript(results[0]);
+			this.browserController.jumpTo("/transcript/"+results[0]);
+			// this.browserController.selectTranscript(results[0]);
 
 		}).error(function() {
 			this.browserController.hideLoading();
@@ -627,7 +673,8 @@ var CoverageSearchController = Class.extend({
 					ev.preventDefault()
 					element = $(ev.target)
 					var transcript_id = element.html()
-					this.browserController.selectTranscript(transcript_id)
+					this.browserController.jumpTo("/transcript/"+transcript_id);
+					// this.browserController.selectTranscript(transcript_id)
 				}, this));
 			}, this));
 		}, this));

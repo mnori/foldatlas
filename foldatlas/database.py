@@ -536,6 +536,8 @@ class StructureHydrator():
                         # If this happens, just ignore the entire ct file by returning
                         return
 
+                    energy = search.group(1)
+
                     # Insert the new structure row
                     structure = Structure(
                         experiment_id=experiment_config["experiment_id"],
@@ -555,9 +557,6 @@ class StructureHydrator():
 
                     # calling split() with no parameter makes it split on any length 
                     # of whitespace - i.e. so that each element is 1 word
-
-                    print("["+line+"]");
-                    
                     from_pos = bits[0]
                     to_pos = bits[4]
                     letter = bits[1]

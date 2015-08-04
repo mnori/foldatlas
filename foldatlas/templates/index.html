@@ -58,7 +58,7 @@
                     {% endfor %}
                 ],
                 geneClick: function(transcriptID) {
-                    window.browserController.selectTranscript(transcriptID);
+                    window.browserController.jumpTo("/transcript/"+transcriptID);
                 }
             }
             window.d3nome = new D3nome(window.d3nomeConfig);
