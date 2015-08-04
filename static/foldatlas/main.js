@@ -8,7 +8,7 @@ var BrowserController = Class.extend({
 		this.reactivities = {};
 		this.drawTranscriptData();
 		this.searchController = new SearchController(this);
-		$("#title").click($.proxy(function() { this.goHome(); }, this));
+		$("#title").click($.proxy(function() { this.jumpTo("/"); }, this));
 
 		// Detect back/forward buttons
 		// We must react by changing the page for each type of URL
