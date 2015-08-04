@@ -2,19 +2,19 @@
 <table class="coverage-table">
 	<tr>
 		<th>Transcript ID</th>
-		<th>Gene length</th>
-		<th>Coverage per nucleotide</th>
-		<th>Has structures?</th>
+		<th style="width: 130px">Gene length</th>
+		<th style="width: 130px">Coverage / base</th>
+		<th style="width: 130px">Has structures?</th>
 	</tr>
 {% for row in transcript_data %}
-	<tr>
-		<td><a href="#" class="transcript-id-link">{{ row["coverage"].transcript_id }}</a></td>
+	<tr class="transcript-row" data-transcript-id="{{ row["coverage"].transcript_id }}">
+		<td><a href="/transcript/{{ row["coverage"].transcript_id }}">{{ row["coverage"].transcript_id }}</a></td>
 		<td>{{ row["gene_length"] }}</td>
 		<td>{{ row["coverage"].measurement }}</td>
 		{% if row["structure"] != None %}
-			<td class="yes"><i class="fa fa-check"></i></td>
+			<td class="yes">yes</td>
 		{% else %}
-			<td><i class="fa fa-times"></i></td>
+			<td>-</td>
 		{% endif %}
 	</tr>
 {% endfor %}

@@ -662,14 +662,12 @@ var CoverageSearchController = Class.extend({
 			$("#search-coverage-data").empty();
 			$("#search-coverage-data").html(results);
 
-			$(".transcript-id-link").each($.proxy(function(key, element) {
+			$(".transcript-row").each($.proxy(function(key, element) {
 				element = $(element)
 				element.click($.proxy(function(ev) {
 					ev.preventDefault()
-					element = $(ev.target)
-					var transcript_id = element.html()
+					var transcript_id = element.attr("data-transcript-id")
 					this.browserController.jumpTo("/transcript/"+transcript_id);
-					// this.browserController.selectTranscript(transcript_id)
 				}, this));
 			}, this));
 		}, this));
