@@ -14,4 +14,4 @@ def process_folder(sauce_folder, dest_folder):
 				shutil.copyfile(sauce_folder+"/"+filename, dest_folder+"/"+filename)
 
 process_folder(sauce_folder+"/in_silico_structures", dest_folder+"/in_silico")
-process_folder(sauce_folder+"/in_vivo_structures", dest_folder+"/in_vivo")
+rocess_folder(sauce_folder+"/in_vivo_structures", dest_folder+"/in_vivo")

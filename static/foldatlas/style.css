@@ -5,7 +5,7 @@ body {
 	height: auto;
 	position: relative;
 	background-color: #35a;
-	font-family: Ubuntu, sans-serif;
+	font-family: Ubuntu, Tahoma, Geneva, sans-serif;
 }
 
 /*** BUTTONS ***/
@@ -40,7 +40,6 @@ body {
 	font-size: 40px;
 	text-shadow: 0px 0px 10px #000;
 	font-weight: bold;
-	font-family: Ubuntu, sans-serif;
 	line-height: 1em;
 	color: #fff;
 	width: 934px;
@@ -60,7 +59,7 @@ body {
 	clear: both;
 	position: relative;
 	height: 35px;
-	border-bottom: 1px solid #000;
+	border-bottom: 1px solid #888;
 }
 
 .tabs > .tab {
@@ -72,15 +71,19 @@ body {
 	padding: 10px;
 	font-size: 16px;
 	height: 14px;
-	
-	border-top: 1px solid #000;
-	border-left: 1px solid #000;
-	border-right: 1px solid #000;
-	border-bottom: 1px solid #000;
-	
+	background-color: #f0f0f0;
+
+	border-top: 1px solid #888;
+	border-left: 1px solid #888;
+	border-right: 1px solid #888;
+
 	border-bottom: 0 none;
-	background-color: #ddd;
 	cursor: pointer;
+	/*box-shadow: inset 0px -10px 10px -10px rgba(0,0,0,0.2);*/
+}
+
+.tabs > .tab:hover {
+	background-color: #fff;
 }
 
 .tabs > .tab.active {
@@ -90,10 +93,11 @@ body {
 	margin-right: 8px;
 	margin-top: -4px;
 
-	background-color: #f6f6f6;
-	border-bottom: 0 none;
+	background-color: #fff;
+	border-bottom: none;
 	height: 15px;
 	cursor: default;
+	box-shadow: none;
 }
 
 #search-button {
@@ -171,7 +175,7 @@ h2 {
 }
 
 .alignment-container {
-	font-family: Ubuntu Mono, sans-serif, monospace;
+	font-family: Ubuntu Mono, monospace;
 }
 
 .alignment-row {
@@ -214,7 +218,7 @@ h2 {
 }
 
 .tick > text {
-	font: 16px Ubuntu Mono, sans-serif;
+	font: 16px Ubuntu Mono, monospace;
 }
 
 .line {
@@ -561,13 +565,13 @@ table.coverage-table td.yes {
 }
 
 .d3nome-x > .tick > text {
-	font: 16px Ubuntu Mono, sans-serif;
+	font: 16px Ubuntu Mono, monospace;
 	stroke: none;
 	fill: #000;
 }
 
 .d3nome-zoomed-out-message {
-	font: 16px Ubuntu Mono, sans-serif;
+	font: 16px Ubuntu Mono, monospace;
 }
 
 /*.d3nome-x .line {
