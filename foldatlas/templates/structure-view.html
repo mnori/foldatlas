@@ -1,11 +1,17 @@
-<h2>Structure</h2>
+<h2>
+	Structure
+	{% if not structure_view.empty %}
+		<a href="/download/structure/{{ structure_view.strain_id }}/{{ structure_view.transcript_id }}" target="_blank" class="button download">
+			<i class="fa fa-download"></i> Download
+		</a>
+	{% endif %}
+</h2>
 	
 {% if structure_view.empty == True %}
 	<div class="message">No data available.</div>
 {% else %}
 	<div id="structure-json" style="display: none;">{{ structure_view.data_json|safe }}</div>
 	<div id="structure-container">
-
 		<div id="pca-container">
 			<h3><i>In silico</i></h3>
 			<div id="pca-container-in-silico" class="pca-container"></div>

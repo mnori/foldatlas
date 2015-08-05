@@ -35,7 +35,7 @@ var BrowserController = Class.extend({
 			document.title = "FoldAtlas: Search";
 
 		} else if (urlIn.indexOf("/transcript/") != -1) {
-			var transcriptID = urlIn.split("/").pop();
+			var transcriptID = this.getTranscriptID();
 			this.selectTranscript(transcriptID);
 			document.title = "FoldAtlas: "+transcriptID;
 
@@ -43,6 +43,10 @@ var BrowserController = Class.extend({
 			this.goHome();
 			document.title = "FoldAtlas";
 		}
+	},
+
+	getTranscriptID: function() {
+		return (""+document.location).split("/").pop();
 	},
 
 	onBackForward: function(url) {
@@ -123,12 +127,17 @@ var BrowserController = Class.extend({
 
 		var measurementData = this.getJsonFromElement("nucleotide-measurement-json")
 		if (measurementData) {
-			this.drawNucleotideMeasurements(measurementData[1]);
-			this.drawNucleotideMeasurements(measurementData[2]);
+			var transcriptID = structureData["transcript_id"]
+
+			console.log(structureData)
+
+			this.drawNucleotideMeasurements(measurementData[1], transcriptID);
+			this.drawNucleotideMeasurements(measurementData[2], transcriptID);
 		}
 	},
 
-	drawNucleotideMeasurements: function(experimentData) {
+	// this should be a seperate class.
+	drawNucleotideMeasurements: function(experimentData, transcriptID) {
 		var detailedID = "nucleotide-measurements-overview_"+experimentData["id"];
 		var overviewID = "nucleotide-measurements-detailed_"+experimentData["id"];
 
@@ -136,15 +145,21 @@ var BrowserController = Class.extend({
 		var lessDetailID = "less-detail_"+experimentData["id"];
 
 		// Add HTML elements (TODO use template instead?)
-		var buf = 
-			"<h2>"+experimentData["description"]+"</h2>";
 
 		if (experimentData["empty"]) {
-			buf += "<div class=\"message\">No data available.</div>"
+			var buf = 
+				"<h2>"+experimentData["description"]+"</h2>"+
+				"<div class=\"message\">No data available.</div>";
 			$("#nucleotide-measurement-charts").append(buf)
 
 		} else {
-			buf += 
+			buf = 
+				"<h2>"+
+					experimentData["description"]+
+					"<a href=\"/download/measurements/"+experimentData["id"]+"/"+this.getTranscriptID()+"\" target=\"_blank\" class=\"button download\">"+
+						"<i class=\"fa fa-download\"></i> Download"+
+					"</a>"+
+				"</h2>"+
 				"<svg id=\""+overviewID+"\"></svg>"+
 				"<a href=\"#\" id=\""+moreDetailID+"\" class=\"nucleotide-detail button\">"+
 					"<i class=\"fa fa-arrow-circle-down\"></i>&nbsp;"+

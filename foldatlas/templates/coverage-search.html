@@ -11,11 +11,7 @@
 		<td><a href="/transcript/{{ row["coverage"].transcript_id }}">{{ row["coverage"].transcript_id }}</a></td>
 		<td>{{ row["gene_length"] }}</td>
 		<td>{{ row["coverage"].measurement }}</td>
-		{% if row["structure"] != None %}
-			<td class="yes">yes</td>
-		{% else %}
-			<td>-</td>
-		{% endif %}
+		{% if row["structure"] != None %}<td class="yes">yes</td>{% else %}<td>-</td>{% endif %}
 	</tr>
 {% endfor %}
 </table>

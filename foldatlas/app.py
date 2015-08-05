@@ -67,6 +67,18 @@ def structure_diagram_ajax(structure_id):
 def structure_circle_plot_ajax(structure_id):
 	return StructureCirclePlotView(structure_id).data_json
 
+@app.route("/download/structure/<strain_id>/<transcript_id>")
+def download_structure(strain_id, transcript_id):
+	return "Structure data here"
+
+@app.route("/download/measurements/<experiment_id>/<transcript_id>")
+def download_measurements(experiment_id, transcript_id):
+	return "Measurements here"
+
+@app.route("/download/all")
+def download_all():
+	return "All data here"
+
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`
 	if (len(argv) > 1 and argv[1] == "hydratedb"):
