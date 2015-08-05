@@ -1,3 +1,8 @@
+/**
+ * Front end code for FoldAtlas.
+ * @author Matthew Norris <matthew.norris@jic.ac.uk>
+ */
+
 // Create the browser controller class
 var BrowserController = Class.extend({
 
@@ -46,8 +51,8 @@ var BrowserController = Class.extend({
 
 	// Call this within the JS to change the page.
 	jumpTo: function(url) {
-		this.routeUrl(url); // and execute the associated JS
-		this.changeUrl(url); // must change the URL bar
+		this.routeUrl(url); // execute JS for this URL
+		this.changeUrl(url); // change the URL bar
 	},
 
 	// HTML5 change URL method
@@ -132,37 +137,46 @@ var BrowserController = Class.extend({
 
 		// Add HTML elements (TODO use template instead?)
 		var buf = 
-			"<h2>"+experimentData["description"]+"</h2>"+
-			"<svg id=\""+overviewID+"\"></svg>"+
-			"<a href=\"#\" id=\""+moreDetailID+"\" class=\"nucleotide-detail button\">"+
-				"<i class=\"fa fa-arrow-circle-down\"></i>&nbsp;"+
-				"More detail"+
-			"</a>"+
-			"<a href=\"#\" id=\""+lessDetailID+"\" class=\"nucleotide-detail button\" style=\"display: none;\">"+
-			"<i class=\"fa fa-arrow-circle-up\"></i>&nbsp;"+
-				"Less detail"+
-			"</a>"+
-			"<svg style=\"display: none;\" id=\""+detailedID+"\"></svg>";
-		$("#nucleotide-measurement-charts").append(buf)
+			"<h2>"+experimentData["description"]+"</h2>";
 
-		// Add button event handlers
-		$("#"+moreDetailID).click($.proxy(function(ev) {
-			ev.preventDefault();
-			$("#"+detailedID).show();
-			$("#"+moreDetailID).hide();
-			$("#"+lessDetailID).show();
-		}, this))
+		if (experimentData["empty"]) {
+			buf += "<div class=\"message\">No data available.</div>"
+			$("#nucleotide-measurement-charts").append(buf)
 
-		$("#"+lessDetailID).click($.proxy(function(ev) {
-			ev.preventDefault();
-			$("#"+detailedID).hide();
-			$("#"+moreDetailID).show();
-			$("#"+lessDetailID).hide();
-		}, this))
+		} else {
+			buf += 
+				"<svg id=\""+overviewID+"\"></svg>"+
+				"<a href=\"#\" id=\""+moreDetailID+"\" class=\"nucleotide-detail button\">"+
+					"<i class=\"fa fa-arrow-circle-down\"></i>&nbsp;"+
+					"More detail"+
+				"</a>"+
+				"<a href=\"#\" id=\""+lessDetailID+"\" class=\"nucleotide-detail button\" style=\"display: none;\">"+
+				"<i class=\"fa fa-arrow-circle-up\"></i>&nbsp;"+
+					"Less detail"+
+				"</a>"+
+				"<svg style=\"display: none;\" id=\""+detailedID+"\"></svg>";
+			
+			$("#nucleotide-measurement-charts").append(buf)
 
-		// Draw the charts
-		this.drawNucleotideMeasurementsOverview(overviewID, experimentData);
-		this.drawNucleotideMeasurementsDetailed(detailedID, experimentData);
+			// Add button event handlers
+			$("#"+moreDetailID).click($.proxy(function(ev) {
+				ev.preventDefault();
+				$("#"+detailedID).show();
+				$("#"+moreDetailID).hide();
+				$("#"+lessDetailID).show();
+			}, this))
+
+			$("#"+lessDetailID).click($.proxy(function(ev) {
+				ev.preventDefault();
+				$("#"+detailedID).hide();
+				$("#"+moreDetailID).show();
+				$("#"+lessDetailID).hide();
+			}, this))
+
+			// Draw the charts
+			this.drawNucleotideMeasurementsOverview(overviewID, experimentData);
+			this.drawNucleotideMeasurementsDetailed(detailedID, experimentData);
+		}
 	},
 
 	// Draw a graph with just 1 row, showing all of the nucleotide measurements

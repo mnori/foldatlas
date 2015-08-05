@@ -246,7 +246,8 @@ h2 {
 	text-align: center;
 }
 
-#search-transcript-id-message {
+.message {
+	text-align: left;
 	padding: 20px;
 	background-color: #ffa;
 	border: 1px solid #000;

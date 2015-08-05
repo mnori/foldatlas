@@ -145,7 +145,11 @@ class TranscriptView():
         self.transcript_id = transcript_id
         self.structure_view = StructureView(self.transcript_id, settings.reference_strain_id)
         self.nucleotide_measurement_view = NucleotideMeasurementView(self.transcript_id, settings.reference_strain_id)
-        self.alignment_view = AlignmentView(self.transcript_id)
+        
+        self.empty = self.structure_view.empty and self.nucleotide_measurement_view.empty
+
+        # disable alignment view... revisit later with SNPstructure
+        # self.alignment_view = AlignmentView(self.transcript_id)
 
 class NucleotideMeasurementView():
 
@@ -174,7 +178,8 @@ class NucleotideMeasurementView():
             .all()
 
         data = {}
-        # populate experiment rows
+
+        # Populate experiment rows
         for experiment in experiments:
             experiment_data = {
                 "id": experiment.id,
@@ -191,11 +196,29 @@ class NucleotideMeasurementView():
                 })
             data[experiment.id] = experiment_data
 
-        # add measurements to each experiment
+        # Add measurements to each experiment
         for measurement_row in measurements: # add values where present
             experiment_id = measurement_row.experiment_id
             pos = measurement_row.position - 1
             data[experiment_id]["data"][pos]["measurement"] = measurement_row.measurement
+
+        # For each experiment, check whether there is no data and set empty flags accordingly.
+
+        self.empty = True # all empty flag
+        for experiment_id in data:
+            entry = data[experiment_id]
+
+            empty = True
+            for pos in entry["data"]:
+                if pos["measurement"] != 0 and pos["measurement"] != None:
+                    empty = False
+                    self.empty = False
+
+            if empty:
+                del entry["data"]
+                entry["empty"] = True
+            else:
+                entry["empty"] = False
 
         self.data_json = json.dumps(data)
         
@@ -403,7 +426,14 @@ class StructureView():
 
             data[experiment.id] = experiment_data
 
-        self.data_json = json.dumps(data)
+        self.empty = True
+        for experiment_id in data:
+            entry = data[experiment_id]
+            if len(entry["data"]) > 0:
+                self.empty = False
+
+        if not self.empty:
+            self.data_json = json.dumps(data)
 
 # Plots an RNA structure using the RNAplot program from the ViennaRNA package.
 class StructureDiagramView():
