@@ -531,7 +531,6 @@ class StructureDiagramView():
         
         # return result
 
-
 class StructureCirclePlotView():
     def __init__(self, structure_id):
         self.structure_id = structure_id
@@ -566,20 +565,11 @@ class StructureCirclePlotView():
 
         self.data_json = json.dumps(out)
 
-        # # build the matrix of values that d3.chord understands
-        # # probably more efficient to make the client do this, by passing in the 
-        # # 2xn array there
-        # n_results = len(results)
-        # for result in results:
+class StructureDownloader():
+    def __init__(self, strain_id, transcript_id):
+        self.strain_id = strain_id
+        self.transcript_id = transcript_id
 
-        #     if result.paired_to_position == 0:
-        #         paired_to = result.position
-        #     else:
-        #         paired_to = result.paired_to_position
-
-        #     row = [0] * n_results
-        #     row[paired_to - 1] = 1
-        #     matrix.append(row)
-
-        # self.data_json = json.dumps(matrix)
+    def generateTxt(self):
+        return "Structure data here for ["+self.strain_id+"] and ["+self.transcript_id+"]"
 

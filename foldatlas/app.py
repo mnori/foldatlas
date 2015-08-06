@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 from sys import argv
 from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, CoverageSearcher, \
-	StructureDiagramView, StructureCirclePlotView
+	StructureDiagramView, StructureCirclePlotView, StructureDownloader
 
 import settings
 import database
@@ -67,9 +67,12 @@ def structure_diagram_ajax(structure_id):
 def structure_circle_plot_ajax(structure_id):
 	return StructureCirclePlotView(structure_id).data_json
 
+# strain ID .. should really be experiment ID
+# and strain ID should only be associated with experiment ID.
+# can then just use experiment IDs for everything.
 @app.route("/download/structure/<strain_id>/<transcript_id>")
 def download_structure(strain_id, transcript_id):
-	return "Structure data here"
+	return StructureDownloader(strain_id, transcript_id).generateTxt()
 
 @app.route("/download/measurements/<experiment_id>/<transcript_id>")
 def download_measurements(experiment_id, transcript_id):
