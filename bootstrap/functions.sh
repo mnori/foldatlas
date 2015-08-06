@@ -8,7 +8,7 @@ function hydrate_db() {
 
 function export_db() {
 	pretty_print "Dumping database"
-	cd /vagrant/sauce_data/
+	cd /vagrant/static/downloads/
 	mysqldump -uroot -pvagrant --add-drop-database foldatlas > foldatlas.sql
 	tar -czpf foldatlas.sql.tar.gz foldatlas.sql 
 	rm foldatlas.sql
@@ -16,7 +16,7 @@ function export_db() {
 
 function import_db() {
 	pretty_print "Importing database"
-	cd /vagrant/sauce_data/
+	cd /vagrant/static/downloads/
 	tar xvzf foldatlas.sql.tar.gz
 
 	# stops mysql crashing out on import

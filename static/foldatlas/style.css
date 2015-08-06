@@ -49,6 +49,25 @@ h2 > .button.download:active, .button.download:hover {
 	background-color: #fff;
 }
 
+#header .button {
+	border: 1px solid #000;
+	/*position: absolute;
+	right: 10px;
+	bottom: 10px;*/
+	float: right;
+	margin-top: 8px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: -1px;
+	vertical-align: bottom;	
+	z-index: 9001;
+	font-weight: normal;
+}
+
+#header .button:active, #header .button:hover {
+	background-color: #fff;
+}
+
 /*** /BUTTONS ***/
 
 #header {

@@ -99,7 +99,7 @@ function install() {
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-	if [ ! -f "/vagrant/sauce_data/foldatlas.sql.tar.gz" ]
+	if [ ! -f "/vagrant/static/downloads/foldatlas.sql.tar.gz" ]
 		then
 		dl_sauce
 		hydrate_db # create the DB from the raw data
