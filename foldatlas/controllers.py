@@ -571,6 +571,10 @@ class StructureDownloader():
         self.transcript_id = transcript_id
 
     def generateTxt(self):
+
+        # NOTE - more than 20 structures is likely to crash this shizzle
+        # probably need to look at a chunk based system
+
         results = db_session \
             .query(Structure, StructurePosition) \
             .filter(
@@ -583,8 +587,46 @@ class StructureDownloader():
 
         buf = ""
         for result in results:
+            structure = result[0]
+            structure_position = result[1]
+
+            buf +=  str(structure.id)+"\t"+ \
+                    str(structure.experiment_id)+"\t"+ \
+                    str(structure.strain_id)+"\t"+ \
+                    str(structure.transcript_id)+"\t"+ \
+                    str(structure.energy)+"\t"+ \
+                    str(structure.pc1)+"\t"+ \
+                    str(structure.pc2)+"\t"+ \
+                    str(structure_position.letter)+"\t"+ \
+                    str(structure_position.position)+"\t"+ \
+                    str(structure_position.paired_to_position)+"\n"
+
+        return buf
+
+class NucleotideMeasurementDownloader():
+    def __init__(self, experiment_id, transcript_id):
+        self.experiment_id = experiment_id
+        self.transcript_id = transcript_id
+
+    def generateTxt(self):
+        strain_id = settings.reference_strain_id
+
+        results = db_session \
+            .query(NucleotideMeasurement) \
+            .filter(
+                NucleotideMeasurement.strain_id==strain_id,
+                NucleotideMeasurement.experiment_id==self.experiment_id,
+                NucleotideMeasurement.transcript_id==self.transcript_id
+            ) \
+            .all()
             
+        buf = ""
+        for result in results: 
+            buf +=  str(result.position)+"\t"+ \
+                    str(result.measurement)+"\n"
 
 
-        return "whatevs"
+        return buf
+
+
 

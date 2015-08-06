@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 from sys import argv
 from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, CoverageSearcher, \
-	StructureDiagramView, StructureCirclePlotView, StructureDownloader
+	StructureDiagramView, StructureCirclePlotView, StructureDownloader, \
+	NucleotideMeasurementDownloader
 
 import settings
 import database
@@ -72,11 +73,13 @@ def structure_circle_plot_ajax(structure_id):
 # can then just use experiment IDs for everything.
 @app.route("/download/structure/<strain_id>/<transcript_id>")
 def download_structure(strain_id, transcript_id):
-	return StructureDownloader(strain_id, transcript_id).generateTxt()
+	buf = StructureDownloader(strain_id, transcript_id).generateTxt()
+	return Response(buf, mimetype='text/plain')
 
 @app.route("/download/measurements/<experiment_id>/<transcript_id>")
 def download_measurements(experiment_id, transcript_id):
-	return "Measurements here"
+	buf = NucleotideMeasurementDownloader(experiment_id, transcript_id).generateTxt()
+	return Response(buf, mimetype='text/plain')
 
 @app.route("/download/all")
 def download_all():
