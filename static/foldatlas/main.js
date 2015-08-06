@@ -35,7 +35,7 @@ var BrowserController = Class.extend({
 			document.title = "FoldAtlas: Search";
 
 		} else if (urlIn.indexOf("/transcript/") != -1) {
-			var transcriptID = this.getTranscriptID();
+			var transcriptID = this.getTranscriptID(urlIn);
 			this.selectTranscript(transcriptID);
 			document.title = "FoldAtlas: "+transcriptID;
 
@@ -45,8 +45,11 @@ var BrowserController = Class.extend({
 		}
 	},
 
-	getTranscriptID: function() {
-		return (""+document.location).split("/").pop();
+	getTranscriptID: function(urlIn) {
+		if (typeof(urlIn) === "undefined") {
+			urlIn = ""+document.location;
+		}
+		return urlIn.split("/").pop();
 	},
 
 	onBackForward: function(url) {

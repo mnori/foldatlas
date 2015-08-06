@@ -19,6 +19,7 @@ body {
 	line-height: 15px;
 	text-decoration: none;
 	background-color: #f0f0f0;
+	text-shadow: none;
 }
 
 .button:active, .button.pressed {
@@ -40,7 +41,6 @@ h2 > .button.download {
 	background-color: #f0f0f0;
 	border: 1px solid #000;
 	font-weight: normal;
-	text-shadow: none;
 	margin-right: 30px;
 	margin-top: 9px;
 }
@@ -115,7 +115,7 @@ h2 > .button.download:active, .button.download:hover {
 	box-shadow: none;
 }
 
-#search-button {
+/*#search-button {
 	display: block;
 	font-size: 14px;
 	background-color: rgba(0, 0, 0, 0.5);
@@ -130,11 +130,10 @@ h2 > .button.download:active, .button.download:hover {
 	border-bottom: 0 none;
 	border-right: 0 none;
 
-	/*float: left;*/
 	position: absolute;
 	bottom: 0px;
 	right: 0px;
-}
+}*/
 
 #content {
 	font-size: 16px;

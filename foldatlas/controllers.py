@@ -628,5 +628,4 @@ class NucleotideMeasurementDownloader():
 
         return buf
 
-
-
+# class AllDownloader():
