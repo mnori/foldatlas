@@ -130,10 +130,7 @@ var BrowserController = Class.extend({
 
 		var measurementData = this.getJsonFromElement("nucleotide-measurement-json")
 		if (measurementData) {
-			var transcriptID = structureData["transcript_id"]
-
-			console.log(structureData)
-
+			var transcriptID = this.getTranscriptID();
 			this.drawNucleotideMeasurements(measurementData[1], transcriptID);
 			this.drawNucleotideMeasurements(measurementData[2], transcriptID);
 		}

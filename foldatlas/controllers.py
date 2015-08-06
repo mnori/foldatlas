@@ -478,10 +478,6 @@ class StructureDiagramView():
                 print("Error: cannot do self pairing!");
                 dot_bracket_str += "."
 
-        # # these must be indentical!
-        # print("n_reverse: "+str(n_reverse))
-        # print("n_forward: "+str(n_forward))
-
         return {
             "sequence": seq_str.replace("T", "U"),
             "structure": dot_bracket_str
