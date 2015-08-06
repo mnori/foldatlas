@@ -11,7 +11,7 @@ from sqlalchemy import and_
 
 import json, database, settings, uuid, os, subprocess
 from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement, Experiment, \
-    TranscriptCoverage, StructurePosition
+    TranscriptCoverage, Structure, StructurePosition
 
 from utils import ensure_dir
 
@@ -571,5 +571,20 @@ class StructureDownloader():
         self.transcript_id = transcript_id
 
     def generateTxt(self):
-        return "Structure data here for ["+self.strain_id+"] and ["+self.transcript_id+"]"
+        results = db_session \
+            .query(Structure, StructurePosition) \
+            .filter(
+                Structure.strain_id==self.strain_id,
+                Structure.transcript_id==self.transcript_id,
+                Structure.id==StructurePosition.structure_id
+            ) \
+            .order_by(Structure.experiment_id, Structure.id, StructurePosition.position) \
+            .all()
+
+        buf = ""
+        for result in results:
+            
+
+
+        return "whatevs"
 
