@@ -105,7 +105,7 @@
 	    for (var i = 0; i < chromosomes.length; i++) {
 	    	var selected = i == this.selectedChromosome ? "selected=\"selected\"" : "";
     	buf += 
-	    		"<option value=\""+chromosomes[i].id+"\" "+selected+">"+
+	    		"<option value=\""+i+"\" "+selected+">"+
     		 		chromosomes[i].id+" ("+chromosomes[i].length+" bp)"+
     			"</option>";
 	    }
@@ -114,8 +114,11 @@
 		// Add the HTML to the container
 		$(this.config.container).html(buf);
 
+		// Initialise the chromosome selector menu
+		this.initChromosomeSelector();
+
 		// Initialise the viewer SVG
-		this.initViewer()
+		this.initViewer();
 
 		// Add resizer
 		this.initialContainerHeight = $(this.config.container).height()
@@ -142,6 +145,20 @@
 			this.drawData();
 
 		}, this)});
+	},
+
+	initChromosomeSelector: function() {
+		$("#d3nome-chromosome-selector").on("change", $.proxy(function(ev) {
+			var chrInd = $(ev.target).val();
+			this.selectedChromosome = chrInd;
+			this.jumpToPosition([0, this.minBrushRange]);
+			this.loadData();
+		}, this));
+	},
+
+	jumpToPosition: function(coords) {
+		this.navBoundaries = coords;
+		this.updateBrush(this.navBoundaries);
 	},
 
 	setOverlayDims: function() {
@@ -320,7 +337,9 @@
 
 		this.updateBrush(this.navBoundaries);
 
-		this.loadData(this.chromosomes[this.selectedChromosome].id, this.navBoundaries[0], this.navBoundaries[1]);
+		// this.loadData(this.chromosomes[this.selectedChromosome].id, this.navBoundaries[0], this.navBoundaries[1]);
+
+		this.loadData();
 	},
 
 	setXGrid: function() {

@@ -228,7 +228,6 @@ class SequenceHydrator():
                     "FROM feature, transcript "
                     "WHERE feature.transcript_id = transcript.id "
                     "AND feature.strain_id =  'Col_0' "
-                    "AND chromosome_id =  'Chr1' "
                     "GROUP BY transcript.gene_id "
                     "LIMIT "+str(start)+", "+str(self.gene_location_chunk_size))
 
