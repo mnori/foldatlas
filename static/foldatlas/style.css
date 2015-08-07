@@ -609,16 +609,9 @@ table.coverage-table td.yes {
 	font: 16px Ubuntu Mono, monospace;
 }
 
-/*.d3nome-x .line {
-	fill: none;
-	stroke: blue;
-	stroke-width: 2px;
+#d3nome-chromosome-selector {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	z-index: 20;
 }
-
-.d3nome-x .tick text {
-	font-size: 14px;
-}
-
-.d3nome-x .tick line {
-	opacity: 0.2;
-}*/

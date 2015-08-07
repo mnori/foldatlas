@@ -572,11 +572,12 @@ class StructureDownloader():
         # probably need to look at a chunk based system
 
         results = db_session \
-            .query(Structure, StructurePosition) \
+            .query(Structure, StructurePosition, Experiment) \
             .filter(
                 Structure.strain_id==self.strain_id,
                 Structure.transcript_id==self.transcript_id,
-                Structure.id==StructurePosition.structure_id
+                Structure.id==StructurePosition.structure_id,
+                Structure.experiment_id==Experiment.id
             ) \
             .order_by(Structure.experiment_id, Structure.id, StructurePosition.position) \
             .all()
@@ -585,9 +586,10 @@ class StructureDownloader():
         for result in results:
             structure = result[0]
             structure_position = result[1]
+            experiment = result[2]
 
             buf +=  str(structure.id)+"\t"+ \
-                    str(structure.experiment_id)+"\t"+ \
+                    str(experiment.description)+"\t"+ \
                     str(structure.strain_id)+"\t"+ \
                     str(structure.transcript_id)+"\t"+ \
                     str(structure.energy)+"\t"+ \

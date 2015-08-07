@@ -86,9 +86,19 @@
 	},
 
 	draw: function() {
-		var buf = 
-			"Select your chromosome:"+
-	        "<select id=\"chromosome-selector\">";
+
+		// Draw canvas and its resize bar
+		var buf = 	
+			"<div id=\"d3nome-canvas-container\">"+
+				"<svg id=\"d3nome-canvas\"></svg>"+
+			"</div>"+
+			"<div id=\"d3nome-resize-bar\" class=\"ui-resizable-handle ui-resizable-s\" style=\"width: "+this.totSvgDims.x+"px;\">"+
+				"..."+
+			"</div>";
+
+		// Draw chromosome select menu
+		buf += 
+	        "<select id=\"d3nome-chromosome-selector\">";
 
 	    var chromosomes = this.chromosomes;
 
@@ -99,16 +109,9 @@
     		 		chromosomes[i].id+" ("+chromosomes[i].length+" bp)"+
     			"</option>";
 	    }
+		buf += 	"</select>";
 
-		buf += 	"</select><br />"+
-				"<div id=\"d3nome-canvas-container\">"+
-					"<svg id=\"d3nome-canvas\"></svg>"+
-				"</div>"+
-				"<div id=\"d3nome-resize-bar\" class=\"ui-resizable-handle ui-resizable-s\" style=\"width: "+this.totSvgDims.x+"px;\">"+
-					"..."+
-				"</div>"
-
-		// Add the HTML
+		// Add the HTML to the container
 		$(this.config.container).html(buf);
 
 		// Initialise the viewer SVG
