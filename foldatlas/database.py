@@ -77,7 +77,7 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = 250
+    gene_limit = 50
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -153,8 +153,9 @@ class SequenceHydrator():
         print("Finished adding chromosomes to ["+strain_config["name"]+"]")
 
     def hydrate_genes(self, strain_config):
-        genes_added = 0
 
+        # gotta stratify this by chromosome
+        n_genes_added = {}
         feature_rows = []
 
         # open the annotation file and go through it line by line
@@ -164,32 +165,53 @@ class SequenceHydrator():
                     continue
 
                 bits = gff_line.split("\t")
-                feature_type = bits[2] # BUG
+                feature_type = bits[2]
                 if feature_type == "gene": 
                     
                     if len(feature_rows) > 0: # this is needed to stop it going wrong at the beginning
-                        self.hydrate_gene(feature_rows, strain_config["name"])
-                        genes_added += 1
-                        feature_rows = []
-                        if self.gene_limit != None and genes_added >= self.gene_limit:
-                            break
-                        if genes_added % 100 == 0:
-                            print (str(genes_added)+" genes processed")
 
-                        if genes_added % self.gene_chunk_size == 0: # commit at regular intervals
+                        # feature_rows contains all the data for a single gene.
+                        self.hydrate_gene(feature_rows, strain_config["name"])
+
+                        # reset the data collection
+                        feature_rows = []
+
+                        # initialise counter if it needs doing
+                        if chr_id not in n_genes_added:
+                            n_genes_added[chr_id] = 0
+
+                        # make sure we haven't hit the limit
+                        if self.gene_limit != None and n_genes_added[chr_id] >= self.gene_limit:
+                            # if limit is hit, must continue since there might be other
+                            # chromosomes to process
+                            continue
+                        else:
+                            n_genes_added[chr_id] += 1
+
+                        # show progress
+                        if n_genes_added[chr_id] % 100 == 0:
+                            print (str(n_genes_added[chr_id])+" genes processed")
+
+                        # commit at regular intervals
+                        if n_genes_added[chr_id] % self.gene_chunk_size == 0:
                             self.commit_all()
 
+                # keep track of the chromosome ID
+                chr_id = bits[0]
+
+                # add feature row
                 feature_rows.append(bits)
 
-        # gotta add that last entry
-        if (len(feature_rows) > 0):
+        # gotta add that last entry, if needed
+        if      len(feature_rows) > 0 and \
+                (self.gene_limit == None or n_genes_added[chr_id] < self.gene_limit):
+
             self.hydrate_gene(feature_rows, strain_config["name"])
-            genes_added += 1
+            n_genes_added[chr_id] += 1
 
         self.commit_all()
 
-        # do the sequences
-        print (str(genes_added)+" genes added total")
+        print("Genes added total: "+str(n_genes_added))
 
     # Cache gene locations in a redundant table by looking at the feature locations.
     def cache_gene_locations(self, strain_config):
