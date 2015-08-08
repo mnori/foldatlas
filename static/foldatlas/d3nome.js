@@ -151,18 +151,28 @@
 
 	initChromosomeSelector: function() {
 
-		// Doesn't work when jquery shiz gets added
-		$("#d3nome-chromosome-selector").on("change", $.proxy(function(ev) {
-			var chrInd = $(ev.target).val();
-			this.selectedChromosome = chrInd;
-			this.jumpToPosition([0, this.minBrushRange]);
-			this.loadData();
-		}, this));
+		// $("#d3nome-chromosome-selector").on("change", $.proxy(function(ev) {
+		// 	var chrInd = $(ev.target).val();
+		// 	this.selectedChromosome = chrInd;
+		// 	this.jumpToPosition([0, this.minBrushRange]);
+		// 	this.loadData();
+		// }, this));
 
 		// Transform native element to fancy jquery version
 		$("#d3nome-chromosome-selector").selectmenu({
 			width: 150
 		});
+
+		$("#d3nome-chromosome-selector").on(
+			"selectmenuselect",
+			$.proxy(function(event, ui) {
+				var chrInd = $(event.target).val();
+				this.selectedChromosome = chrInd;
+				this.jumpToPosition([0, this.minBrushRange]);
+				this.loadData();
+			}, this)
+		);
+
 	},
 
 	jumpToPosition: function(coords) {
