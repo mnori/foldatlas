@@ -104,9 +104,11 @@
 
 	    for (var i = 0; i < chromosomes.length; i++) {
 	    	var selected = i == this.selectedChromosome ? "selected=\"selected\"" : "";
-    	buf += 
+
+	    	var len = Math.round(chromosomes[i].length / 1000000)+" Mb";
+    		buf += 
 	    		"<option value=\""+i+"\" "+selected+">"+
-    		 		chromosomes[i].id+" ("+chromosomes[i].length+" bp)"+
+    		 		chromosomes[i].id+" ("+len+")"+
     			"</option>";
 	    }
 		buf += 	"</select>";
@@ -148,12 +150,19 @@
 	},
 
 	initChromosomeSelector: function() {
+
+		// Doesn't work when jquery shiz gets added
 		$("#d3nome-chromosome-selector").on("change", $.proxy(function(ev) {
 			var chrInd = $(ev.target).val();
 			this.selectedChromosome = chrInd;
 			this.jumpToPosition([0, this.minBrushRange]);
 			this.loadData();
 		}, this));
+
+		// Transform native element to fancy jquery version
+		$("#d3nome-chromosome-selector").selectmenu({
+			width: 150
+		});
 	},
 
 	jumpToPosition: function(coords) {

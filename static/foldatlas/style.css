@@ -609,9 +609,85 @@ table.coverage-table td.yes {
 	font: 16px Ubuntu Mono, monospace;
 }
 
-#d3nome-chromosome-selector {
+/** SELECT MENU **/
+
+/* Select button */
+.d3nome-container .ui-selectmenu-button {
 	position: absolute;
-	bottom: 0px;
-	right: 0px;
+	bottom: 10px;
+	right: 10px;
 	z-index: 20;
+
+	/* generic button shiz */
+	margin: 5px;
+	padding: 7px 10px;
+	border: 1px solid #888;
+	color: #000;
+	line-height: 15px;
+	background-color: #f0f0f0;
+	margin: 0px;
+	border-radius: 0px;
 }
+
+/* Text element inside the button */
+.d3nome-container .ui-selectmenu-button .ui-selectmenu-text {
+	padding: 0px;
+	margin: 0px;
+	font-weight: normal;
+	font-size: 16px;
+	line-height: 15px;
+	position: relative;
+	padding-left: 20px;
+}
+
+/* Adds the arrow to the select button */
+.d3nome-container .ui-selectmenu-button .ui-selectmenu-text:before {
+    position:absolute;
+    font-family: FontAwesome;
+    top:0;
+    left: 0px;
+    font-size: 18px;
+    content: "\f107";
+}
+
+/* Hover - show button gradient */
+.d3nome-container .ui-selectmenu-button.ui-state-hover {
+	background-color: #fff;
+	border: 1px solid #666;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.15) 100%);
+}
+
+/* Button pressed */
+.d3nome-container .ui-corner-top {
+	border: 1px solid #666;
+	padding: 9px 10px 5px 10px;
+	background-color: #f0f0f0;
+	box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.d3nome-container .ui-state-focus {
+	outline: none;
+}
+
+#d3nome-chromosome-selector-menu {
+	border: 1px solid #000;
+	border-radius: 0px;
+}
+
+#d3nome-chromosome-selector-menu .ui-menu-item,
+#d3nome-chromosome-selector-menu .ui-state-focus {
+	font-size: 16px;
+	padding: 5px 10px;
+}
+
+#d3nome-chromosome-selector-menu .ui-menu-item {
+	background-color: #f0f0f0;
+}
+
+#d3nome-chromosome-selector-menu .ui-state-focus {
+	background-color: #666;
+	font-weight: normal;
+	color: #fff;
+	border: 0px;
+}
+
