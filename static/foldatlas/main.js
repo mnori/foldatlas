@@ -78,23 +78,6 @@ var BrowserController = Class.extend({
 
 	// /URLS /////////////////////////////////////////////////////////
 
-	// Jump to a specific transcript page
-	selectTranscript: function(transcriptID) {
-		this.showLoading();
-		// this.changeUrl("/transcript/"+transcriptID, transcriptID)
-		$.ajax({
-			url: "/ajax/transcript/"+transcriptID,
-			context: this
-		}).done(function(results) {
-			this.hideLoading();
-			$("#search").hide()
-			$("#d3nome").show();
-			$("#transcript-data").empty();
-			$("#transcript-data").html(results);
-			this.drawTranscriptData();
-		});
-	},
-
 	showLoading: function() {
 		$("#loading-indicator").show()
 	},
@@ -120,7 +103,31 @@ var BrowserController = Class.extend({
 		return json;
 	},
 
+	// Jump to a specific transcript page
+	selectTranscript: function(transcriptID) {
+		this.showLoading();
+		// this.changeUrl("/transcript/"+transcriptID, transcriptID)
+		$.ajax({
+			url: "/ajax/transcript/"+transcriptID,
+			context: this
+		}).done(function(results) {
+			this.hideLoading();
+			$("#search").hide()
+			$("#d3nome").show();
+			$("#transcript-data").empty();
+			$("#transcript-data").html(results);
+			this.drawTranscriptData();
+		});
+	},
+
 	drawTranscriptData: function(reactivities) {
+		// 1) obtain transcript coordinates
+
+		// 2) use those to move the brush to the right place
+		var jumpToCoords = [1000, 2000];
+		var d3nome = window.d3nomeObject;
+		d3nome.jumpToPosition(jumpToCoords);
+
 		var structureData = this.getJsonFromElement("structure-json")
 
 		// TODO better way to detect whether there is stuctural data

@@ -151,13 +151,6 @@
 
 	initChromosomeSelector: function() {
 
-		// $("#d3nome-chromosome-selector").on("change", $.proxy(function(ev) {
-		// 	var chrInd = $(ev.target).val();
-		// 	this.selectedChromosome = chrInd;
-		// 	this.jumpToPosition([0, this.minBrushRange]);
-		// 	this.loadData();
-		// }, this));
-
 		// Transform native element to fancy jquery version
 		$("#d3nome-chromosome-selector").selectmenu({
 			width: 150
@@ -175,6 +168,7 @@
 
 	},
 
+	// coords - 2 element array
 	jumpToPosition: function(coords) {
 		this.navBoundaries = coords;
 		this.updateBrush(this.navBoundaries);

@@ -38,8 +38,6 @@
         $(document).ready(function () { 
             {% set chromosomes = genome_browser.get_chromosomes() %}
 
-            window.browserController = new BrowserController(window.foldatlasConfig);
-
             window.d3nomeConfig = {
                 container: "#d3nome",
                 selectedChromosome: 0, // i.e. select the first chromosome
@@ -60,7 +58,9 @@
                     window.browserController.jumpTo("/transcript/"+transcriptID);
                 }
             }
-            window.d3nome = new D3nome(window.d3nomeConfig);
+            window.d3nomeObject = new D3nome(window.d3nomeConfig);
+
+            window.browserController = new BrowserController(window.foldatlasConfig);
         });
 
     </script>
