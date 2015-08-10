@@ -86,17 +86,29 @@ h1 .button {
 
 #header {
 	height: 80px;
-	color: #fff;
-	text-shadow: 0px 0px 10px #000;
-	font-weight: bold;
 	width: 934px;
 	padding: 15px;
 	border: 1px solid #000;
 	background: 
 		url("http://static.foldatlas.dev/assets/header-bg.png"), 
 		linear-gradient(to bottom, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* W3C */
-
 	position: relative;
+}
+
+#title {
+	font-weight: bold;
+	color: #fff;
+	text-shadow: 0px 0px 10px #000;
+	position: absolute;
+	left: 15px;
+	bottom: 15px;
+	font-size: 40px;
+	cursor: pointer;
+	line-height: 1em;
+}
+
+#title:hover {
+	text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5);
 }
 
 #content {
@@ -109,14 +121,6 @@ h1 .button {
 	border-bottom: 1px solid #000;
 	border-left: 1px solid #000;
 	position: relative;
-}
-
-#title {
-	position: absolute;
-	left: 15px;
-	bottom: 15px;
-	font-size: 40px;
-	cursor: pointer;
 }
 
 .tabs {

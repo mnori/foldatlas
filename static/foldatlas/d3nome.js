@@ -47,7 +47,7 @@
 
 		// total dimensions of the browser 
 		// TODO use config values
-		this.totSvgDims = {x: 898, y: 300}
+		this.totSvgDims = {x: 902, y: 300}
 		this.initialSvgDims = {x: this.totSvgDims.x, y: this.totSvgDims.y}
 
 		this.navDims = null;
@@ -90,7 +90,7 @@
 
 		// Draw canvas and its resize bar
 		var buf = 	
-			"<div id=\"d3nome-canvas-container\">"+
+			"<div id=\"d3nome-canvas-container\" style=\"width: "+this.totSvgDims.x+"px; \">"+
 				"<svg id=\"d3nome-canvas\"></svg>"+
 			"</div>"+
 			"<div id=\"d3nome-resize-bar\" class=\"ui-resizable-handle ui-resizable-s\" style=\"width: "+this.totSvgDims.x+"px;\">"+
@@ -115,6 +115,7 @@
 
 		// Add the HTML to the container
 		$(this.config.container).html(buf);
+		$(this.config.container).attr("style", "width: "+this.totSvgDims.x+"px;");
 
 		// Initialise the chromosome selector menu
 		this.initChromosomeSelector();
@@ -210,7 +211,7 @@
 
 	calcDims: function() {
 		this.navDims = {x: this.totSvgDims.x, y: this.navHeight};
-		this.viewDims = {x: 898, y: (this.totSvgDims.y - this.navDims.y)};
+		this.viewDims = {x: this.totSvgDims.x, y: (this.totSvgDims.y - this.navDims.y)};
 	},
 
 	// Set up the chromosome scrollbar.

@@ -8,7 +8,6 @@ var BrowserController = Class.extend({
 
 	// Constructor
 	init: function(config) {
-		console.log("init() invoked");
 		this.nucsPerRow = 80;
 		this.staticBase = config.staticBaseUrl;
 		this.reactivities = {};
