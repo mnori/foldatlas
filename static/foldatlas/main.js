@@ -8,6 +8,7 @@ var BrowserController = Class.extend({
 
 	// Constructor
 	init: function(config) {
+		console.log("init() invoked");
 		this.nucsPerRow = 80;
 		this.staticBase = config.staticBaseUrl;
 		this.reactivities = {};
@@ -120,19 +121,25 @@ var BrowserController = Class.extend({
 		});
 	},
 
-	drawTranscriptData: function(reactivities) {
+	/**
+	 * Draw transcript data, if available.
+	 */
+	drawTranscriptData: function() {
 		// 1) obtain transcript coordinates
-		var transcriptData = JSON.parse($("#transcript-json").html());
+		var transcriptData = this.getJsonFromElement("transcript-json");
+		if (!transcriptData) {
+			return;
+		}
 
 		// 2) use those to move the brush to the right place
-		var start = transcriptData.start;
-		var end = transcriptData.end;
+		var chrID = transcriptData["chromosome_id"];
+		var diff = transcriptData["end"] - transcriptData["start"];
+		var start = transcriptData["start"] - diff;
+		var end = transcriptData["end"] + diff;
 
-		// var d3nome = window.d3nomeObject;
-		// d3nome.jumpToPosition(chrId[
-		// 	transcriptData.start, 
-		// 	transcriptData.end
-		// ]);
+		// figure out chrInd
+		var d3nome = window.d3nomeObject;
+		d3nome.jumpToPosition(d3nome.chrIDToInd(chrID), [start, end]);
 
 		var structureData = this.getJsonFromElement("structure-json")
 

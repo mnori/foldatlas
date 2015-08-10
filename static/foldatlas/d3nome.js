@@ -164,9 +164,23 @@
 		);
 	},
 
+	chrIDToInd: function(chrID) {
+		for (var i = 0; i < this.chromosomes.length; i++) {
+			if (chrID == this.chromosomes[i].id) {
+				return i;
+			}
+		}
+	},
+
 	// coords - 2 element array
 	jumpToPosition: function(chrInd, coords) {
 		this.selectedChromosome = chrInd;
+
+		var chrLen = this.chromosomes[this.selectedChromosome].length;
+		coords = [
+			coords[0] < 0 ? 0 : coords[0],
+			coords[1] >= chrLen ? chrLen - 1 : coords[1]
+		];
 		this.navBoundaries = coords;
 		this.updateBrush(this.navBoundaries);
 		this.loadData();
