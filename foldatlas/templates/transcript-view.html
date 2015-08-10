@@ -1,6 +1,11 @@
-<h1>{{ transcript_view.transcript_id }}</h1>
+<h1>
+	{{ transcript_view.transcript_id }}
+	<a href="https://www.arabidopsis.org/servlets/TairObject?type=locus&name={{ transcript_view.gene_id }}" target="_blank" class="button header">
+		<i class="fa fa-external-link"></i> TAIR profile
+	</a>
+</h1>
 
-{{ transcript_view.gene_id }}
+
 
 <div id="transcript-json" style="display: none;">{{ transcript_view.transcript_data|safe }}</div>
 

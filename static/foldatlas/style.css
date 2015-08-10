@@ -22,7 +22,7 @@ body {
 	text-shadow: none;
 }
 
-.button:active, .button.pressed {
+.button:active {
 	border: 1px solid #666;
 	padding: 9px 10px 5px 10px;
 	background-color: #fff;
@@ -36,7 +36,7 @@ body {
 }
 
 /* gotta override h2 styling */
-h2 > .button.download {
+.button.download {
 	float: right;
 	background-color: #f0f0f0;
 	border: 1px solid #000;
@@ -45,9 +45,13 @@ h2 > .button.download {
 	margin-top: 9px;
 }
 
-h2 > .button.download:active, .button.download:hover {
-	background-color: #fff;
+h1 .button {
+	display: inline-block;
+	vertical-align: bottom;
+	margin: 0px 0px 0px 10px;
+	font-weight: normal;
 }
+
 
 #header .button {
 	border: 1px solid #000;
@@ -62,6 +66,10 @@ h2 > .button.download:active, .button.download:hover {
 	vertical-align: bottom;	
 	z-index: 9001;
 	font-weight: normal;
+}
+
+.button.download:active, .button.download:hover {
+	background-color: #fff;
 }
 
 #header .button:active, #header .button:hover {
@@ -167,7 +175,7 @@ h2 > .button.download:active, .button.download:hover {
 
 h1 {
 	font-size: 30px;
-	text-align: center;
+	text-align: left;
 }
 
 h2 {
@@ -685,7 +693,7 @@ table.coverage-table td.yes {
 }
 
 #d3nome-chromosome-selector-menu .ui-state-focus {
-	background-color: #666;
+	background-color: #555;
 	font-weight: normal;
 	color: #fff;
 	border: 0px;
