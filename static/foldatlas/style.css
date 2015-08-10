@@ -59,7 +59,7 @@ h1 .button {
 	right: 10px;
 	bottom: 10px;*/
 	float: right;
-	margin-top: 8px;
+	margin-top: 48px;
 	margin-right: 0px;
 	margin-bottom: 0px;
 	margin-left: -1px;
@@ -79,21 +79,27 @@ h1 .button {
 /*** /BUTTONS ***/
 
 #header {
-	font-size: 40px;
+	height: 80px;
+	color: #fff;
 	text-shadow: 0px 0px 10px #000;
 	font-weight: bold;
-	line-height: 1em;
-	color: #fff;
 	width: 934px;
-	margin: 0 auto;
+	margin: 30px auto 0 auto;
 	padding: 15px;
 	border: 1px solid #000;
 	box-shadow: 0px 0px 40px #000;
-	background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* W3C */
+	background: 
+		url("http://static.foldatlas.dev/assets/header-bg.png"), 
+		linear-gradient(to bottom, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* W3C */
+
 	position: relative;
 }
 
 #title {
+	position: absolute;
+	left: 15px;
+	bottom: 15px;
+	font-size: 40px;
 	cursor: pointer;
 }
 

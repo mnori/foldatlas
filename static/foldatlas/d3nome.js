@@ -22,6 +22,7 @@
 
 		this.maxBrushRange = 2500000;
 		this.minBrushRange = 25000;
+		this.initRange = 250000;
 
 		// If zoomed out more than this, it will just fetch gene boundaries rather than features
 		this.simpleThreshold = 100000;
@@ -159,7 +160,9 @@
 			"selectmenuselect",
 			$.proxy(function(event, ui) {
 				var chrInd = $(event.target).val();
-				this.jumpToPosition(chrInd, [0, this.minBrushRange], false);
+				if (chrInd != this.selectedChromosome) { // only jump if the chromosome has changed.
+					this.jumpToPosition(chrInd, [0, this.initRange], false);
+				}
 			}, this)
 		);
 	},
