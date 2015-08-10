@@ -122,11 +122,17 @@ var BrowserController = Class.extend({
 
 	drawTranscriptData: function(reactivities) {
 		// 1) obtain transcript coordinates
+		var transcriptData = JSON.parse($("#transcript-json").html());
 
 		// 2) use those to move the brush to the right place
-		var jumpToCoords = [1000, 2000];
-		var d3nome = window.d3nomeObject;
-		d3nome.jumpToPosition(jumpToCoords);
+		var start = transcriptData.start;
+		var end = transcriptData.end;
+
+		// var d3nome = window.d3nomeObject;
+		// d3nome.jumpToPosition(chrId[
+		// 	transcriptData.start, 
+		// 	transcriptData.end
+		// ]);
 
 		var structureData = this.getJsonFromElement("structure-json")
 

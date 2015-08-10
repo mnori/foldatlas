@@ -104,7 +104,6 @@
 
 	    for (var i = 0; i < chromosomes.length; i++) {
 	    	var selected = i == this.selectedChromosome ? "selected=\"selected\"" : "";
-
 	    	var len = Math.round(chromosomes[i].length / 1000000)+" Mb";
     		buf += 
 	    		"<option value=\""+i+"\" "+selected+">"+
@@ -160,18 +159,17 @@
 			"selectmenuselect",
 			$.proxy(function(event, ui) {
 				var chrInd = $(event.target).val();
-				this.selectedChromosome = chrInd;
-				this.jumpToPosition([0, this.minBrushRange]);
-				this.loadData();
+				this.jumpToPosition(chrInd, [0, this.minBrushRange]);
 			}, this)
 		);
-
 	},
 
 	// coords - 2 element array
-	jumpToPosition: function(coords) {
+	jumpToPosition: function(chrInd, coords) {
+		this.selectedChromosome = chrInd;
 		this.navBoundaries = coords;
 		this.updateBrush(this.navBoundaries);
+		this.loadData();
 	},
 
 	setOverlayDims: function() {

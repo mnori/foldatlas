@@ -11,7 +11,7 @@ from sqlalchemy import and_
 
 import json, database, settings, uuid, os, subprocess
 from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement, Experiment, \
-    TranscriptCoverage, Structure, StructurePosition
+    TranscriptCoverage, Structure, StructurePosition, GeneLocation
 
 from utils import ensure_dir
 
@@ -141,8 +141,25 @@ class TranscriptView():
 
     def __init__(self, transcript_id):
 
-        # TODO try to fetch transcript ID first, then if it works do the rest of the stuff
         self.transcript_id = transcript_id
+
+        # Get the coords of the associated gene
+        data = db_session \
+            .query(Transcript, GeneLocation) \
+            .filter(
+                Transcript.id==transcript_id,
+                Transcript.gene_id==GeneLocation.gene_id,
+                GeneLocation.strain_id==settings.reference_strain_id
+            ) \
+            .all()
+
+        self.transcript_data = json.dumps({
+            "transcript_id": transcript_id,
+            "chromosome_id": data[0][1].chromosome_id,
+            "start": data[0][1].start, 
+            "end": data[0][1].end
+        })
+
         self.structure_view = StructureView(self.transcript_id, settings.reference_strain_id)
         self.nucleotide_measurement_view = NucleotideMeasurementView(self.transcript_id, settings.reference_strain_id)
         
