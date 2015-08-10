@@ -4,7 +4,7 @@
 body {
 	height: auto;
 	position: relative;
-	background-color: #35a;
+	background-color: #2f3b5d;
 	font-family: Ubuntu, Tahoma, Geneva, sans-serif;
 }
 
@@ -78,20 +78,36 @@ h1 .button {
 
 /*** /BUTTONS ***/
 
+#main-container {
+	box-shadow: 0px 0px 40px #000;
+	margin: 30px auto 30px auto;
+	width: 964px;;
+}
+
 #header {
 	height: 80px;
 	color: #fff;
 	text-shadow: 0px 0px 10px #000;
 	font-weight: bold;
 	width: 934px;
-	margin: 30px auto 0 auto;
 	padding: 15px;
 	border: 1px solid #000;
-	box-shadow: 0px 0px 40px #000;
 	background: 
 		url("http://static.foldatlas.dev/assets/header-bg.png"), 
 		linear-gradient(to bottom, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* W3C */
 
+	position: relative;
+}
+
+#content {
+	font-size: 16px;
+	background-color: #fff;
+	width: 904px;
+	padding: 30px;
+	border-top: 0px;
+	border-right: 1px solid #000;
+	border-bottom: 1px solid #000;
+	border-left: 1px solid #000;
 	position: relative;
 }
 
@@ -168,17 +184,6 @@ h1 .button {
 	right: 0px;
 }*/
 
-#content {
-	font-size: 16px;
-	background-color: #fff;
-	width: 900px;
-	margin: 0 auto;
-	padding: 30px;
-	border: 2px solid #fff;
-	box-shadow: 0px 0px 40px #000;
-	position: relative;
-}
-
 h1 {
 	font-size: 30px;
 	text-align: left;
@@ -186,8 +191,8 @@ h1 {
 
 h2 {
 
-	margin-left: -32px;
-	margin-right: -32px;
+	margin-left: -30px;
+	margin-right: -30px;
 	padding-left: 30px;
 	text-shadow: 0px 0px 10px #000;
 	text-align: left;
@@ -196,7 +201,7 @@ h2 {
 	background-color: #555;
 	border-top: 1px solid #000;
 	border-bottom: 1px solid #000;
-	border-left: 2px solid #666;
+	border-left: 1px solid #666;
 	border-right: 2px solid #666;
 	line-height: 50px;
 	font-size: 20px;

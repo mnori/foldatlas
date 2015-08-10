@@ -74,43 +74,45 @@
 
     <div id="progress"></div>
 
-    <div id="header">
-        <span id="title">FoldAtlas</span>
-        <a href="#" id="search-button" class="button"><i class="fa fa-search"></i>&nbsp;Search</a>
-        <a href="{{ settings.static_base_url }}/downloads/foldatlas.sql.tar.gz" class="button"><i class="fa fa-download"></i>&nbsp;Download All</a>
-    </div>
-
-    <div id="content">
-
-        <div id="search" {% if not search %}style="display: none;"{% endif %}>
-            <div class="tabs">
-                <div class="tab active" id="search-tab-transcript-id" data-ui-id="search-transcript-id"><i class="fa fa-search"></i>&nbsp;Transcript ID</div>
-                <div class="tab" id="search-tab-coverage" data-ui-id="search-coverage"><i class="fa fa-search"></i>&nbsp;Coverage</div>
-            </div>
-
-            <div id="search-transcript-id">
-                <div id="search-transcript-id-container">
-                    <input type="text" id="search-transcript-id-text" />
-                    <a href="#" class="button" type="submit" id="search-transcript-id-submit">Search</a>
-
-                </div>
-                <div id="search-transcript-id-message" class="message" style="display: none;">
-                    <!-- filled by JS -->
-                </div>
-            </div>
-
-            <div id="search-coverage" style="display: none;"><!-- filled by JS --></div>
+    <div id="main-container">
+        <div id="header">
+            <span id="title">FoldAtlas</span>
+            <a href="#" id="search-button" class="button"><i class="fa fa-search"></i>&nbsp;Search</a>
+            <a href="{{ settings.static_base_url }}/downloads/foldatlas.sql.tar.gz" class="button"><i class="fa fa-download"></i>&nbsp;Download All</a>
         </div>
 
-        <!-- this empty div will be filled by d3nome -->
-        <!-- it can be hidden by choosing another search method -->
-        <div id="d3nome" class="d3nome-container" {% if search %}style="display: none;"{% endif %}></div>
+        <div id="content">
 
-        <!-- Transcript data is added here -->
-        <div id="transcript-data">
-            {% if transcript_view is defined %}
-                {% include "transcript-view.html" %}
-            {% endif %}
+            <div id="search" {% if not search %}style="display: none;"{% endif %}>
+                <div class="tabs">
+                    <div class="tab active" id="search-tab-transcript-id" data-ui-id="search-transcript-id"><i class="fa fa-search"></i>&nbsp;Transcript ID</div>
+                    <div class="tab" id="search-tab-coverage" data-ui-id="search-coverage"><i class="fa fa-search"></i>&nbsp;Coverage</div>
+                </div>
+
+                <div id="search-transcript-id">
+                    <div id="search-transcript-id-container">
+                        <input type="text" id="search-transcript-id-text" />
+                        <a href="#" class="button" type="submit" id="search-transcript-id-submit">Search</a>
+
+                    </div>
+                    <div id="search-transcript-id-message" class="message" style="display: none;">
+                        <!-- filled by JS -->
+                    </div>
+                </div>
+
+                <div id="search-coverage" style="display: none;"><!-- filled by JS --></div>
+            </div>
+
+            <!-- this empty div will be filled by d3nome -->
+            <!-- it can be hidden by choosing another search method -->
+            <div id="d3nome" class="d3nome-container" {% if search %}style="display: none;"{% endif %}></div>
+
+            <!-- Transcript data is added here -->
+            <div id="transcript-data">
+                {% if transcript_view is defined %}
+                    {% include "transcript-view.html" %}
+                {% endif %}
+            </div>
         </div>
     </div>
   </body>
