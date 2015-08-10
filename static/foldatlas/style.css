@@ -650,6 +650,7 @@ table.coverage-table td.yes {
 	background-color: #f0f0f0;
 	margin: 0px;
 	border-radius: 0px;
+	background-image: none;
 }
 
 /* Text element inside the button */
@@ -695,12 +696,14 @@ table.coverage-table td.yes {
 #d3nome-chromosome-selector-menu {
 	border: 1px solid #000;
 	border-radius: 0px;
+	background-image: none;
 }
 
 #d3nome-chromosome-selector-menu .ui-menu-item,
 #d3nome-chromosome-selector-menu .ui-state-focus {
 	font-size: 16px;
 	padding: 5px 10px;
+	background-image: none;
 }
 
 #d3nome-chromosome-selector-menu .ui-menu-item {
@@ -714,3 +717,6 @@ table.coverage-table td.yes {
 	border: 0px;
 }
 
+#d3nome-chromosome-selector-button.ui-selectmenu-button span.ui-icon.ui-icon {
+	background-image: none;
+}
