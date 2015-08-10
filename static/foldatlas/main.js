@@ -139,7 +139,7 @@ var BrowserController = Class.extend({
 
 		// figure out chrInd
 		var d3nome = window.d3nomeObject;
-		d3nome.jumpToPosition(d3nome.chrIDToInd(chrID), [start, end]);
+		d3nome.jumpToPosition(d3nome.chrIDToInd(chrID), [start, end], true);
 
 		var structureData = this.getJsonFromElement("structure-json")
 

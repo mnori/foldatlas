@@ -159,7 +159,7 @@
 			"selectmenuselect",
 			$.proxy(function(event, ui) {
 				var chrInd = $(event.target).val();
-				this.jumpToPosition(chrInd, [0, this.minBrushRange]);
+				this.jumpToPosition(chrInd, [0, this.minBrushRange], false);
 			}, this)
 		);
 	},
@@ -173,14 +173,24 @@
 	},
 
 	// coords - 2 element array
-	jumpToPosition: function(chrInd, coords) {
+	jumpToPosition: function(chrInd, coords, updateMenu) {
 		this.selectedChromosome = chrInd;
 
+		// make sure coords are within the chromosome's range
 		var chrLen = this.chromosomes[this.selectedChromosome].length;
 		coords = [
 			coords[0] < 0 ? 0 : coords[0],
 			coords[1] >= chrLen ? chrLen - 1 : coords[1]
 		];
+
+		if (updateMenu) {
+			// if selected chromosome has changed, must update the chromosome selector menu
+			// $("#d3nome-chromosome-selector").selectmenu("value", chrInd);
+			$("#d3nome-chromosome-selector").val(chrInd);
+			$("#d3nome-chromosome-selector").selectmenu("refresh", true);
+		}
+
+		// update the view
 		this.navBoundaries = coords;
 		this.updateBrush(this.navBoundaries);
 		this.loadData();
