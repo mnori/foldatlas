@@ -1,5 +1,7 @@
 <h1>{{ transcript_view.transcript_id }}</h1>
 
+{{ transcript_view.gene_id }}
+
 <div id="transcript-json" style="display: none;">{{ transcript_view.transcript_data|safe }}</div>
 
 {% if transcript_view.empty %}

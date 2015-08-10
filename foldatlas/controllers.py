@@ -153,7 +153,10 @@ class TranscriptView():
             ) \
             .all()
 
+        self.gene_id = data[0][1].gene_id
+
         self.transcript_data = json.dumps({
+            "gene_id": self.gene_id,
             "transcript_id": transcript_id,
             "chromosome_id": data[0][1].chromosome_id,
             "start": data[0][1].start, 
