@@ -581,6 +581,7 @@ class StructureCirclePlotView():
 
         self.data_json = json.dumps(out)
 
+# Generates plaintext structure text files for download
 class StructureDownloader():
     def __init__(self, strain_id, transcript_id):
         self.strain_id = strain_id
@@ -621,6 +622,7 @@ class StructureDownloader():
 
         return buf
 
+# Generates plain text nucleotide measurements for user download
 class NucleotideMeasurementDownloader():
     def __init__(self, experiment_id, transcript_id):
         self.experiment_id = experiment_id
@@ -629,6 +631,11 @@ class NucleotideMeasurementDownloader():
     def generateTxt(self):
         strain_id = settings.reference_strain_id
 
+        # Grab sequence string
+        seq_str = str(Transcript(self.transcript_id) \
+            .get_sequence(settings.reference_strain_id).seq)
+
+        # Use the ORM to grab all the measurements
         results = db_session \
             .query(NucleotideMeasurement) \
             .filter(
@@ -637,12 +644,22 @@ class NucleotideMeasurementDownloader():
                 NucleotideMeasurement.transcript_id==self.transcript_id
             ) \
             .all()
-            
-        buf = ""
-        for result in results: 
-            buf +=  str(result.position)+"\t"+ \
-                    str(result.measurement)+"\n"
+        
+        # index measurements by pos
+        measurements = {}
+        for result in results:
+            measurements[result.position] = result.measurement
 
+        # build the output string
+        buf = ""
+        n = 0
+        for n in range(0, len(seq_str)): 
+            pos = n + 1
+            measurement = "NA" if pos not in measurements else measurements[pos]
+            buf +=  str(pos)+"\t"+ \
+                    seq_str[n]+"\t"+ \
+                    str(measurement)+"\n"
+            n += 1
 
         return buf
 

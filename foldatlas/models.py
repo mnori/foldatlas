@@ -96,7 +96,8 @@ class Transcript(Base):
 
         return seqs_out
 
-    # convenience method to fetch a single SeqRecord.
+    # convenience method to fetch a single SeqRecord sequence.
+    # Sequence is always reverse complemented if it's a backwards gene
     def get_sequence(self, strain_id):
         return list(self.get_sequences(strain_id).values())[0]
 
