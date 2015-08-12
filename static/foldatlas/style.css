@@ -483,13 +483,15 @@ table.coverage-table td.yes {
 }
 
 .pagination-status {
-	width: 100px;
+	width: 130px;
 	margin: 0px 3px 0px 3px;
 	text-align: center;
 	padding: 5px;
 	line-height: 19px;
 	border: 1px solid #888;
 	background-color: none;
+	font-size: 16px;
+	font-family: Ubuntu, Tahoma, Geneva, sans-serif
 }
 
 /* /PAGINATION ********************************************************/
