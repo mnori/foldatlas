@@ -50,6 +50,8 @@
 		this.totSvgDims = {x: 902, y: 300}
 		this.initialSvgDims = {x: this.totSvgDims.x, y: this.totSvgDims.y}
 
+		this.minHeight = this.totSvgDims.y;
+
 		this.navDims = null;
 		this.viewDims = null;
 
@@ -128,7 +130,10 @@
 		this.initialContainerHeight = $(this.config.container).height()
 
 		$(this.config.container).resizable({
-			handles: {"s": "#d3nome-resize-bar"}, 
+			handles: {
+				s: "#d3nome-resize-bar"
+			}, 
+			minHeight: this.minHeight
 		}).bind({resize: $.proxy(function(event, ui) {
 			var newContainerHeight = ui.size.height;
 			var heightDiff = newContainerHeight - this.initialContainerHeight;
