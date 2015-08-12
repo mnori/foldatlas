@@ -115,7 +115,8 @@
 
 		// Add the HTML to the container
 		$(this.config.container).html(buf);
-		$(this.config.container).attr("style", "width: "+this.totSvgDims.x+"px;");
+		
+		$(this.config.container).css({width: this.totSvgDims.x+"px"});
 
 		// Initialise the chromosome selector menu
 		this.initChromosomeSelector();
