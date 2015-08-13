@@ -5,7 +5,9 @@ from sqlalchemy import Column, Integer, String, Text, Enum, Float, ForeignKey, F
 from database import Base
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+
 import database
+import settings
 
 # A Gene describes a locus identifier for a gene, plus any metadata associated with the locus.
 # Genes are generic - they can be associated with multiple strains.
@@ -35,6 +37,7 @@ class Transcript(Base):
     def __repr__(self):
         return "<Transcript %r>" % (self.id)
 
+    # Retrieve sequences for a transcript, keyed by strain ID.
     def get_sequences(self, strain_id=None):
 
         if strain_id != None:
@@ -80,6 +83,7 @@ class Transcript(Base):
                 transcript_seqs[strain_id] = {} 
                 transcript_seqs[strain_id]["seq"] = Seq("")
 
+            # APPEND the feature sequence
             transcript_seqs[strain_id]["seq"] += row["seq"]
             transcript_seqs[strain_id]["direction"] = row["direction"]
 
@@ -98,7 +102,9 @@ class Transcript(Base):
 
     # convenience method to fetch a single SeqRecord sequence.
     # Sequence is always reverse complemented if it's a backwards gene
-    def get_sequence(self, strain_id):
+    def get_sequence(self, strain_id=None):
+        if strain_id == None:
+            strain_id = settings.reference_strain_id
         return list(self.get_sequences(strain_id).values())[0]
 
 # Describes a strain.

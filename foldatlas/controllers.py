@@ -223,7 +223,6 @@ class NucleotideMeasurementView():
             data[experiment_id]["data"][pos]["measurement"] = measurement_row.measurement
 
         # For each experiment, check whether there is no data and set empty flags accordingly.
-
         self.empty = True # all empty flag
         for experiment_id in data:
             entry = data[experiment_id]
@@ -663,4 +662,3 @@ class NucleotideMeasurementDownloader():
 
         return buf
 
-# class AllDownloader():

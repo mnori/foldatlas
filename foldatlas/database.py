@@ -34,25 +34,29 @@ def hydrate_db():
         # Add the annotations
         SequenceHydrator().hydrate() 
 
-        # Add DMS reactivities
-        NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
-        CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
+        # # Add DMS reactivities
+        # NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
+        # CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
 
-        # Add ribosome profiling
-        NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
-        CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
+        # # Add ribosome profiling
+        # NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
+        # CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
 
+        # # Import all available RNA structures
+        # StructureHydrator().hydrate(settings.structures_in_silico)
+        # StructureHydrator().hydrate(settings.structures_in_vivo)
+
+        # # Do PCA analysis on the structures
+        # PcaHydrator().hydrate(settings.structures_in_silico)
+        # PcaHydrator().hydrate(settings.structures_in_vivo)
+
+
+
+
+        # DISABLED STUFF #########################################################
         # Do alignments so we can see polymorphism
-        # This takes a pretty long time, will probably have to run on HPC when doing the real thing.
-        TranscriptAligner().align() 
-
-        # Import RNA structures
-        StructureHydrator().hydrate(settings.structures_in_silico)
-        StructureHydrator().hydrate(settings.structures_in_vivo)
-
-        # Do PCA analysis on the structures
-        PcaHydrator().hydrate(settings.structures_in_silico)
-        PcaHydrator().hydrate(settings.structures_in_vivo)
+        # Disabled - for now...
+        # TranscriptAligner().align() 
 
         print("Hydration Complete.")
 
@@ -77,7 +81,9 @@ class SequenceHydrator():
     transcript_ids_seen_this_strain = set()
 
     # limit on genes to process - for testing purposes
-    gene_limit = 50
+    # None means it imports everything
+    # gene_limit = 50
+    gene_limit = None
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -649,7 +655,6 @@ class PcaHydrator():
             db_session.add(structure)
         db_session.commit()
 
-        
     def do_pca(self, structure_vecs):
 
         data = list(structure_vecs.values())

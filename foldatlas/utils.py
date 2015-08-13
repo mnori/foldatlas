@@ -32,3 +32,23 @@ class TimelineEntry():
 def ensure_dir(f):
 	if not os.path.exists(f):
 		os.makedirs(f)
+
+class FastaExporter():
+	def export(self):
+		print("Exporting...")
+
+		from database import db_session
+		from models import Transcript
+
+		# Get all transcript IDs
+		results = db_session \
+            .query(Transcript.id) \
+            .all()
+
+		for result in results:
+			transcript_id = result[0]
+			seq_str = str(Transcript(transcript_id).get_sequence().seq)
+			print("["+seq_str+"]")
+			exit()
+		
+		print("...Finished exporting")

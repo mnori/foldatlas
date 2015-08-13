@@ -6,6 +6,7 @@ from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, Cover
 
 import settings
 import database
+from utils import FastaExporter
 
 app = Flask(__name__)
 
@@ -87,10 +88,20 @@ def download_all():
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`
-	if (len(argv) > 1 and argv[1] == "hydratedb"):
-		# reset the database
-		database.hydrate_db()
-		
+	if len(argv) > 1:
+		cmd = argv[1]
+		if argv[1] == "hydratedb":
+			# reset the database
+			database.hydrate_db()
+
+		elif argv[1] == "exportfasta":
+			# export sequences into a big fasta file
+			FastaExporter().export()
+
+		else:
+			print("Invalid command")
+			exit()
+	
 	else:
 		# dev server: get the party started
 		app.run(host='0.0.0.0', debug=True)
