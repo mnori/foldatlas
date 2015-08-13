@@ -37,18 +37,27 @@ class FastaExporter():
 	def export(self):
 		print("Exporting...")
 
+		from Bio import SeqIO
 		from database import db_session
 		from models import Transcript
+		import settings 
 
 		# Get all transcript IDs
 		results = db_session \
             .query(Transcript.id) \
             .all()
 
+		n = 0
+		output_handle = open(settings.genomes_sauce_folder+"/transcripts.fasta", "w")
 		for result in results:
 			transcript_id = result[0]
-			seq_str = str(Transcript(transcript_id).get_sequence().seq)
-			print("["+seq_str+"]")
-			exit()
-		
+			seq_record = Transcript(transcript_id).get_sequence()
+			seq_record.id = transcript_id
+			SeqIO.write(seq_record, output_handle, "fasta")
+
+			n += 1
+			if n % 100 == 0:
+				print("["+str(n)+"] sequences written")
+
+		output_handle.close()
 		print("...Finished exporting")
