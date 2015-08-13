@@ -6,7 +6,7 @@ from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, Cover
 
 import settings
 import database
-from utils import FastaExporter
+from utils import FastaExporter, FastaSplitter
 
 app = Flask(__name__)
 
@@ -97,6 +97,10 @@ if __name__ == "__main__":
 		elif argv[1] == "exportfasta":
 			# export sequences into a big fasta file
 			FastaExporter().export()
+
+		elif argv[1] == "splitfasta":
+			# export sequences into a big fasta file
+			FastaSplitter().split()
 
 		else:
 			print("Invalid command")

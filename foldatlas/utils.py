@@ -33,6 +33,7 @@ def ensure_dir(f):
 	if not os.path.exists(f):
 		os.makedirs(f)
 
+# Create a big fasta containing all transcript sequences stored in the DB.
 class FastaExporter():
 	def export(self):
 		print("Exporting...")
@@ -52,6 +53,11 @@ class FastaExporter():
 		for result in results:
 			transcript_id = result[0]
 			seq_record = Transcript(transcript_id).get_sequence()
+			
+			if seq_record == None:
+				print ("Missing sequence for ["+transcript_id+"]")
+				continue
+
 			seq_record.id = transcript_id
 			SeqIO.write(seq_record, output_handle, "fasta")
 
@@ -61,3 +67,51 @@ class FastaExporter():
 
 		output_handle.close()
 		print("...Finished exporting")
+
+# Split big fasta file into smaller ones. This is for doing HPC structure predictions
+class FastaSplitter():
+
+	def __init__(self):
+		import settings
+
+		self.n_chunks = 256
+		self.sauce_filepath = settings.genomes_sauce_folder+"/transcripts.fasta"
+		self.target_dirpath = settings.genomes_sauce_folder+"/rnastructure_seqs"
+
+	def split(self):
+		from Bio import SeqIO
+		from utils import ensure_dir
+
+		# Count the sequences
+
+		print("Counting sequences...")
+		n_seqs = 0
+		handle = open(self.sauce_filepath, "r")
+		for record in SeqIO.parse(handle, "fasta"):
+		    n_seqs += 1
+		handle.close()
+		chunk_size = int(n_seqs / self.n_chunks)
+		print("...There are ["+str(n_seqs)+"] sequences")
+
+		# Iterate through chunks of sequences.
+		# For each sequence, write a single fasta file in the right location.
+		n_seqs = 0
+		handle = open(self.sauce_filepath, "r")
+		for record in SeqIO.parse(handle, "fasta"):
+			chunk_n = int(n_seqs / chunk_size)
+			chunk_dir = self.target_dirpath+"/chunk_"+str(chunk_n)+"/"+record.id
+			ensure_dir(chunk_dir+"/")
+
+			f = open(chunk_dir+"/seq.fasta", "w")
+			SeqIO.write(record, f, "fasta")
+			f.close()
+
+			n_seqs += 1
+
+			if n_seqs % 100 == 0:
+				print("["+str(n_seqs)+"] fasta files written")
+
+		handle.close()		
+
+
+

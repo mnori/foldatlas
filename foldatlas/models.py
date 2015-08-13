@@ -105,7 +105,12 @@ class Transcript(Base):
     def get_sequence(self, strain_id=None):
         if strain_id == None:
             strain_id = settings.reference_strain_id
-        return list(self.get_sequences(strain_id).values())[0]
+
+        vals = list(self.get_sequences(strain_id).values())
+        if len(vals) > 0:
+            return vals[0]
+        else:
+            return None
 
 # Describes a strain.
 class Strain(Base):
