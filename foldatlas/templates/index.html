@@ -1,6 +1,3 @@
-{%- if search is not defined -%}
-    {%- set search = False -%}
-{%- endif -%}
 <!DOCTYPE HTML>
 <!--
      ____,____, __,  ____,____,____,__,   ____,____, 
@@ -87,12 +84,19 @@
         <div id="header">
             <span id="title">FoldAtlas</span>
             <a href="#" id="search-button" class="button"><i class="fa fa-search"></i>&nbsp;Search</a>
-            <a href="{{ settings.static_base_url }}/downloads/foldatlas.sql.tar.gz" class="button"><i class="fa fa-download"></i>&nbsp;Download All</a>
+            <a href="{{ settings.static_base_url }}/downloads/foldatlas.sql.tar.gz" class="button">
+                <i class="fa fa-download"></i>&nbsp;Download All
+            </a>
+            <a href="{{ settings.app_base_url }}/help" class="button" id="documentation-button">
+                <i class="fa fa-question-circle"></i>&nbsp;Help
+            </a>
         </div>
 
         <div id="content">
 
-            <div id="search" {% if not search %}style="display: none;"{% endif %}>
+            <div id="help" {% if page != "help" %}style="display: none;"{% endif %}></div>
+
+            <div id="search" {% if page != "search" %}style="display: none;"{% endif %}>
                 <div class="tabs">
                     <div class="tab active" id="search-tab-transcript-id" data-ui-id="search-transcript-id"><i class="fa fa-search"></i>&nbsp;Transcript ID</div>
                     <div class="tab" id="search-tab-coverage" data-ui-id="search-coverage"><i class="fa fa-search"></i>&nbsp;Coverage</div>
@@ -113,9 +117,9 @@
             </div>
 
             <!-- this empty div will be filled by d3nome -->
-            <div id="d3nome" class="d3nome-container" {% if search %}style="display: none;"{% endif %}></div>
+            <div id="d3nome" class="d3nome-container" {% if page != "home" and page != "transcript" %}style="display: none;"{% endif %}></div>
 
-            <!-- Transcript data is added here -->
+            <!-- Transcript data is added here when loading -->
             <div id="transcript-data">
                 {% if transcript_view is defined %}
                     {% include "transcript-view.html" %}

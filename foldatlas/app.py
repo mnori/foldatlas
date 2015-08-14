@@ -19,11 +19,11 @@ def after_request(response):
 # Maybe also some introductory text.
 @app.route("/")
 def index():
-	return render_template("index.html", settings=settings, genome_browser=GenomeBrowser())
+	return render_template("index.html", settings=settings, genome_browser=GenomeBrowser(), page="home")
 
 @app.route("/search")
 def search():
-	return render_template("index.html", settings=settings, genome_browser=GenomeBrowser(), search=True)	
+	return render_template("index.html", settings=settings, genome_browser=GenomeBrowser(), page="search")
 
 # Transcript - initialise the genome browser with custom parameters to center on the gene of interest.
 # Also show the transcript's details
@@ -32,7 +32,8 @@ def view_transcript(transcript_id):
 	return render_template("index.html", 
 		settings=settings, 
 		genome_browser=GenomeBrowser(), 
-		transcript_view=TranscriptView(transcript_id))
+		transcript_view=TranscriptView(transcript_id),
+		page="transcript")
 
 @app.route("/ajax/genome-browser/genes")
 def get_genes_ajax():
