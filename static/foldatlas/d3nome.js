@@ -47,7 +47,12 @@
 
 		// total dimensions of the browser 
 		// TODO use config values
-		this.totSvgDims = {x: 902, y: 300}
+		this.lrPadding = 20;
+		this.totSvgDims = {x: 902 + (this.lrPadding * 2), y: 300}
+
+		// Left / right padding
+		// Prevents labels being chopped off at the sides
+
 		this.initialSvgDims = {x: this.totSvgDims.x, y: this.totSvgDims.y}
 
 		this.minHeight = this.totSvgDims.y;
