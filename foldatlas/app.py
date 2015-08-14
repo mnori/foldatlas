@@ -44,6 +44,10 @@ def view_transcript(transcript_id):
 def get_genes_ajax():
 	return GenomeBrowser().get_genes(request)
 
+@app.route("/ajax/help")
+def get_help_ajax():
+	return render_template("help-view.html")
+
 @app.route("/ajax/genome-browser/transcripts")
 def get_transcripts_ajax():
 	return GenomeBrowser().get_transcripts(request)

@@ -13,7 +13,12 @@ var BrowserController = Class.extend({
 		this.reactivities = {};
 		this.drawTranscriptData();
 		this.searchController = new SearchController(this);
+
 		$("#title").click($.proxy(function() { this.jumpTo("/"); }, this));
+		$("#help-button").click($.proxy(function(ev) { 
+			ev.preventDefault();
+			this.jumpTo("/help"); 
+		}, this));
 
 		// Detect back/forward buttons
 		// We must react by changing the page for each type of URL
@@ -36,13 +41,35 @@ var BrowserController = Class.extend({
 
 		} else if (urlIn.indexOf("/transcript/") != -1) {
 			var transcriptID = this.getTranscriptID(urlIn);
+			console.log("Transcript selected!");
 			this.selectTranscript(transcriptID);
 			document.title = "FoldAtlas: "+transcriptID;
+
+		} else if (urlIn.indexOf("/help") != -1) {
+			this.selectHelp();
+			document.title = "FoldAtlas: Help"
 
 		} else { // url not recognised - assume we need to go home
 			this.goHome();
 			document.title = "FoldAtlas";
 		}
+	},
+
+	selectHelp: function() {
+		this.showLoading();
+		$.ajax({
+			url: "/ajax/help",
+			context: this
+
+		}).done(function(html) {
+			// TODO sort out this mess
+			this.hideLoading();
+			$("#help").show()
+			$("#search").hide()
+			$("#d3nome").hide();
+			$("#help").html(html);
+			$("#transcript-data").empty();
+		});
 	},
 
 	getTranscriptID: function(urlIn) {
