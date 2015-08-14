@@ -36,6 +36,7 @@ var BrowserController = Class.extend({
 		urlIn = ""+urlIn;
 
 		if (urlIn.indexOf("/search") != -1) {
+			this.showHideLoading(); // just for consistency
 			this.searchController.show();
 			document.title = "FoldAtlas: Search";
 
@@ -50,6 +51,7 @@ var BrowserController = Class.extend({
 			document.title = "FoldAtlas: Help"
 
 		} else { // url not recognised - assume we need to go home
+			this.showHideLoading(); // just for consistency
 			this.goHome();
 			document.title = "FoldAtlas";
 		}
@@ -63,12 +65,12 @@ var BrowserController = Class.extend({
 
 		}).done(function(html) {
 			// TODO sort out this mess
-			this.hideLoading();
 			$("#help").show()
 			$("#search").hide()
 			$("#d3nome").hide();
 			$("#help").html(html);
 			$("#transcript-data").empty();
+			this.hideLoading();
 		});
 	},
 
@@ -110,7 +112,12 @@ var BrowserController = Class.extend({
 	},
 
 	hideLoading: function() {
-		$("#loading-indicator").hide()
+		$("#loading-indicator").fadeOut(300);
+	},
+
+	showHideLoading: function() {
+		this.showLoading();
+		this.hideLoading();
 	},
 
 	// Reset to landing page
@@ -118,10 +125,9 @@ var BrowserController = Class.extend({
 		// TODO sort out this mess
 		$("#help").hide();
 		$("#search").hide();
-		$("#loading-indicator").hide();
-
 		$("#d3nome").show();
 		$("#transcript-data").empty();
+		this.hideLoading();
 	},
 
 	getJsonFromElement: function(elementID) {
@@ -141,13 +147,13 @@ var BrowserController = Class.extend({
 			url: "/ajax/transcript/"+transcriptID,
 			context: this
 		}).done(function(results) {
-			this.hideLoading();
 			$("#help").hide()
 			$("#search").hide()
 			$("#d3nome").show();
 			$("#transcript-data").empty();
 			$("#transcript-data").html(results);
 			this.drawTranscriptData();
+			this.hideLoading();
 		});
 	},
 
@@ -672,7 +678,6 @@ var TranscriptIDSearchController = Class.extend({
 			url: "/ajax/search-transcript/"+term,
 			context: this
 		}).done(function(results) {
-			this.browserController.hideLoading();
 			results = $.parseJSON(results);		
 			var exactMatch = false;
 			for (var i = 0; i < results.length; i++) {
@@ -685,11 +690,12 @@ var TranscriptIDSearchController = Class.extend({
 			}
 			this.browserController.jumpTo("/transcript/"+results[0]);
 			// this.browserController.selectTranscript(results[0]);
+			this.browserController.hideLoading();
 
 		}).error(function() {
-			this.browserController.hideLoading();
 			$("#search-transcript-id-message").html("No transcripts found matching \""+term+"\"")
 			$("#search-transcript-id-message").show();
+			this.browserController.hideLoading();
 		});
 	}
 });
@@ -704,7 +710,6 @@ var CoverageSearchController = Class.extend({
 			url: "/ajax/get-coverage-page-count", context: this
 
 		}).done(function(pageNum) {
-			this.browserController.hideLoading();
 			// insert pagination HTML
 			var buf = 
 				"	<div id=\"search-coverage-paginator\" class=\"pagination\">" +
@@ -728,6 +733,7 @@ var CoverageSearchController = Class.extend({
 
             // retrieve the first page of results.
 			this.search(1);
+			this.browserController.hideLoading();
 		});
 	},
 
@@ -738,7 +744,6 @@ var CoverageSearchController = Class.extend({
 			url: "/ajax/search-coverage/"+pageNum,
 			context: this
 		}).done($.proxy(function(results) {
-			this.browserController.hideLoading();
 			$("#search-coverage-data").empty();
 			$("#search-coverage-data").html(results);
 
@@ -750,6 +755,7 @@ var CoverageSearchController = Class.extend({
 					this.browserController.jumpTo("/transcript/"+transcript_id);
 				}, this));
 			}, this));
+			this.browserController.hideLoading();
 		}, this));
 	}
 });

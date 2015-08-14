@@ -8,6 +8,10 @@ body {
 	font-family: Ubuntu, Tahoma, Geneva, sans-serif;
 }
 
+p {
+	line-height: 1.4em;
+}
+
 /*** BUTTONS ***/
 
 .button {
