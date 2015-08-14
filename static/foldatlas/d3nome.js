@@ -47,8 +47,7 @@
 
 		// total dimensions of the browser 
 		// TODO use config values
-		this.lrPadding = 20;
-		this.totSvgDims = {x: 902 + (this.lrPadding * 2), y: 300}
+		this.totSvgDims = {x: 902, y: 300}
 
 		// Left / right padding
 		// Prevents labels being chopped off at the sides

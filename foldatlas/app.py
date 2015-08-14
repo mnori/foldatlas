@@ -46,7 +46,7 @@ def get_genes_ajax():
 
 @app.route("/ajax/help")
 def get_help_ajax():
-	return render_template("help-view.html")
+	return render_template("help-view.html", settings=settings)
 
 @app.route("/ajax/genome-browser/transcripts")
 def get_transcripts_ajax():
