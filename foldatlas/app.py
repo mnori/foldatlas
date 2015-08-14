@@ -25,6 +25,11 @@ def index():
 def search():
 	return render_template("index.html", settings=settings, genome_browser=GenomeBrowser(), page="search")
 
+@app.route("/help")
+def help():
+	# TODO get rid of genome browser dependency
+	return render_template("index.html", settings=settings, genome_browser=GenomeBrowser(), page="help")
+
 # Transcript - initialise the genome browser with custom parameters to center on the gene of interest.
 # Also show the transcript's details
 @app.route("/transcript/<transcript_id>")

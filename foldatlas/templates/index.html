@@ -21,7 +21,7 @@
 
     <script type="text/javascript" src="{{ settings.static_base_url }}/foldatlas/jquery-2.1.4.js"></script>
     <script type="text/javascript" src="{{ settings.static_base_url }}/foldatlas/jquery-ui.js"></script>
-    <script type="text/javascript" src="{{ settings.static_base_url }}/foldatlas/d3.v3.min.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base_url }}/foldatlas/d3.v3.min.js"></script>s
     <script type="text/javascript" src="{{ settings.static_base_url }}/assets/jquery.jqpagination.js"></script>
     <script type="text/javascript" src="{{ settings.static_base_url }}/assets/colorbrewer.min.js"></script>
     <script type="text/javascript" src="{{ settings.static_base_url }}/assets/forna/htdocs/js/fornac.js"></script>
@@ -78,23 +78,25 @@
         <i class="fa fa-cog fa-spin"></i>
     </div>
 
-    <div id="progress"></div>
-
     <div id="main-container">
         <div id="header">
             <span id="title">FoldAtlas</span>
-            <a href="#" id="search-button" class="button"><i class="fa fa-search"></i>&nbsp;Search</a>
+            <a id="search-button" href="#" class="button"><i class="fa fa-search"></i>&nbsp;Search</a>
             <a href="{{ settings.static_base_url }}/downloads/foldatlas.sql.tar.gz" class="button">
                 <i class="fa fa-download"></i>&nbsp;Download All
             </a>
-            <a href="{{ settings.app_base_url }}/help" class="button" id="documentation-button">
+            <a id="help-button" href="{{ settings.app_base_url }}/help" class="button" id="documentation-button">
                 <i class="fa fa-question-circle"></i>&nbsp;Help
             </a>
         </div>
 
         <div id="content">
 
-            <div id="help" {% if page != "help" %}style="display: none;"{% endif %}></div>
+            <div id="help" {% if page != "help" %}style="display: none;"{% endif %}>
+                {% if page == "help" %}
+                    {% include "help-view.html" %}
+                {% endif %}
+            </div>
 
             <div id="search" {% if page != "search" %}style="display: none;"{% endif %}>
                 <div class="tabs">
@@ -106,7 +108,6 @@
                     <div id="search-transcript-id-container">
                         <input type="text" id="search-transcript-id-text" />
                         <a href="#" class="button" type="submit" id="search-transcript-id-submit">Search</a>
-
                     </div>
                     <div id="search-transcript-id-message" class="message" style="display: none;">
                         <!-- filled by JS -->

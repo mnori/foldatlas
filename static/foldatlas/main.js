@@ -88,9 +88,12 @@ var BrowserController = Class.extend({
 
 	// Reset to landing page
 	goHome: function() {
-		$("#search").hide()
-		$("#d3nome").show();
+		// TODO sort out this mess
+		$("#help").hide();
+		$("#search").hide();
 		$("#loading-indicator").hide();
+
+		$("#d3nome").show();
 		$("#transcript-data").empty();
 	},
 
@@ -112,6 +115,7 @@ var BrowserController = Class.extend({
 			context: this
 		}).done(function(results) {
 			this.hideLoading();
+			$("#help").hide()
 			$("#search").hide()
 			$("#d3nome").show();
 			$("#transcript-data").empty();
@@ -550,6 +554,7 @@ var SearchController = Class.extend({
 		$("#transcript-data").empty();
 		$("#search").show()
 		$("#d3nome").hide();
+		$("#help").hide();
 	}
 });
 
