@@ -361,7 +361,7 @@ class CoverageSearcher():
 
     def fetch_transcript_data(self, page_num):
 
-        from sqlalchemy import func
+        from sqlalchemy import func, and_
         from models import Structure, GeneLocation
 
         results = db_session \
@@ -378,7 +378,10 @@ class CoverageSearcher():
             ) \
             .outerjoin((
                 Structure, 
-                Structure.transcript_id==TranscriptCoverage.transcript_id,
+                and_(
+                    Structure.transcript_id==TranscriptCoverage.transcript_id,
+                    Structure.experiment_id==4 # this filters so it's only in vivo considered
+                ) 
             )) \
             .add_entity(Structure) \
             .group_by(TranscriptCoverage.transcript_id) \

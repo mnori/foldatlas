@@ -204,13 +204,13 @@ var BrowserController = Class.extend({
 
 		if (experimentData["empty"]) {
 			var buf = 
-				"<h2>"+experimentData["description"]+"</h2>"+
+				"<h2 class=\"bar\">"+experimentData["description"]+"</h2>"+
 				"<div class=\"message\">No data available.</div>";
 			$("#nucleotide-measurement-charts").append(buf)
 
 		} else {
 			buf = 
-				"<h2>"+
+				"<h2 class=\"bar\">"+
 					experimentData["description"]+
 					"<a href=\"/download/measurements/"+experimentData["id"]+"/"+this.getTranscriptID()+"\" target=\"_blank\" class=\"button download\">"+
 						"<i class=\"fa fa-download\"></i> Download"+
