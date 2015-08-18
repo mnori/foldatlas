@@ -8,7 +8,7 @@ body {
 	font-family: Ubuntu, Tahoma, Geneva, sans-serif;
 }
 
-p {
+p, li {
 	line-height: 1.4em;
 }
 
@@ -509,12 +509,23 @@ table.coverage-table td.yes {
 	margin-top: 20px;
 	margin-bottom: 20px;
 	padding: 20px;
-	border: 2px solid #C7D2EF;
 	clear: both;
+	border: 2px solid #C7D2EF;
 }
 
 .help-example-image {
 	width: 700px;
+}
+
+.help-pre {
+	font-size: 14px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 20px;
+	width: 860px;
+	border: 2px solid #C7D2EF;
+	tab-size: 4;
+	overflow: auto;
 }
 
 /* D3nome-specific *********************************************************************/
@@ -742,6 +753,4 @@ table.coverage-table td.yes {
 #d3nome-chromosome-selector-button.ui-selectmenu-button span.ui-icon.ui-icon {
 	background-image: none;
 }
-
-
 
