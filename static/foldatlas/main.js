@@ -1034,6 +1034,8 @@ var StructureExplorer = Class.extend({
 			this.selectedStructure = this.getMfe();
 		}
 
+		$("#forna-energy").html(this.selectedStructure["energy"]);
+
 		if (this.tabController.selectedTabID == "structure-tab-diagram") {
 			this.drawStructureDiagram();
 		} else {
@@ -1043,7 +1045,6 @@ var StructureExplorer = Class.extend({
 
 	drawStructureDiagram: function() {
 		var structureID = this.selectedStructure["id"];
-		$("#forna-energy").html(this.selectedStructure["energy"]);
 
 		// this should be done in the constructor really.
 		// or have a getStructure method that attached to the object with a callback

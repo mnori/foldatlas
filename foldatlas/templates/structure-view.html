@@ -20,10 +20,17 @@
 		</div>
 
 		<div id="structure-detail">
+
 			<div class="tabs">
 		        <div class="tab active" id="structure-tab-circle-plot" data-ui-id="circle-plot">Circle plot</div>
 		        <div class="tab" id="structure-tab-diagram" data-ui-id="forna-container">Structure diagram</div>
 		    </div>
+
+		    <div class="structure-energy">
+				<i class="fa fa-fire"></i>
+				<span id="forna-energy"><!-- filled with Gibbs free energy --></span>
+				kcal/mol
+			</div>
 
 			<div id="forna-container" style="display: none">
 				<div id="forna-overlay">
@@ -31,12 +38,6 @@
 					<a id="forna-interact-disable" class="forna-interact button" href="#" style="display: none;">Disable Interaction</a>
 					<a id="show-dms" class="forna-interact button" href="#">DMS Reactivity</a>
 					<a id="show-ribosome-profiling" class="forna-interact button" href="#">Ribosome Profiling</a>			
-
-					<div class="energy">
-						<i class="fa fa-fire"></i>
-						<span id="forna-energy"><!-- filled with Gibbs free energy --></span>
-						kcal/mol
-					</div>
 				</div>
 			</div>
 

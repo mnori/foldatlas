@@ -411,11 +411,13 @@ table.coverage-table td.yes {
 	top: 0px;
 }
 
-#forna-overlay > .energy {
+.structure-energy {
 	line-height: 40px;
 	font-size: 16px;
 	position: absolute;
+	top: 38px;
 	right: 10px;
+	z-index: 2;
 }
 
 .forna-interact {
