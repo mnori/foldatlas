@@ -34,24 +34,21 @@ def hydrate_db():
         # Add the annotations
         SequenceHydrator().hydrate() 
 
-        # # Add DMS reactivities
-        # NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
-        # CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
+        # Add DMS reactivities
+        NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
+        CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
 
-        # # Add ribosome profiling
-        # NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
-        # CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
+        # Add ribosome profiling
+        NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
+        CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
 
-        # # Import all available RNA structures
-        # StructureHydrator().hydrate(settings.structures_in_silico)
-        # StructureHydrator().hydrate(settings.structures_in_vivo)
+        # Import all available RNA structures
+        StructureHydrator().hydrate(settings.structures_in_silico)
+        StructureHydrator().hydrate(settings.structures_in_vivo)
 
-        # # Do PCA analysis on the structures
-        # PcaHydrator().hydrate(settings.structures_in_silico)
-        # PcaHydrator().hydrate(settings.structures_in_vivo)
-
-
-
+        # Do PCA analysis on the structures
+        PcaHydrator().hydrate(settings.structures_in_silico)
+        PcaHydrator().hydrate(settings.structures_in_vivo)
 
         # DISABLED STUFF #########################################################
         # Do alignments so we can see polymorphism
@@ -82,8 +79,8 @@ class SequenceHydrator():
 
     # limit on genes to process - for testing purposes
     # None means it imports everything
-    # gene_limit = 50
-    gene_limit = None
+    gene_limit = 100
+    # gene_limit = None
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None

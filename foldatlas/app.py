@@ -100,7 +100,13 @@ if __name__ == "__main__":
 	# if we're in here, we're using `python3 app.py [blah...]`
 	if len(argv) > 1:
 		cmd = argv[1]
-		if argv[1] == "hydratedb":
+
+		if argv[1] == "grabstructures":
+			import utils
+			# reset the database
+			utils.grab_structures()
+
+		elif argv[1] == "hydratedb":
 			# reset the database
 			database.hydrate_db()
 
@@ -109,7 +115,7 @@ if __name__ == "__main__":
 			FastaExporter().export()
 
 		elif argv[1] == "splitfasta":
-			# export sequences into a big fasta file
+			# split fasta sequences into individual ones
 			FastaSplitter().split()
 
 		else:

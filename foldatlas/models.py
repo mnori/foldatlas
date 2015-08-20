@@ -96,6 +96,7 @@ class Transcript(Base):
             if transcript_seqs[strain_id]["direction"] == "reverse":
                 seq = seq.reverse_complement()
 
+            seq = Seq(str(seq).replace("T", "U"))
             seqs_out[strain_id] = SeqRecord(seq, id=strain_id, description="")
 
         return seqs_out
