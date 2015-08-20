@@ -65,15 +65,22 @@
 <h3>Structure data download</h3>
 <img class="help-example-image" src="{{ settings.static_base_url }}/assets/help/structure-download.png" />
 <p>
-    The <b>Download</b> button illustrated above generates a tab-delimited text file containing up to 20 <i>in silico</i> structures, along with up to 20 <i>in vivo</i> structures if coverage is sufficient. The following snippet illustrates the first 4 bases of an <i>in silico</i> structure.
+    The <b>Download</b> button illustrated above generates a tab-delimited text file containing up to 20 <i>in silico</i> structures, along with up to 20 <i>in vivo</i> structures if coverage is sufficient. The following snippet illustrates 10 bases from an <i>in silico</i> structure.
+</p>
 
 <pre class="help-pre">
-1   2           3       4           5       6           7           8   9   10
-
-285 In silico   Col_0   AT1G01010.1 -471.9  -5.32598    -3.91789    A   1   0
-285 In silico   Col_0   AT1G01010.1 -471.9  -5.32598    -3.91789    A   2   0
-285 In silico   Col_0   AT1G01010.1 -471.9  -5.32598    -3.91789    A   3   1626
-285 In silico   Col_0   AT1G01010.1 -471.9  -5.32598    -3.91789    U   4   1625
+<u>1       2          3       4           5       6       7       8   9   10 </u>
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 A   35  0
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 A   36  0
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 A   37  0
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 C   38  134
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 C   39  133
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 A   40  0
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 T   41  132
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 T   42  131
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 C   43  130
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 T   44  129
+2029    In silico  Col_0   AT1G01620.1 -394.1  4.55739 2.90891 T   45  0
 </pre>
 
 <p>
@@ -96,19 +103,46 @@
 <h2>DMS reactivity measurements</h3>
 <p>
     FoldAtlas includes a module that plots DMS reactivity charts and allows them to be downloaded. At present, all FoldAtlas structure probing measurements are from DMS experiments. In the future, we will also add selective 2'-hydroxyl acylation analyzed by primer extension (SHAPE) measurements. 
+
+    EXPLAIN NORMALISATION
 </p>
 
 <h3>DMS measurement charts</h3>
 <p>
-    The chart area includes an overview mode, which displays reactivities for the entire transcript on a single line. This can be seen at the top of the image below. Underneath this, there is a <b>More detail</b> button which shows the transcript on multiple lines, with 80 nucleotides per line. In this detailed view, G and U nucleotide labels are coloured grey to indicate that they do not react with DMS.
+    The chart area includes an overview mode, which displays reactivities for the entire transcript on a single line. This can be seen at the top of the image below. Underneath the overview is a <b>More detail</b> button, which shows the transcript on multiple lines, with 80 nucleotides per line. In this detailed view, G and U nucleotide labels are coloured grey to indicate that they do not react with DMS.
 </p>
 <img class="help-example-image" src="{{ settings.static_base_url }}/assets/help/measurements-chart.png" />
 
 <h3>Downloading DMS measurements</h3>
+<img class="help-example-image" src="{{ settings.static_base_url }}/assets/help/dms-download.png" />
 <p>
-    EXPLAIN NORMALISATION
+   The <b>Download</b> button can be used to obtain a tab-delimited text file containing the DMS reactivity measurements for a given transcript. The following snippet illustrates 10 bases from the AT1G01620.1 transcript:
 </p>
 
+<pre class="help-pre">
+<u>1   2   3       </u>
+75  U   NA
+76  G   NA
+77  U   NA
+78  A   0.492188
+79  G   NA
+80  A   0.767697
+81  A   0.940973
+82  A   0.45815
+83  A   0.0
+84  G   NA
+85  A   0.823105
+</pre>
+
+<p>
+    The columns represent, from left to right:
+
+    <ol>
+        <li>The nucleotide position. Numbers start from 1.</li>
+        <li>The base type letter.</li>
+        <li>The reactivity. 0 indicates no reactivity whilst 1 or more indicates the strongest reactivity. NA indicates a G or U nucleotide, where DMS reactivities are not relevant.</li>
+    </ol>
+</p>
 
 <h2>References</h2>
 
