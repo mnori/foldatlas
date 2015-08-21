@@ -6,6 +6,7 @@ genomes_sauce_folder = "/vagrant/sauce_data"
 
 dms_reactivities_experiment = {
 	"experiment_id": 1,
+	"strain_id": "Col_0",
 	"nucleotides_filepath": "/vagrant/sauce_data/log_react_f_N1A_cdna_n_before.formatted.txt",
 	"coverage_filepath": "/vagrant/sauce_data/reactivities_coverage_orig.txt",
 	"type": "dms_reactivity",
@@ -14,6 +15,7 @@ dms_reactivities_experiment = {
 
 ribosome_profile_experiment = {
 	"experiment_id": 2,
+	"strain_id": "Col_0",
 	"nucleotides_filepath": "/vagrant/sauce_data/p_site_counts_all.txt",
 	"coverage_filepath": "/vagrant/sauce_data/riboseq_coverage.txt",
 	"type": "ribosome_profile",
@@ -22,20 +24,20 @@ ribosome_profile_experiment = {
 
 structures_in_silico = {
 	"experiment_id": 3,
+	"strain_id": "Col_0",
 	"type": "rna_structure",
 	"description": "In silico structure prediction",
 	"sauce_filepath": "/vagrant/sauce_data/structures/in_silico",
 	"sauce_ext": ".ct",
-	"strain_id": "Col_0"
 }
 
 structures_in_vivo = {
 	"experiment_id": 4,
+	"strain_id": "Col_0",
 	"type": "rna_structure",
 	"description": "In vivo experimental structure prediction",
 	"sauce_filepath": "/vagrant/sauce_data/structures/in_vivo",
 	"sauce_ext": "_con.ct",
-	"strain_id": "Col_0"
 }
 
 base_path = "/vagrant/foldatlas"

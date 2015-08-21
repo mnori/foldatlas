@@ -79,8 +79,11 @@ class SequenceHydrator():
 
     # limit on genes to process - for testing purposes
     # None means it imports everything
-    gene_limit = 100
+    gene_limit = 10
     # gene_limit = None
+
+    # Set to true for testing
+    chr1_only = True
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -201,6 +204,10 @@ class SequenceHydrator():
 
                 # keep track of the chromosome ID
                 chr_id = bits[0]
+
+                # this is for testing - only do the first chromosome
+                if self.chr1_only and chr_id != "Chr1":
+                    break
 
                 # add feature row
                 feature_rows.append(bits)
@@ -430,6 +437,7 @@ class NucleotideMeasurementHydrator():
         # Add the experiment
         experiment = Experiment(
             id=experiment_config["experiment_id"],
+            strain_id=experiment_config["strain_id"],
             type=experiment_config["type"],
             description=experiment_config["description"]
         )
@@ -522,6 +530,7 @@ class StructureHydrator():
         # Add the new experiment row to the DB
         experiment = Experiment(
             id=experiment_config["experiment_id"],
+            strain_id=experiment_config["strain_id"],
             type=experiment_config["type"],
             description=experiment_config["description"]
         )

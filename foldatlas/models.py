@@ -241,11 +241,13 @@ class Experiment(Base):
     __tablename__ = "experiment"
 
     id = Column(Integer, primary_key=True, autoincrement=False)
+    strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=False)
     type = Column(Enum("dms_reactivity", "ribosome_profile", "rna_structure"), nullable=False)
     description = Column(Text, nullable=False)
 
-    def __init__(self, id, type, description):
+    def __init__(self, id, strain_id, type, description):
         self.id = id
+        self.strain_id = strain_id
         self.type = type
         self.description = description
 
