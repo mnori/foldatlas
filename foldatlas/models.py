@@ -307,15 +307,13 @@ class Structure(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     experiment_id = Column(Integer, ForeignKey("experiment.id"), nullable=False)
-    strain_id = Column(String(256), ForeignKey("strain.id"), nullable=False)
     transcript_id = Column(String(256), ForeignKey("transcript.id"), nullable=False)
     energy = Column(Float, nullable=False)
     pc1 = Column(Float, nullable=False, default=0)
     pc2 = Column(Float, nullable=False, default=0)
 
-    def __init__(self, experiment_id, strain_id, transcript_id, energy, pc1=0, pc2=0):
+    def __init__(self, experiment_id, transcript_id, energy, pc1=0, pc2=0):
         self.experiment_id = experiment_id
-        self.strain_id = strain_id
         self.transcript_id = transcript_id
         self.energy = energy
         self.pc1 = pc1

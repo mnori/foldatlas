@@ -574,7 +574,6 @@ class StructureHydrator():
                     # Insert the new structure row
                     structure = Structure(
                         experiment_id=experiment_config["experiment_id"],
-                        strain_id=experiment_config["strain_id"],
                         transcript_id=transcript_id,
                         energy=energy
                     )
@@ -614,10 +613,7 @@ class PcaHydrator():
         # Get all transcript IDs for which there are structures
         results = db_session \
             .query(Structure.transcript_id) \
-            .filter(
-                Structure.experiment_id==experiment_config["experiment_id"],
-                Structure.strain_id==experiment_config["strain_id"]
-            ) \
+            .filter(Structure.experiment_id==experiment_config["experiment_id"]) \
             .distinct() \
             .all()
 
@@ -634,7 +630,6 @@ class PcaHydrator():
             .filter(
                 StructurePosition.structure_id==Structure.id,
                 Structure.experiment_id==experiment_config["experiment_id"],
-                Structure.strain_id==experiment_config["strain_id"],
                 Structure.transcript_id==transcript_id
             ) \
             .order_by(Structure.id, StructurePosition.position) \

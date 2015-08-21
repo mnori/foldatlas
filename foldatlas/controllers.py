@@ -427,12 +427,11 @@ class StructureView():
                 "data": []
             }
 
-            # fetch all Structure objects that match the IDs
+            # fetch all Structure objects that match the experiment ID and the transcript ID
             results = db_session \
                 .query(Structure) \
                 .filter(
                     Structure.experiment_id==experiment.id,
-                    Structure.strain_id==self.strain_id,
                     Structure.transcript_id==self.transcript_id
                 ) \
                 .all()
@@ -597,10 +596,9 @@ class StructureDownloader():
         results = db_session \
             .query(Structure, StructurePosition, Experiment) \
             .filter(
-                Structure.strain_id==self.strain_id,
-                Structure.transcript_id==self.transcript_id,
                 Structure.id==StructurePosition.structure_id,
-                Structure.experiment_id==Experiment.id
+                Structure.experiment_id==Experiment.id,
+                Structure.transcript_id==self.transcript_id
             ) \
             .order_by(Structure.experiment_id, Structure.id, StructurePosition.position) \
             .all()
