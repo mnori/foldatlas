@@ -218,63 +218,76 @@ class GeneLocation(Base):
     def __repr__(self):
         return "<GeneLocation "+self.gene_id+", "+self.strain_id+">";
 
-class Experiment(Base):
-    __tablename__ = "experiment"
+class NucleotideExperiment(Base):
+    __tablename__ = "nucleotide_experiment"
 
     id = Column(Integer, primary_key=True, autoincrement=False)
     strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=False)
-    type = Column(Enum("dms_reactivity", "ribosome_profile", "rna_structure"), nullable=False)
     description = Column(Text, nullable=False)
 
-    def __init__(self, id, strain_id, type, description):
+    def __init__(self, id, strain_id, description):
         self.id = id
         self.strain_id = strain_id
-        self.type = type
         self.description = description
 
     def __repr__(self):
-        return "<Experiment %r>" % (self.id)
+        return "<NucleotideExperiment %r>" % (self.id)
+
+class StructurePredictionRun(Base):
+    __tablename__ = "structure_prediction_run"
+
+    id = Column(Integer, primary_key=True, autoincrement=False)
+    strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=False)
+    description = Column(Text, nullable=False)
+
+    def __init__(self, id, strain_id, description):
+        self.id = id
+        self.strain_id = strain_id
+        self.description = description
+
+    def __repr__(self):
+        return "<StructurePredictionRun %r>" % (self.id)
 
 # Represents one measurement, at a particular nucleotide position.
 class NucleotideMeasurement(Base):
     __tablename__ = "nucleotide_measurement"
 
-    experiment_id = Column(Integer, ForeignKey("experiment.id"), primary_key=True)
+    nucleotide_experiment_id = Column(Integer, ForeignKey("nucleotide_experiment.id"), primary_key=True)
     transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
 
     # if there's no measurement at a position, there is no corresponding row.
     position = Column(Integer, autoincrement=False, primary_key=True) 
     measurement = Column(Float, nullable=False) 
 
-    def __init__(self, experiment_id=None, transcript_id=None, position=None, measurement=None):
+    def __init__(self, nucleotide_experiment_id=None, transcript_id=None, position=None, measurement=None):
 
-        self.experiment_id = experiment_id
+        self.nucleotide_experiment_id = nucleotide_experiment_id
         self.transcript_id = transcript_id
         self.position = position
         self.measurement = measurement
 
     def __repr__(self):
         return "<NucleotideMeasurement %r-%r-%r-%r>" % (
-            self.experiment_id, self.transcript_id, self.position
+            self.nucleotide_experiment_id, self.transcript_id, self.position
         )
 
 # Represents a coverage measurement for a single transcript
 class TranscriptCoverage(Base):
     __tablename__ = "transcript_coverage"
 
-    experiment_id = Column(Integer, ForeignKey("experiment.id"), primary_key=True)
+    nucleotide_experiment_id = Column(Integer, ForeignKey("nucleotide_experiment.id"), primary_key=True)
     transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
     measurement = Column(Float, nullable=False) 
 
-    def __init__(self, experiment_id=None, transcript_id=None, measurement=None):
+    def __init__(self, nucleotide_experiment_id=None, transcript_id=None, measurement=None):
 
-        self.experiment_id = experiment_id
+        self.nucleotide_experiment_id = nucleotide_experiment_id
         self.transcript_id = transcript_id
         self.measurement = measurement
 
     def __repr__(self):
         return "<TranscriptCoverage %r-%r-%r>" % (
-            self.experiment_id, self.transcript_id
+            self.nucleotide_experiment_id, self.transcript_id
         )
 
 # Represents a structure prediction for a single RNA sequence
@@ -283,14 +296,14 @@ class Structure(Base):
     __tablename__ = "structure"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    experiment_id = Column(Integer, ForeignKey("experiment.id"), nullable=False)
+    structure_prediction_run_id = Column(Integer, ForeignKey("structure_prediction_run.id"), nullable=False)
     transcript_id = Column(String(256), ForeignKey("transcript.id"), nullable=False)
     energy = Column(Float, nullable=False)
     pc1 = Column(Float, nullable=False, default=0)
     pc2 = Column(Float, nullable=False, default=0)
 
-    def __init__(self, experiment_id, transcript_id, energy, pc1=0, pc2=0):
-        self.experiment_id = experiment_id
+    def __init__(self, structure_prediction_run_id, transcript_id, energy, pc1=0, pc2=0):
+        self.structure_prediction_run_id = structure_prediction_run_id
         self.transcript_id = transcript_id
         self.energy = energy
         self.pc1 = pc1

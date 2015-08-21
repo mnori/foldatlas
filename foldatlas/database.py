@@ -22,7 +22,8 @@ Base.query = db_session.query_property()
 import models
 
 from models import Strain, Gene, Transcript, Feature, NucleotideMeasurement, \
-    GeneLocation, Experiment, TranscriptCoverage, Structure, StructurePosition
+    GeneLocation, NucleotideExperiment, StructurePredictionRun, TranscriptCoverage, \
+    Structure, StructurePosition
 
 def hydrate_db():
     try:
@@ -435,10 +436,9 @@ class NucleotideMeasurementHydrator():
     def hydrate(self, experiment_config):
 
         # Add the experiment
-        experiment = Experiment(
-            id=experiment_config["experiment_id"],
+        experiment = NucleotideExperiment(
+            id=experiment_config["nucleotide_experiment_id"],
             strain_id=experiment_config["strain_id"],
-            type=experiment_config["type"],
             description=experiment_config["description"]
         )
         db_session.add(experiment)
@@ -470,7 +470,7 @@ class NucleotideMeasurementHydrator():
                     position += 1
                     if (count_str != "NA"): # skip adding "NA" entries.
                         obj = NucleotideMeasurement(
-                            experiment_id=experiment_config["experiment_id"],
+                            nucleotide_experiment_id=experiment_config["nucleotide_experiment_id"],
                             transcript_id=transcript_id, 
                             position=position, 
                             measurement=float(count_str)
@@ -513,7 +513,7 @@ class CoverageHydrator():
                     continue
 
                 obj = TranscriptCoverage(
-                    experiment_id=experiment_config["experiment_id"],
+                    nucleotide_experiment_id=experiment_config["nucleotide_experiment_id"],
                     transcript_id=transcript_id,
                     measurement=coverage
                 )
@@ -526,10 +526,9 @@ class StructureHydrator():
     def hydrate(self, experiment_config):
 
         # Add the new experiment row to the DB
-        experiment = Experiment(
-            id=experiment_config["experiment_id"],
+        experiment = StructurePredictionRun(
+            id=experiment_config["structure_prediction_run_id"],
             strain_id=experiment_config["strain_id"],
-            type=experiment_config["type"],
             description=experiment_config["description"]
         )
         db_session.add(experiment)
@@ -571,7 +570,7 @@ class StructureHydrator():
 
                     # Insert the new structure row
                     structure = Structure(
-                        experiment_id=experiment_config["experiment_id"],
+                        structure_prediction_run_id=experiment_config["structure_prediction_run_id"],
                         transcript_id=transcript_id,
                         energy=energy
                     )
@@ -611,7 +610,7 @@ class PcaHydrator():
         # Get all transcript IDs for which there are structures
         results = db_session \
             .query(Structure.transcript_id) \
-            .filter(Structure.experiment_id==experiment_config["experiment_id"]) \
+            .filter(Structure.structure_prediction_run_id==experiment_config["structure_prediction_run_id"]) \
             .distinct() \
             .all()
 
@@ -627,7 +626,7 @@ class PcaHydrator():
             .query(Structure, StructurePosition) \
             .filter(
                 StructurePosition.structure_id==Structure.id,
-                Structure.experiment_id==experiment_config["experiment_id"],
+                Structure.structure_prediction_run_id==experiment_config["structure_prediction_run_id"],
                 Structure.transcript_id==transcript_id
             ) \
             .order_by(Structure.id, StructurePosition.position) \

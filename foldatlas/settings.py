@@ -5,36 +5,32 @@ database_uri = "mysql+mysqlconnector://root:vagrant@127.0.0.1/foldatlas?charset=
 genomes_sauce_folder = "/vagrant/sauce_data"
 
 dms_reactivities_experiment = {
-	"experiment_id": 1,
+	"nucleotide_experiment_id": 1,
 	"strain_id": "Col_0",
 	"nucleotides_filepath": "/vagrant/sauce_data/log_react_f_N1A_cdna_n_before.formatted.txt",
 	"coverage_filepath": "/vagrant/sauce_data/reactivities_coverage_orig.txt",
-	"type": "dms_reactivity",
 	"description": "DMS reactivities"
 }
 
 ribosome_profile_experiment = {
-	"experiment_id": 2,
+	"nucleotide_experiment_id": 2,
 	"strain_id": "Col_0",
 	"nucleotides_filepath": "/vagrant/sauce_data/p_site_counts_all.txt",
 	"coverage_filepath": "/vagrant/sauce_data/riboseq_coverage.txt",
-	"type": "ribosome_profile",
 	"description": "Ribosome occupancies",
 }
 
 structures_in_silico = {
-	"experiment_id": 3,
+	"structure_prediction_run_id": 1,
 	"strain_id": "Col_0",
-	"type": "rna_structure",
 	"description": "In silico structure prediction",
 	"sauce_filepath": "/vagrant/sauce_data/structures/in_silico",
 	"sauce_ext": ".ct",
 }
 
 structures_in_vivo = {
-	"experiment_id": 4,
+	"structure_prediction_run_id": 2,
 	"strain_id": "Col_0",
-	"type": "rna_structure",
 	"description": "In vivo experimental structure prediction",
 	"sauce_filepath": "/vagrant/sauce_data/structures/in_vivo",
 	"sauce_ext": "_con.ct",
