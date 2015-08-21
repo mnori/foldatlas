@@ -218,25 +218,6 @@ class GeneLocation(Base):
     def __repr__(self):
         return "<GeneLocation "+self.gene_id+", "+self.strain_id+">";
 
-
-# Represents a single row of ClustalW alignment data. 
-# Each row is a combination of strain and transcript.
-# TODO add type field(s), so we can store splices/unspliced/different methods etc.
-class AlignmentEntry(Base):
-    __tablename__ = "alignment_entry"
-
-    transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
-    strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
-    sequence = Column(Text, nullable=False)
-
-    def __init__(self, transcript_id=None, strain_id=None, sequence=None):
-        self.transcript_id = transcript_id
-        self.strain_id = strain_id
-        self.sequence = sequence
-
-    def __repr__(self):
-        return "<AlignmentEntry %r-%r>" % (self.transcript_id, self.strain_id)
-
 class Experiment(Base):
     __tablename__ = "experiment"
 
@@ -259,24 +240,22 @@ class NucleotideMeasurement(Base):
     __tablename__ = "nucleotide_measurement"
 
     experiment_id = Column(Integer, ForeignKey("experiment.id"), primary_key=True)
-    strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
     transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
 
     # if there's no measurement at a position, there is no corresponding row.
     position = Column(Integer, autoincrement=False, primary_key=True) 
     measurement = Column(Float, nullable=False) 
 
-    def __init__(self, experiment_id=None, strain_id=None, transcript_id=None, position=None, measurement=None):
+    def __init__(self, experiment_id=None, transcript_id=None, position=None, measurement=None):
 
         self.experiment_id = experiment_id
-        self.strain_id = strain_id
         self.transcript_id = transcript_id
         self.position = position
         self.measurement = measurement
 
     def __repr__(self):
         return "<NucleotideMeasurement %r-%r-%r-%r>" % (
-            self.experiment_id, self.strain_id, self.transcript_id, self.position
+            self.experiment_id, self.transcript_id, self.position
         )
 
 # Represents a coverage measurement for a single transcript
@@ -295,7 +274,7 @@ class TranscriptCoverage(Base):
 
     def __repr__(self):
         return "<TranscriptCoverage %r-%r-%r>" % (
-            self.experiment_id, self.strain_id, self.transcript_id
+            self.experiment_id, self.transcript_id
         )
 
 # Represents a structure prediction for a single RNA sequence
@@ -339,3 +318,20 @@ class StructurePosition(Base):
     def __repr__(self):
         return "<StructurePosition %r-%r>" % (self.structure_id, self.position)
 
+# Represents a single row of ClustalW alignment data. 
+# Each row is a combination of strain and transcript.
+# TODO add type field(s), so we can store splices/unspliced/different methods etc.
+# class AlignmentEntry(Base):
+#     __tablename__ = "alignment_entry"
+
+#     transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
+#     strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
+#     sequence = Column(Text, nullable=False)
+
+#     def __init__(self, transcript_id=None, strain_id=None, sequence=None):
+#         self.transcript_id = transcript_id
+#         self.strain_id = strain_id
+#         self.sequence = sequence
+
+#     def __repr__(self):
+#         return "<AlignmentEntry %r-%r>" % (self.transcript_id, self.strain_id)

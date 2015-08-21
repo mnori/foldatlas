@@ -21,7 +21,7 @@ Base.query = db_session.query_property()
 
 import models
 
-from models import Strain, Gene, Transcript, Feature, AlignmentEntry, NucleotideMeasurement, \
+from models import Strain, Gene, Transcript, Feature, NucleotideMeasurement, \
     GeneLocation, Experiment, TranscriptCoverage, Structure, StructurePosition
 
 def hydrate_db():
@@ -471,7 +471,6 @@ class NucleotideMeasurementHydrator():
                     if (count_str != "NA"): # skip adding "NA" entries.
                         obj = NucleotideMeasurement(
                             experiment_id=experiment_config["experiment_id"],
-                            strain_id=settings.reference_strain_id, 
                             transcript_id=transcript_id, 
                             position=position, 
                             measurement=float(count_str)

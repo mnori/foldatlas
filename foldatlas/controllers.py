@@ -10,7 +10,7 @@ from sqlalchemy import and_
 # import forgi.graph.bulge_graph as fgb
 
 import json, database, settings, uuid, os, subprocess
-from models import Feature, Transcript, AlignmentEntry, NucleotideMeasurement, Experiment, \
+from models import Feature, Transcript, NucleotideMeasurement, Experiment, \
     TranscriptCoverage, Structure, StructurePosition, GeneLocation
 
 from utils import ensure_dir
@@ -192,7 +192,6 @@ class NucleotideMeasurementView():
             .query(NucleotideMeasurement) \
             .filter(
                 NucleotideMeasurement.experiment_id.in_(experiment_ids),
-                NucleotideMeasurement.strain_id==self.strain_id,
                 NucleotideMeasurement.transcript_id==self.transcript_id
             ) \
             .all()
@@ -639,7 +638,6 @@ class NucleotideMeasurementDownloader():
         results = db_session \
             .query(NucleotideMeasurement) \
             .filter(
-                NucleotideMeasurement.strain_id==strain_id,
                 NucleotideMeasurement.experiment_id==self.experiment_id,
                 NucleotideMeasurement.transcript_id==self.transcript_id
             ) \
