@@ -515,7 +515,6 @@ class CoverageHydrator():
 
                 obj = TranscriptCoverage(
                     experiment_id=experiment_config["experiment_id"],
-                    strain_id=settings.reference_strain_id,
                     transcript_id=transcript_id,
                     measurement=coverage
                 )

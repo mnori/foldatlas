@@ -284,14 +284,12 @@ class TranscriptCoverage(Base):
     __tablename__ = "transcript_coverage"
 
     experiment_id = Column(Integer, ForeignKey("experiment.id"), primary_key=True)
-    strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
     transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
     measurement = Column(Float, nullable=False) 
 
-    def __init__(self, experiment_id=None, strain_id=None, transcript_id=None, measurement=None):
+    def __init__(self, experiment_id=None, transcript_id=None, measurement=None):
 
         self.experiment_id = experiment_id
-        self.strain_id = strain_id
         self.transcript_id = transcript_id
         self.measurement = measurement
 

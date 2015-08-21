@@ -376,7 +376,7 @@ class CoverageSearcher():
                 Transcript.gene_id==GeneLocation.gene_id,
                 GeneLocation.strain_id==settings.reference_strain_id
             ) \
-            .outerjoin((
+            .outerjoin(( # Left join to find in-vivo structures for structure indicator
                 Structure, 
                 and_(
                     Structure.transcript_id==TranscriptCoverage.transcript_id,
