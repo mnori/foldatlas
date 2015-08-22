@@ -181,10 +181,12 @@ class NucleotideMeasurementView():
 
     def build_entries(self, experiment_ids):
 
+        from models import NucleotideExperiment
+
         # Load experiments
         experiments = db_session \
-            .query(Experiment) \
-            .filter(Experiment.id.in_(experiment_ids)) \
+            .query(NucleotideExperiment) \
+            .filter(NucleotideExperiment.id.in_(experiment_ids)) \
             .all()
 
         # Load measurements
@@ -192,7 +194,7 @@ class NucleotideMeasurementView():
         measurements = db_session \
             .query(NucleotideMeasurement) \
             .filter(
-                NucleotideMeasurement.experiment_id.in_(experiment_ids),
+                NucleotideMeasurement.nucleotide_experiment_id.in_(experiment_ids),
                 NucleotideMeasurement.transcript_id==self.transcript_id
             ) \
             .all()
@@ -203,7 +205,6 @@ class NucleotideMeasurementView():
         for experiment in experiments:
             experiment_data = {
                 "id": experiment.id,
-                "type": experiment.type,
                 "description": experiment.description,
                 "data": []
             }
@@ -218,7 +219,7 @@ class NucleotideMeasurementView():
 
         # Add measurements to each experiment
         for measurement_row in measurements: # add values where present
-            experiment_id = measurement_row.experiment_id
+            experiment_id = measurement_row.nucleotide_experiment_id
             pos = measurement_row.position - 1
             data[experiment_id]["data"][pos]["measurement"] = measurement_row.measurement
 
@@ -343,7 +344,7 @@ class CoverageSearcher():
 
         # The experiment ID to sort by. Ideally this should have a value for each
         # transcript, otherwise there will be some missing transcripts...
-        self.experiment_id = 2
+        self.nucleotide_experiment_id = 2
 
     def fetch_page_count(self):
         # better to do the imports closer to where they are needed
@@ -353,7 +354,7 @@ class CoverageSearcher():
         transcript_count = db_session \
             .query(func.count('*')) \
             .select_from(TranscriptCoverage) \
-            .filter(TranscriptCoverage.experiment_id==self.experiment_id) \
+            .filter(TranscriptCoverage.nucleotide_experiment_id==self.nucleotide_experiment_id) \
             .scalar()
 
         page_count = ceil(transcript_count / self.page_size)
@@ -371,7 +372,7 @@ class CoverageSearcher():
                 GeneLocation
             ) \
             .filter(
-                TranscriptCoverage.experiment_id==self.experiment_id,
+                TranscriptCoverage.nucleotide_experiment_id==self.nucleotide_experiment_id,
                 Transcript.id==TranscriptCoverage.transcript_id,
                 Transcript.gene_id==GeneLocation.gene_id,
                 GeneLocation.strain_id==settings.reference_strain_id
@@ -380,7 +381,9 @@ class CoverageSearcher():
                 Structure, 
                 and_(
                     Structure.transcript_id==TranscriptCoverage.transcript_id,
-                    Structure.experiment_id==4 # this filters so it's only in vivo considered
+
+                    # this filters so it's only in vivo considered
+                    Structure.structure_prediction_run_id==2 
                 ) 
             )) \
             .add_entity(Structure) \
@@ -404,26 +407,25 @@ class StructureView():
     def __init__(self, transcript_id, strain_id):
         self.transcript_id = transcript_id
         self.strain_id = strain_id
-        self.build_entries([3, 4])
+        self.build_entries([1, 2])
 
-    def build_entries(self, experiment_ids):
+    def build_entries(self, structure_prediction_run_ids):
 
-        from models import Structure
+        from models import Structure, StructurePredictionRun
 
         # Load experiments
-        experiments = db_session \
-            .query(Experiment) \
-            .filter(Experiment.id.in_(experiment_ids)) \
+        runs = db_session \
+            .query(StructurePredictionRun) \
+            .filter(StructurePredictionRun.id.in_(structure_prediction_run_ids)) \
             .all()
 
         data = {}
 
-        for experiment in experiments:
+        for run in runs:
 
-            experiment_data = {
-                "id": experiment.id,
-                "type": experiment.type,
-                "description": experiment.description,
+            run_data = {
+                "id": run.id,
+                "description": run.description,
                 "data": []
             }
 
@@ -431,21 +433,21 @@ class StructureView():
             results = db_session \
                 .query(Structure) \
                 .filter(
-                    Structure.experiment_id==experiment.id,
+                    Structure.structure_prediction_run_id==run.id,
                     Structure.transcript_id==self.transcript_id
                 ) \
                 .all()
 
             # add the structures to output json
             for structure in results:
-                experiment_data["data"].append({
+                run_data["data"].append({
                     "id": structure.id,
                     "energy": structure.energy,
                     "pc1": structure.pc1,
                     "pc2": structure.pc2
                 })
 
-            data[experiment.id] = experiment_data
+            data[run.id] = run_data
 
         self.empty = True
         for experiment_id in data:

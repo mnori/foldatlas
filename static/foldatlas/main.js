@@ -873,7 +873,7 @@ var StructureExplorer = Class.extend({
 
 	// Get the MFE structure.
 	getMfe: function() {
-		var inVivoExperimentID = 4;
+		var inVivoExperimentID = 2;
 		var lowestEntry = null;
 		var structureData = this.structureData[inVivoExperimentID].data
 
@@ -890,8 +890,8 @@ var StructureExplorer = Class.extend({
 	},
 
 	drawStructurePcas: function() {
-		this.drawStructurePca(this.structureData[3], "pca-container-in-silico");
-		this.drawStructurePca(this.structureData[4], "pca-container-in-vivo");
+		this.drawStructurePca(this.structureData[1], "pca-container-in-silico");
+		this.drawStructurePca(this.structureData[2], "pca-container-in-vivo");
 	},
 
 	// Draws a PCA structure scatter plot
