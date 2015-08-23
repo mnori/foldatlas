@@ -248,46 +248,45 @@ class StructurePredictionRun(Base):
     def __repr__(self):
         return "<StructurePredictionRun %r>" % (self.id)
 
+# Represents a coverage measurement for a single transcript
+class NucleotideMeasurementSet(Base):
+    __tablename__ = "nucleotide_measurement_set"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nucleotide_experiment_id = Column(Integer, ForeignKey("nucleotide_experiment.id"))
+    transcript_id = Column(String(256), ForeignKey("transcript.id"))
+    coverage = Column(Float, nullable=False) 
+
+    def __init__(self, nucleotide_experiment_id=None, transcript_id=None, coverage=None):
+
+        self.nucleotide_experiment_id = nucleotide_experiment_id
+        self.transcript_id = transcript_id
+        self.coverage = coverage
+
+    def __repr__(self):
+        return "<NucleotideMeasurementSet %r-%r-%r>" % (
+            self.nucleotide_experiment_id, self.transcript_id
+        )
+
 # Represents one measurement, at a particular nucleotide position.
 class NucleotideMeasurement(Base):
     __tablename__ = "nucleotide_measurement"
 
-    nucleotide_experiment_id = Column(Integer, ForeignKey("nucleotide_experiment.id"), primary_key=True)
-    transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
+    nucleotide_measurement_set_id = Column(Integer, 
+        ForeignKey("nucleotide_measurement_set.id"), primary_key=True, autoincrement=True)
 
     # if there's no measurement at a position, there is no corresponding row.
     position = Column(Integer, autoincrement=False, primary_key=True) 
     measurement = Column(Float, nullable=False) 
 
-    def __init__(self, nucleotide_experiment_id=None, transcript_id=None, position=None, measurement=None):
-
-        self.nucleotide_experiment_id = nucleotide_experiment_id
-        self.transcript_id = transcript_id
+    def __init__(self, nucleotide_measurement_set_id=None, position=None, measurement=None):
+        self.nucleotide_measurement_set_id = nucleotide_measurement_set_id
         self.position = position
         self.measurement = measurement
 
     def __repr__(self):
         return "<NucleotideMeasurement %r-%r-%r-%r>" % (
-            self.nucleotide_experiment_id, self.transcript_id, self.position
-        )
-
-# Represents a coverage measurement for a single transcript
-class TranscriptCoverage(Base):
-    __tablename__ = "transcript_coverage"
-
-    nucleotide_experiment_id = Column(Integer, ForeignKey("nucleotide_experiment.id"), primary_key=True)
-    transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
-    measurement = Column(Float, nullable=False) 
-
-    def __init__(self, nucleotide_experiment_id=None, transcript_id=None, measurement=None):
-
-        self.nucleotide_experiment_id = nucleotide_experiment_id
-        self.transcript_id = transcript_id
-        self.measurement = measurement
-
-    def __repr__(self):
-        return "<TranscriptCoverage %r-%r-%r>" % (
-            self.nucleotide_experiment_id, self.transcript_id
+            self.nucleotide_measurement_set_id, self.position, self.measurement
         )
 
 # Represents a structure prediction for a single RNA sequence

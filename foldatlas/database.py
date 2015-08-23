@@ -3,6 +3,7 @@
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import and_
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
@@ -22,10 +23,10 @@ Base.query = db_session.query_property()
 import models
 
 from models import Strain, Gene, Transcript, Feature, NucleotideMeasurement, \
-    GeneLocation, NucleotideExperiment, StructurePredictionRun, TranscriptCoverage, \
+    GeneLocation, NucleotideExperiment, StructurePredictionRun, NucleotideMeasurementSet, \
     Structure, StructurePosition
 
-def hydrate_db():
+def import_db():
     try:
 
         print("Rebuilding schema...")
@@ -33,23 +34,23 @@ def hydrate_db():
         Base.metadata.create_all(bind=engine)
 
         # Add the annotations
-        SequenceHydrator().hydrate() 
+        SequenceImporter().execute() 
 
         # Add DMS reactivities
-        NucleotideMeasurementHydrator().hydrate(settings.dms_reactivities_experiment)
-        CoverageHydrator().hydrate(settings.dms_reactivities_experiment)
-
+        NucleotideMeasurementImporter().execute(settings.dms_reactivities_experiment)
+        NucleotideMeasurementSetImporter().execute(settings.dms_reactivities_experiment)
+        
         # Add ribosome profiling
-        NucleotideMeasurementHydrator().hydrate(settings.ribosome_profile_experiment)
-        CoverageHydrator().hydrate(settings.ribosome_profile_experiment)
+        NucleotideMeasurementImporter().execute(settings.ribosome_profile_experiment)
+        NucleotideMeasurementSetImporter().execute(settings.ribosome_profile_experiment)
 
         # Import all available RNA structures
-        StructureHydrator().hydrate(settings.structures_in_silico)
-        StructureHydrator().hydrate(settings.structures_in_vivo)
+        StructureImporter().execute(settings.structures_in_silico)
+        StructureImporter().execute(settings.structures_in_vivo)
 
         # Do PCA analysis on the structures
-        PcaHydrator().hydrate(settings.structures_in_silico)
-        PcaHydrator().hydrate(settings.structures_in_vivo)
+        PcaImporter().execute(settings.structures_in_silico)
+        PcaImporter().execute(settings.structures_in_vivo)
 
         # DISABLED STUFF #########################################################
         # Do alignments so we can see polymorphism
@@ -63,7 +64,7 @@ def hydrate_db():
         raise e
 
 # Parses genome sequence .fa and annotation .gff3 files into the database.
-class SequenceHydrator():
+class SequenceImporter():
 
     # how many genes to process before committing rows to the database.
     gene_chunk_size = 2500 
@@ -95,16 +96,16 @@ class SequenceHydrator():
     strain_limit = None
 
     # Use the genome sequence and annotation files to populate the database.
-    def hydrate(self):
+    def execute(self):
         n_strains = 0
         for strain in settings.strains:
-            self.hydrate_strain(strain)
+            self.execute_strain(strain)
             n_strains += 1
             if self.strain_limit != None and n_strains >= self.strain_limit:
                 break
         db_session.commit()
 
-    def hydrate_strain(self, strain_config):
+    def execute_strain(self, strain_config):
         self.transcript_ids_seen_this_strain = set()
 
         print("Hydrating strain ["+strain_config["name"]+"]")
@@ -115,16 +116,16 @@ class SequenceHydrator():
         db_session.commit()
 
         # add the chrosomomes
-        self.hydrate_chrosomomes(strain_config)
+        self.execute_chrosomomes(strain_config)
 
         # add genes, transcripts, and feature annotations
-        self.hydrate_genes(strain_config)
+        self.execute_genes(strain_config)
 
         self.cache_gene_locations(strain_config)
 
     # Adding chromosomes to the DB is a little bit tricky, since the sequences are huge.
     # Therefore a LOAD DATA INFILE strategy is used to import the data.
-    def hydrate_chrosomomes(self, strain_config):
+    def execute_chrosomomes(self, strain_config):
 
         print("Adding chromosomes...")
         filepath = settings.genomes_sauce_folder+"/"+strain_config["sequence_filename"]
@@ -159,7 +160,7 @@ class SequenceHydrator():
 
         print("Finished adding chromosomes to ["+strain_config["name"]+"]")
 
-    def hydrate_genes(self, strain_config):
+    def execute_genes(self, strain_config):
 
         # gotta stratify this by chromosome
         n_genes_added = {}
@@ -178,7 +179,7 @@ class SequenceHydrator():
                     if len(feature_rows) > 0: # this is needed to stop it going wrong at the beginning
 
                         # feature_rows contains all the data for a single gene.
-                        self.hydrate_gene(feature_rows, strain_config["name"])
+                        self.execute_gene(feature_rows, strain_config["name"])
 
                         # reset the data collection
                         feature_rows = []
@@ -217,7 +218,7 @@ class SequenceHydrator():
         if      len(feature_rows) > 0 and \
                 (self.gene_limit == None or n_genes_added[chr_id] < self.gene_limit):
 
-            self.hydrate_gene(feature_rows, strain_config["name"])
+            self.execute_gene(feature_rows, strain_config["name"])
             n_genes_added[chr_id] += 1
 
         self.commit_all()
@@ -276,7 +277,7 @@ class SequenceHydrator():
         db_session.commit()
         print("...done.")
 
-    def hydrate_gene(self, feature_rows, strain_id):
+    def execute_gene(self, feature_rows, strain_id):
         features = {}
         sequence = None
         transcript = None
@@ -430,10 +431,43 @@ class TranscriptAligner():
 
         return transcript_ids
 
-# Inserts DMS reactivities into the DB.
-class NucleotideMeasurementHydrator():
+# Loads coverage data from a single file into the database.
+class NucleotideMeasurementSetImporter():
+    def execute(self, experiment_config):
+        from sqlalchemy import update
 
-    def hydrate(self, experiment_config):
+        transcript_ids = get_inserted_transcript_ids()
+        coverage_filepath = experiment_config["coverage_filepath"]
+
+        print("coverage_filepath: ["+coverage_filepath+"]")
+
+        if not os.path.isfile(coverage_filepath):
+            print("WARNING: skipped import of missing ["+coverage_filepath+"]")
+            return
+
+        with open(coverage_filepath) as coverage_file:
+            for coverage_line in coverage_file:
+                (transcript_id, coverage) = coverage_line.strip().split("\t")
+
+                # skip transcripts not already in DB
+                if transcript_id not in transcript_ids:
+                    continue
+
+                update_q = update(NucleotideMeasurementSet) \
+                    .where(and_(
+                        NucleotideMeasurementSet.nucleotide_experiment_id==experiment_config["nucleotide_experiment_id"],
+                        NucleotideMeasurementSet.transcript_id==transcript_id,
+                    ))\
+                    .values(coverage=coverage)
+
+                db_session.execute(update_q)
+
+        db_session.commit()
+
+# Inserts DMS reactivities into the DB.
+class NucleotideMeasurementImporter():
+
+    def execute(self, experiment_config):
 
         # Add the experiment
         experiment = NucleotideExperiment(
@@ -450,10 +484,11 @@ class NucleotideMeasurementHydrator():
 
         # Open the DMS reactivities file. These are normalised already.
         with open(experiment_config["nucleotides_filepath"], "r") as input_file:
-            for line in input_file:
+            for line in input_file: # each line = 1 transcript
         
                 bits = line.strip().split("\t")
                 transcript_id = bits[0]
+                transcript_len = len(bits) - 1
 
                 # skip transcripts not already in DB
                 if transcript_id not in transcript_ids:
@@ -464,19 +499,34 @@ class NucleotideMeasurementHydrator():
 
                 count_strs = bits[1:]
 
+                # Add set object. Will add coverage after going through reactivities
+                measurement_set = NucleotideMeasurementSet(
+                    nucleotide_experiment_id=experiment_config["nucleotide_experiment_id"],
+                    transcript_id=transcript_id,
+                    coverage=0
+                )
+                db_session.add(measurement_set)
+                db_session.commit()
+
                 # go through reactivity entries, adding each to the database.
                 position = 0
                 for count_str in count_strs:
                     position += 1
                     if (count_str != "NA"): # skip adding "NA" entries.
                         obj = NucleotideMeasurement(
-                            nucleotide_experiment_id=experiment_config["nucleotide_experiment_id"],
-                            transcript_id=transcript_id, 
+                            nucleotide_measurement_set_id=measurement_set.id,
                             position=position, 
                             measurement=float(count_str)
                         )
-                        db_session.add(obj)        
+                        db_session.add(obj)
+
                 db_session.commit() # insert all the reactivity measurement rows into the DB
+
+
+                # add the coverage
+                # ...
+
+
                 print("Added ["+transcript_id+"] ("+str(position)+" positions)")
 
         input_file.close()
@@ -492,38 +542,9 @@ def get_inserted_transcript_ids():
 
     return transcript_ids
 
-# Loads coverage data from a single file into the database.
-class CoverageHydrator():
-    def hydrate(self, experiment_config):
+class StructureImporter():
 
-        transcript_ids = get_inserted_transcript_ids()
-
-        coverage_filepath = experiment_config["coverage_filepath"]
-
-        if not os.path.isfile(coverage_filepath):
-            print("WARNING: skipped import of missing ["+coverage_filepath+"]")
-            return
-
-        with open(coverage_filepath) as coverage_file:
-            for coverage_line in coverage_file:
-                (transcript_id, coverage) = coverage_line.strip().split("\t")
-
-                # skip transcripts not already in DB
-                if transcript_id not in transcript_ids:
-                    continue
-
-                obj = TranscriptCoverage(
-                    nucleotide_experiment_id=experiment_config["nucleotide_experiment_id"],
-                    transcript_id=transcript_id,
-                    measurement=coverage
-                )
-                db_session.add(obj)
-
-        db_session.commit()
-
-class StructureHydrator():
-
-    def hydrate(self, experiment_config):
+    def execute(self, experiment_config):
 
         # Add the new experiment row to the DB
         experiment = StructurePredictionRun(
@@ -602,8 +623,8 @@ class StructureHydrator():
         print ("["+str(n_structs)+"] structures added")
 
 # Carries out PCA using structures
-class PcaHydrator():
-    def hydrate(self, experiment_config):
+class PcaImporter():
+    def execute(self, experiment_config):
 
         transcript_structures = {}
 

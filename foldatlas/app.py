@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
 		elif argv[1] == "hydratedb":
 			# reset the database
-			database.hydrate_db()
+			database.import_db()
 
 		elif argv[1] == "exportfasta":
 			# export sequences into a big fasta file
