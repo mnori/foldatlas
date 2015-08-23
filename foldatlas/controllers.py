@@ -191,11 +191,12 @@ class NucleotideMeasurementView():
 
         # Load measurements
         seq_str = str(Transcript(self.transcript_id).get_sequence(self.strain_id).seq)
-        measurements = db_session \
-            .query(NucleotideMeasurement) \
+        measurements_data = db_session \
+            .query(NucleotideMeasurementSet, NucleotideMeasurement) \
             .filter(
-                NucleotideMeasurement.nucleotide_experiment_id.in_(experiment_ids),
-                NucleotideMeasurement.transcript_id==self.transcript_id
+                NucleotideMeasurementSet.nucleotide_experiment_id.in_(experiment_ids),
+                NucleotideMeasurementSet.transcript_id==self.transcript_id,
+                NucleotideMeasurementSet.id==NucleotideMeasurement.nucleotide_measurement_set_id
             ) \
             .all()
 
@@ -218,10 +219,14 @@ class NucleotideMeasurementView():
             data[experiment.id] = experiment_data
 
         # Add measurements to each experiment
-        for measurement_row in measurements: # add values where present
-            experiment_id = measurement_row.nucleotide_experiment_id
-            pos = measurement_row.position - 1
-            data[experiment_id]["data"][pos]["measurement"] = measurement_row.measurement
+        for row in measurements_data: # add values where present
+
+            measurement_set = row[0]
+            measurement = row[1]
+
+            experiment_id = measurement_set.nucleotide_experiment_id
+            pos = measurement.position - 1
+            data[experiment_id]["data"][pos]["measurement"] = measurement.measurement
 
         # For each experiment, check whether there is no data and set empty flags accordingly.
         self.empty = True # all empty flag
@@ -353,8 +358,8 @@ class CoverageSearcher():
 
         transcript_count = db_session \
             .query(func.count('*')) \
-            .select_from(TranscriptCoverage) \
-            .filter(TranscriptCoverage.nucleotide_experiment_id==self.nucleotide_experiment_id) \
+            .select_from(NucleotideMeasurementSet) \
+            .filter(NucleotideMeasurementSet.nucleotide_experiment_id==self.nucleotide_experiment_id) \
             .scalar()
 
         page_count = ceil(transcript_count / self.page_size)
@@ -366,29 +371,25 @@ class CoverageSearcher():
         from models import Structure, GeneLocation
 
         results = db_session \
-            .query(
-                TranscriptCoverage,
-                Transcript,
-                GeneLocation
-            ) \
+            .query(NucleotideMeasurementSet, Transcript, GeneLocation,) \
             .filter(
-                TranscriptCoverage.nucleotide_experiment_id==self.nucleotide_experiment_id,
-                Transcript.id==TranscriptCoverage.transcript_id,
+                NucleotideMeasurementSet.nucleotide_experiment_id==self.nucleotide_experiment_id,
+                Transcript.id==NucleotideMeasurementSet.transcript_id,
                 Transcript.gene_id==GeneLocation.gene_id,
-                GeneLocation.strain_id==settings.reference_strain_id
+                GeneLocation.strain_id==settings.reference_strain_id # get this for gene len
             ) \
             .outerjoin(( # Left join to find in-vivo structures for structure indicator
                 Structure, 
                 and_(
-                    Structure.transcript_id==TranscriptCoverage.transcript_id,
+                    Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
 
                     # this filters so it's only in vivo considered
                     Structure.structure_prediction_run_id==2 
                 ) 
             )) \
             .add_entity(Structure) \
-            .group_by(TranscriptCoverage.transcript_id) \
-            .order_by(TranscriptCoverage.measurement.desc()) \
+            .group_by(NucleotideMeasurementSet.transcript_id) \
+            .order_by(NucleotideMeasurementSet.coverage.desc()) \
             .offset((int(page_num) - 1) * self.page_size) \
             .limit(str(self.page_size)) \
             .all()
