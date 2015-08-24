@@ -1,4 +1,6 @@
-# from app import db
+# Database package
+# Includes all the code needed to import plaintext files into the DB.
+# @author Matthew Norris <matthew.norris@jic.ac.uk>
 
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -57,7 +59,7 @@ def import_db():
         # Disabled - for now...
         # TranscriptAligner().align() 
 
-        print("Hydration Complete.")
+        print("Import Complete.")
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
         print(str(e).replace("\\n", "\n").replace("\\t", "\t"))
@@ -81,11 +83,15 @@ class SequenceImporter():
 
     # limit on genes to process - for testing purposes
     # None means it imports everything
-    gene_limit = 10
-    # gene_limit = None
+    # gene_limit = 10
+    gene_limit = None
 
     # Set to true for testing
-    chr1_only = True
+    chr1_only = False
+
+    # Only import these genes. Can be None or a list.
+    # filter_genes = ["AT3G29370", "AT3G48550", "AT2G31360"]
+    filter_genes = None
 
     # limit on chromosome sequence to add, in bp - for testing
     bp_limit = None
@@ -225,7 +231,90 @@ class SequenceImporter():
 
         print("Genes added total: "+str(n_genes_added))
 
-    # Cache gene locations in a redundant table by looking at the feature locations.
+    def execute_gene(self, feature_rows, strain_id):
+        features = {}
+        sequence = None
+        transcript = None
+
+        gene_id = None
+        min_start = None
+        max_end = None
+
+        for feature_row in feature_rows: # Loop through annotation rows in the gff file, all related to the current gene
+
+            # keep track of start and end
+            start = feature_row[3]
+            end = feature_row[4]
+            direction = "forward" if feature_row[6] == "+" else "reverse"
+            chromosome_id = feature_row[0]
+
+            feature_type = feature_row[2]
+            attribs = feature_row[8].strip()
+
+            # This causes bugs.
+            # if feature_type == "gene": # Handle gene entries
+                # gene_id = attribs.split(";")[0].split(":")[1] # grab the gene ID - we'll want this for later
+
+            new_gene_id = self.find_attribs_value("ID=Gene", attribs)
+            if new_gene_id != None:
+
+                # only deal with proper genes. setting gene_id to None means nothing else will be processed.
+                # so it will essentially skip non-"gene" entries.
+                if feature_type != "gene":
+                    gene_id = None
+                    continue
+
+                # Check against filter list if there is one
+                if self.filter_genes != None and new_gene_id not in self.filter_genes:
+                    # filter list exists, and gene is not in filter list
+                    # skip this gene
+                    return
+
+                gene_id = new_gene_id
+
+                # add the Gene entry - if it hasn't been already
+                if gene_id not in self.genes_seen: 
+                    gene = Gene(gene_id)
+                    self.genes_to_write.append(gene)
+                    self.genes_seen[gene_id] = gene
+            
+            elif gene_id != None : # Handle transcript entries - if the gene is legit
+                transcript_id = self.find_attribs_value("ID=Transcript", attribs)
+                if transcript_id != None: # it's a transcript entry
+
+                    # add the Transcript entry - if it hasn't been already
+                    transcript_id = self.ensure_unique_transcript_id(transcript_id)
+
+                    if transcript_id not in self.transcripts_seen: 
+                        transcript = Transcript(
+                            id=transcript_id, gene_id=gene_id
+                        )
+                        self.transcripts_to_write.append(transcript)
+                        self.transcripts_seen[transcript.id] = transcript
+
+                else: # Handle transcript feature entries
+
+                    # for some reason, features for a given strain/transcript 
+                    # combination are not always added
+
+                    transcript_id = self.find_attribs_value("Parent=Transcript", attribs)
+
+                    if transcript_id != None: # it's a transcript feature entry
+                        # put a filter here? some elements are not worth storing?
+                        self.features_to_write.append(Feature(
+                            transcript_id=transcript_id,
+                            type_id=feature_row[2],
+                            strain_id=strain_id,
+                            chromosome_id=chromosome_id,
+                            start=start,
+                            end=end,
+                            direction=direction
+                        ))
+
+                    else:
+                        pass # this happens for pseudogenes and TEs - which we aint interested in
+
+     # Cache gene locations in a redundant table by looking at the feature locations.
     def cache_gene_locations(self, strain_config):
         print("Caching gene locations...")
         start = 0
@@ -276,83 +365,6 @@ class SequenceImporter():
             db_session.add(entity)
         db_session.commit()
         print("...done.")
-
-    def execute_gene(self, feature_rows, strain_id):
-        features = {}
-        sequence = None
-        transcript = None
-
-        gene_id = None
-        min_start = None
-        max_end = None
-
-        for feature_row in feature_rows: # Loop through annotation rows in the gff file, all related to the current gene
-
-            # keep track of start and end
-            start = feature_row[3]
-            end = feature_row[4]
-            direction = "forward" if feature_row[6] == "+" else "reverse"
-            chromosome_id = feature_row[0]
-
-            feature_type = feature_row[2]
-            attribs = feature_row[8].strip()
-
-            # This causes bugs.
-            # if feature_type == "gene": # Handle gene entries
-                # gene_id = attribs.split(";")[0].split(":")[1] # grab the gene ID - we'll want this for later
-
-            new_gene_id = self.find_attribs_value("ID=Gene", attribs)
-            if new_gene_id != None:
-
-                # only deal with proper genes. setting gene_id to None means nothing else will be processed.
-                # so it will essentially skip non-"gene" entries.
-                if feature_type != "gene":
-                    gene_id = None
-                    continue
-
-                gene_id = new_gene_id
-
-                # add the Gene entry - if it hasn't been already
-                if gene_id not in self.genes_seen: 
-                    gene = Gene(gene_id)
-                    self.genes_to_write.append(gene)
-                    self.genes_seen[gene_id] = gene
-            
-            elif gene_id != None : # Handle transcript entries - if the gene is legit
-                transcript_id = self.find_attribs_value("ID=Transcript", attribs)
-                if transcript_id != None: # it's a transcript entry
-
-                    # add the Transcript entry - if it hasn't been already
-                    transcript_id = self.ensure_unique_transcript_id(transcript_id)
-
-                    if transcript_id not in self.transcripts_seen: 
-                        transcript = Transcript(
-                            id=transcript_id, gene_id=gene_id
-                        )
-                        self.transcripts_to_write.append(transcript)
-                        self.transcripts_seen[transcript.id] = transcript
-
-                else: # Handle transcript feature entries
-
-                    # for some reason, features for a given strain/transcript 
-                    # combination are not always added
-
-                    transcript_id = self.find_attribs_value("Parent=Transcript", attribs)
-
-                    if transcript_id != None: # it's a transcript feature entry
-                        # put a filter here? some elements are not worth storing?
-                        self.features_to_write.append(Feature(
-                            transcript_id=transcript_id,
-                            type_id=feature_row[2],
-                            strain_id=strain_id,
-                            chromosome_id=chromosome_id,
-                            start=start,
-                            end=end,
-                            direction=direction
-                        ))
-
-                    else:
-                        pass # this happens for pseudogenes and TEs - which we aint interested in
 
     def ensure_unique_transcript_id(self, transcript_id):
         version = 1
