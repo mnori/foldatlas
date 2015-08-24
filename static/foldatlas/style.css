@@ -502,7 +502,7 @@ table.coverage-table td.yes {
 
 /* /PAGINATION ********************************************************/
 
-.help-example-image-small, .help-example-image {
+.help-example-image-full, .help-example-image-small, .help-example-image {
 	display: block;
 	margin-left: auto;
 	margin-right: auto;
@@ -515,6 +515,10 @@ table.coverage-table td.yes {
 
 .help-example-image {
 	width: 700px;
+}
+
+.help-example-image-full {
+	width: 860px;
 }
 
 .help-pre {

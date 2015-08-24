@@ -202,7 +202,7 @@ class GeneLocation(Base):
 
     gene_id = Column(String(256), ForeignKey("gene.id"), nullable=False, primary_key=True)
     strain_id = Column(String(256), ForeignKey("strain.id"), nullable=False, primary_key=True)
-    chromosome_id = chromosome_id = Column(String(256), nullable=False)
+    chromosome_id = Column(String(256), nullable=False)
     start = Column(Integer, nullable=False)
     end = Column(Integer, nullable=False)
     direction = Column(Enum("forward", "reverse"), nullable=False)
