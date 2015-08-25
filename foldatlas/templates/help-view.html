@@ -145,7 +145,7 @@
 
 <h2>Database download</h2>
 
-The entire FoldAtlas database can be downloaded as an SQL file by using the <b>Download All</b> button:
+The entire FoldAtlas MySQL database can be downloaded as an SQL file by using the <b>Download All</b> button:
 
 <img class="help-example-image" src="{{ settings.static_base_url }}/assets/help/all-download.png" />
 
@@ -153,9 +153,58 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
 
 <img class="help-example-image-full" src="{{ settings.static_base_url }}/assets/help/er-diagram.png" />
 
+<h3>Structural entities</h3>
+
+<p>
+    <ol>
+        <li>
+            <b>Structure Prediction Run:</b>
+            This represents a single genome-scale RNA structure prediction run. At present all of these have been generated using the RNAstructure [REF] method.
+        </li><li>
+            <b>Structure:</b>
+            Represents a single structure that has been predicted as part of a structure prediction run. This is generated from a single transcript sequence. Includes a free energy estimate and data for PCA plots.
+        </li><li>
+            <b>Structure Position:</b>
+            Stores the base pairing attributes of a single nucleotide position within a structure prediction. The base pairing information can be used to plot RNA structure diagrams.
+        </li><li>
+            <b>Nucleotide Experiment:</b>
+            Represents a genome-scale experiment that involves taking measurements at specific nucleotide positions. At present this is used to represent DMS reactivity data. In the future, data from SHAPE and ribosome profiling experiments will also be represented by this entity.
+        </li><li>
+            <b>Nucleotide Measurement Set:</b>
+            Represents a set of DMS measurements for a single transcript. Includes a property to store a per-nucleotide coverage value for the entire transcript.
+        </li><li>
+            <b>Nucleotide Measurement:</b>
+            Represents a single DMS reactivity measurement, at a specific nucleotide position.
+        </li>
+    </ol>
+</p>
+
 <h3>Genomic entities</h3>
 
-<h3>Structural entities</h3>
+<p>
+    Other FoldAtlas tables deal with representing genomic data structures. These are used by the genome browser and also to generate RNA sequences. These cover gene and transcript identifiers. Genomic entities include:
+    <ol>
+        <li>
+            <b>Strain:</b>
+            A strain represents a single sequenced accession of a particular organism. At present, the only strain stored in FoldAtlas is Col0, which represents the <i>A. thaliana</i> reference genome. Future versions of FoldAtlas will include additional strains and organisms.
+        </li><li>
+            <b>Chromosome:</b>
+            All FoldAtlas sequences originate from chromosome entities. Each chromosome is associated with a strain and a chromosome ID, which is a generic identifier shared across strains. The sequence property stores the entire chromosome sequence.
+        </li><li>
+            <b>Feature:</b>
+            A feature describes start and stop boundaries within a chromosome that correspond to coding sequences (CDSs), untranslated regions (UTRs) or introns. By combining  features and chromosome sequences, it is possible to find the sequence of a transcript.
+        </li><li>
+            <b>Gene Location:</b>
+            A gene location contains redundant information about the start and stop boundaries of a gene with respect to the genome sequence of a particular strain. This data is used to quickly calculate gene lengths, and to visualise gene boundaries in the integrated <i>d3nome</i> genome browser.
+        </li><li>
+            <b>Gene:</b>
+            FoltAtlas gene entities are generic, i.e. are shared between different strains. A gene can therefore have multiple strain-specific locations, and can also be associated with multiple transcripts, representing alternative splice forms.
+        </li><li>
+            <b>Transcript:</b>
+            The transcript is a generic entity that can be shared amongst multiple strains, with the transcript sequence represented by chromosome sequence and strain-specific features that cover the chromosome sequence.
+        </li>
+    </ol>
+</p>
 
 <h2>References</h2>
 
