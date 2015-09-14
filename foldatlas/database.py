@@ -84,7 +84,7 @@ class SequenceImporter():
     # limit on genes to process - for testing purposes
     # None means it imports everything
     # gene_limit = 10
-    gene_limit = None
+    gene_limit = 100
 
     # Set to true for testing
     chr1_only = False
