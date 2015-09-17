@@ -264,9 +264,7 @@ class NucleotideMeasurementSet(Base):
         self.coverage = coverage
 
     def __repr__(self):
-        return "<NucleotideMeasurementSet %r-%r-%r>" % (
-            self.nucleotide_experiment_id, self.transcript_id
-        )
+        return "<NucleotideMeasurementSet %r>" % (self.id)
 
 # Represents one measurement, at a particular nucleotide position.
 class NucleotideMeasurement(Base):

@@ -7,10 +7,10 @@
 		<th style="width: 130px"><i>In vivo</i> structure?</th>
 	</tr>
 {% for row in transcript_data %}
-	<tr class="transcript-row" data-transcript-id="{{ row["coverage"].transcript_id }}">
-		<td><a href="/transcript/{{ row["coverage"].transcript_id }}">{{ row["coverage"].transcript_id }}</a></td>
+	<tr class="transcript-row" data-transcript-id="{{ row["measurement_set"].transcript_id }}">
+		<td><a href="/transcript/{{ row["measurement_set"].transcript_id }}">{{ row["measurement_set"].transcript_id }}</a></td>
 		<td>{{ row["gene_length"] }}</td>
-		<td>{{ row["coverage"].measurement }}</td>
+		<td>{{ row["measurement_set"].coverage }}</td>
 		{% if row["structure"] != None %}<td class="yes">yes</td>{% else %}<td>-</td>{% endif %}
 	</tr>
 {% endfor %}

@@ -49,7 +49,7 @@ class FastaExporter():
             .all()
 
 		n = 0
-		output_handle = open(settings.genomes_sauce_folder+"/transcripts.fasta", "w")
+		output_handle = open(settings.data_folder+"/transcripts.fasta", "w")
 		for result in results:
 			transcript_id = result[0]
 			seq_record = Transcript(transcript_id).get_sequence()
@@ -75,8 +75,8 @@ class FastaSplitter():
 		import settings
 
 		self.n_chunks = 256
-		self.sauce_filepath = settings.genomes_sauce_folder+"/transcripts.fasta"
-		self.target_dirpath = settings.genomes_sauce_folder+"/rnastructure_seqs"
+		self.sauce_filepath = settings.data_folder+"/transcripts.fasta"
+		self.target_dirpath = settings.data_folder+"/rnastructure_seqs"
 
 	def split(self):
 		from Bio import SeqIO

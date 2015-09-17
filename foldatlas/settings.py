@@ -2,21 +2,25 @@
 # This defines hostname, database name, username and password for connecting to the DB.
 database_uri = "mysql+mysqlconnector://root:vagrant@127.0.0.1/foldatlas?charset=utf8&use_unicode=0"
 
-genomes_sauce_folder = "/vagrant/sauce_data"
+# Points to the general data folder
+data_folder = "/vagrant/sauce_data"
+
+# Points to structure data folder, which contains a *lot* of files
+structure_data_folder = "/vagrant/structure_data"
 
 dms_reactivities_experiment = {
 	"nucleotide_experiment_id": 1,
 	"strain_id": "Col_0",
-	"nucleotides_filepath": "/vagrant/sauce_data/log_react_f_N1A_cdna_n_before.formatted.txt",
-	"coverage_filepath": "/vagrant/sauce_data/reactivities_coverage_orig.txt",
+	"nucleotides_filepath": data_folder+"/log_react_f_N1A_cdna_n_before.formatted.txt",
+	"coverage_filepath": data_folder+"/reactivities_coverage_orig.txt",
 	"description": "DMS reactivities"
 }
 
 ribosome_profile_experiment = {
 	"nucleotide_experiment_id": 2,
 	"strain_id": "Col_0",
-	"nucleotides_filepath": "/vagrant/sauce_data/p_site_counts_all.txt",
-	"coverage_filepath": "/vagrant/sauce_data/riboseq_coverage.txt",
+	"nucleotides_filepath": data_folder+"/p_site_counts_all.txt",
+	"coverage_filepath": data_folder+"/riboseq_coverage.txt",
 	"description": "Ribosome occupancies",
 }
 
@@ -24,7 +28,7 @@ structures_in_silico = {
 	"structure_prediction_run_id": 1,
 	"strain_id": "Col_0",
 	"description": "In silico structure prediction",
-	"sauce_filepath": "/vagrant/sauce_data/structures/in_silico",
+	"sauce_filepath": structure_data_folder+"/in_silico_structures",
 	"sauce_ext": ".ct",
 }
 
@@ -32,7 +36,7 @@ structures_in_vivo = {
 	"structure_prediction_run_id": 2,
 	"strain_id": "Col_0",
 	"description": "In vivo experimental structure prediction",
-	"sauce_filepath": "/vagrant/sauce_data/structures/in_vivo",
+	"sauce_filepath": structure_data_folder+"/in_vivo_structures",
 	"sauce_ext": "_con.ct",
 }
 

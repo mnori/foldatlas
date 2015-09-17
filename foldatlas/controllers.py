@@ -349,7 +349,7 @@ class CoverageSearcher():
 
         # The experiment ID to sort by. Ideally this should have a value for each
         # transcript, otherwise there will be some missing transcripts...
-        self.nucleotide_experiment_id = 2
+        self.nucleotide_experiment_id = 1
 
     def fetch_page_count(self):
         # better to do the imports closer to where they are needed
@@ -370,23 +370,44 @@ class CoverageSearcher():
         from sqlalchemy import func, and_
         from models import Structure, GeneLocation
 
+        # optional in vivo query - will include some non-in vivo results
+        # results = db_session \
+        #     .query(NucleotideMeasurementSet, Transcript, GeneLocation,) \
+        #     .filter(
+        #         NucleotideMeasurementSet.nucleotide_experiment_id==self.nucleotide_experiment_id,
+        #         Transcript.id==NucleotideMeasurementSet.transcript_id,
+        #         Transcript.gene_id==GeneLocation.gene_id,
+        #         GeneLocation.strain_id==settings.reference_strain_id # get this for gene len
+        #     ) \
+        #     .outerjoin(( # Left join to find in-vivo structures for structure indicator
+        #         Structure, 
+        #         and_(
+        #             Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
+
+        #             # this filters so it's only in vivo considered
+        #             Structure.structure_prediction_run_id==2 
+        #         ) 
+        #     )) \
+        #     .add_entity(Structure) \
+        #     .group_by(NucleotideMeasurementSet.transcript_id) \
+        #     .order_by(NucleotideMeasurementSet.coverage.desc()) \
+        #     .offset((int(page_num) - 1) * self.page_size) \
+        #     .limit(str(self.page_size)) \
+        #     .all()
+
+        # mandatory in vivo query
         results = db_session \
-            .query(NucleotideMeasurementSet, Transcript, GeneLocation,) \
+            .query(NucleotideMeasurementSet, Transcript, GeneLocation, Structure, ) \
             .filter(
                 NucleotideMeasurementSet.nucleotide_experiment_id==self.nucleotide_experiment_id,
                 Transcript.id==NucleotideMeasurementSet.transcript_id,
                 Transcript.gene_id==GeneLocation.gene_id,
-                GeneLocation.strain_id==settings.reference_strain_id # get this for gene len
-            ) \
-            .outerjoin(( # Left join to find in-vivo structures for structure indicator
-                Structure, 
-                and_(
-                    Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
+                GeneLocation.strain_id==settings.reference_strain_id, # get this for gene len
+                Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
 
-                    # this filters so it's only in vivo considered
-                    Structure.structure_prediction_run_id==2 
-                ) 
-            )) \
+                # this filters so it's only in vivo considered
+                Structure.structure_prediction_run_id==2    
+            ) \
             .add_entity(Structure) \
             .group_by(NucleotideMeasurementSet.transcript_id) \
             .order_by(NucleotideMeasurementSet.coverage.desc()) \
@@ -397,7 +418,7 @@ class CoverageSearcher():
         out = []
         for result in results:
             out.append({
-                "coverage": result[0],
+                "measurement_set": result[0],
                 "structure": result[3],
                 "gene_length": (result[2].end - result[2].start) + 1
             })

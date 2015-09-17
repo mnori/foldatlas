@@ -84,7 +84,7 @@ class SequenceImporter():
     # limit on genes to process - for testing purposes
     # None means it imports everything
     # gene_limit = 10
-    gene_limit = 100
+    gene_limit = 10
 
     # Set to true for testing
     chr1_only = False
@@ -134,7 +134,7 @@ class SequenceImporter():
     def execute_chrosomomes(self, strain_config):
 
         print("Adding chromosomes...")
-        filepath = settings.genomes_sauce_folder+"/"+strain_config["sequence_filename"]
+        filepath = settings.data_folder+"/"+strain_config["sequence_filename"]
 
         for record in SeqIO.parse(filepath, "fasta"): # loop through chromosomes
 
@@ -173,7 +173,7 @@ class SequenceImporter():
         feature_rows = []
 
         # open the annotation file and go through it line by line
-        with open(settings.genomes_sauce_folder+"/"+strain_config["annotation_filename"]) as gff_file:
+        with open(settings.data_folder+"/"+strain_config["annotation_filename"]) as gff_file:
             for gff_line in gff_file:
                 if gff_line[0] == "#": # ignore comments
                     continue
