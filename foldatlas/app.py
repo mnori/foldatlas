@@ -82,9 +82,9 @@ def structure_circle_plot_ajax(structure_id):
 # strain ID .. should really be experiment ID
 # and strain ID should only be associated with experiment ID.
 # can then just use experiment IDs for everything.
-@app.route("/download/structure/<strain_id>/<transcript_id>")
-def download_structure(strain_id, transcript_id):
-	buf = StructureDownloader(strain_id, transcript_id).generateTxt()
+@app.route("/download/structure/<transcript_id>")
+def download_structure(transcript_id):
+	buf = StructureDownloader([1, 2], transcript_id).generateTxt()
 	return Response(buf, mimetype='text/plain')
 
 @app.route("/download/measurements/<experiment_id>/<transcript_id>")

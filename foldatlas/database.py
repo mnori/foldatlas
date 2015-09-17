@@ -84,7 +84,7 @@ class SequenceImporter():
     # limit on genes to process - for testing purposes
     # None means it imports everything
     # gene_limit = 10
-    gene_limit = 10
+    gene_limit = 100
 
     # Set to true for testing
     chr1_only = False
@@ -684,6 +684,9 @@ class PcaImporter():
             structure.pc1 = float(pca_results[structure.id][0])
             structure.pc2 = float(pca_results[structure.id][1])
             db_session.add(structure)
+
+        print("Did PCA for ["+transcript_id+"]")
+
         db_session.commit()
 
     def do_pca(self, structure_vecs):

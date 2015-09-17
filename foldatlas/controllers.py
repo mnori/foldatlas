@@ -608,8 +608,8 @@ class StructureCirclePlotView():
 
 # Generates plaintext structure text files for download
 class StructureDownloader():
-    def __init__(self, strain_id, transcript_id):
-        self.strain_id = strain_id
+    def __init__(self, structure_prediction_run_ids, transcript_id):
+        self.structure_prediction_run_ids = structure_prediction_run_ids
         self.transcript_id = transcript_id
 
     def generateTxt(self):
@@ -618,24 +618,24 @@ class StructureDownloader():
         # probably need to look at a chunk based system
 
         results = db_session \
-            .query(Structure, StructurePosition, Experiment) \
+            .query(Structure, StructurePosition, StructurePredictionRun) \
             .filter(
-                Structure.id==StructurePosition.structure_id,
-                Structure.experiment_id==Experiment.id,
-                Structure.transcript_id==self.transcript_id
+                Structure.structure_prediction_run_id.in_(self.structure_prediction_run_ids),
+                StructurePredictionRun.id==Structure.structure_prediction_run_id,
+                Structure.transcript_id==self.transcript_id,
+                Structure.id==StructurePosition.structure_id
             ) \
-            .order_by(Structure.experiment_id, Structure.id, StructurePosition.position) \
+            .order_by(Structure.structure_prediction_run_id, Structure.id, StructurePosition.position) \
             .all()
 
         buf = ""
         for result in results:
             structure = result[0]
             structure_position = result[1]
-            experiment = result[2]
+            run = result[2]
 
             buf +=  str(structure.id)+"\t"+ \
-                    str(experiment.description)+"\t"+ \
-                    str(structure.strain_id)+"\t"+ \
+                    str(run.description)+"\t"+ \
                     str(structure.transcript_id)+"\t"+ \
                     str(structure.energy)+"\t"+ \
                     str(structure.pc1)+"\t"+ \
