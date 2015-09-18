@@ -15,9 +15,12 @@ function export_db() {
 }
 
 function import_db() {
-	pretty_print "Importing database"
+	pretty_print "Extracting database..."
 	cd /vagrant/static/downloads/
 	tar xvzf foldatlas.sql.tar.gz
+	echo "Done."
+
+	pretty_print "Importing database..."
 
 	# stops mysql crashing out on import
 	echo "SET GLOBAL max_allowed_packet=1073741824;" | mysql -u root -pvagrant
@@ -25,6 +28,8 @@ function import_db() {
 	# does the actual import
 	mysql -uroot -pvagrant foldatlas < foldatlas.sql
 	rm foldatlas.sql
+
+	echo "Done."
 }
 
 # Grabs lots of genome data files. These will be parsed and used to seed the SNP database.

@@ -640,7 +640,7 @@ class StructureDownloader():
                     str(structure.energy)+"\t"+ \
                     str(structure.pc1)+"\t"+ \
                     str(structure.pc2)+"\t"+ \
-                    str(structure_position.letter)+"\t"+ \
+                    str(structure_position.letter.replace("T", "U"))+"\t"+ \
                     str(structure_position.position)+"\t"+ \
                     str(structure_position.paired_to_position)+"\n"
 
