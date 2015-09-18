@@ -648,8 +648,8 @@ class StructureDownloader():
 
 # Generates plain text nucleotide measurements for user download
 class NucleotideMeasurementDownloader():
-    def __init__(self, experiment_id, transcript_id):
-        self.experiment_id = experiment_id
+    def __init__(self, nucleotide_experiment_id, transcript_id):
+        self.nucleotide_experiment_id = nucleotide_experiment_id
         self.transcript_id = transcript_id
 
     def generateTxt(self):
@@ -661,17 +661,18 @@ class NucleotideMeasurementDownloader():
 
         # Use the ORM to grab all the measurements
         results = db_session \
-            .query(NucleotideMeasurement) \
+            .query(NucleotideMeasurementSet, NucleotideMeasurement) \
             .filter(
-                NucleotideMeasurement.experiment_id==self.experiment_id,
-                NucleotideMeasurement.transcript_id==self.transcript_id
+                NucleotideMeasurementSet.nucleotide_experiment_id==self.nucleotide_experiment_id,
+                NucleotideMeasurementSet.transcript_id==self.transcript_id,
+                NucleotideMeasurementSet.id==NucleotideMeasurement.nucleotide_measurement_set_id
             ) \
             .all()
         
         # index measurements by pos
         measurements = {}
         for result in results:
-            measurements[result.position] = result.measurement
+            measurements[result[1].position] = result[1].measurement
 
         # build the output string
         buf = ""
