@@ -5,5 +5,8 @@
 import sys
 sys.path.insert(0, '/vagrant/foldatlas')
 
+import sys
+print(sys.version)
+
 # now do the import
 from app import app as application

@@ -11,7 +11,6 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Align.Applications import ClustalwCommandline
 from Bio import AlignIO
-from sklearn import decomposition
 
 import settings, os
 import sys
@@ -402,8 +401,7 @@ class TranscriptAligner():
             self.process_transcript_id(transcript_id)
             
     def process_transcript_id(self, transcript_id):
-
-        print("Aligning ["+transcript_id+"]...", end="")
+        print("Aligning ["+transcript_id+"]...")
         sys.stdout.flush()
 
         seqs_to_align = list(Transcript(transcript_id).get_sequences().values())
@@ -637,7 +635,6 @@ class StructureImporter():
 # Carries out PCA using structures
 class PcaImporter():
     def execute(self, experiment_config):
-
         transcript_structures = {}
 
         # Get all transcript IDs for which there are structures
@@ -690,7 +687,7 @@ class PcaImporter():
         db_session.commit()
 
     def do_pca(self, structure_vecs):
-
+        from sklearn import decomposition
         data = list(structure_vecs.values())
 
         # Do PCA.

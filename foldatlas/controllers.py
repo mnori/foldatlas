@@ -1,4 +1,4 @@
-from database import db_session;
+from database import db_session
 from sqlalchemy import and_
 
 # # try to use python2 module in python3
