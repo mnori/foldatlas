@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, send_from_directory
 from sys import argv
 from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, CoverageSearcher, \
 	StructureDiagramView, StructureCirclePlotView, StructureDownloader, \
@@ -9,6 +9,11 @@ import database
 from utils import FastaExporter, FastaSplitter
 
 app = Flask(__name__)
+
+@app.route('/static/<path:path>/<filename>')
+def send_static(path, filename):
+	# probably not very secure but it'll do for now
+	return send_from_directory('/vagrant/static/', path+"/"+filename)
 
 @app.after_request
 def after_request(response):

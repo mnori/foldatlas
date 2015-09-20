@@ -94,7 +94,7 @@ h1 .button {
 	padding: 15px;
 	border: 1px solid #000;
 	background: 
-		url("http://static.foldatlas.dev/assets/header-bg.png"), 
+		url("/static/assets/header-bg.png"), 
 		linear-gradient(to bottom, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* W3C */
 	position: relative;
 }

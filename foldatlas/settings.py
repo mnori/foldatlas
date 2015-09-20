@@ -42,7 +42,7 @@ structures_in_vivo = {
 
 base_path = "/vagrant/foldatlas"
 
-static_base_url = "http://static.foldatlas.dev"
+static_base_url = "/static"
 app_base_url = "http://foldatlas.dev"
 
 genoverse_base = static_base_url+"/genoverse"
