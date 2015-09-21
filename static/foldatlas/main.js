@@ -253,9 +253,10 @@ var BrowserController = Class.extend({
 	// Draw a graph with just 1 row, showing all of the nucleotide measurements
 	// on the same row. Could potentially make this zoomable for more awesomeness
 	drawNucleotideMeasurementsOverview: function(svgID, experimentData) {
-		var yLabelText = (experimentData["type"] == "dms_reactivity") 
-			? "Reactivity"
-			: "Occupancy";
+
+		// var yLabelText = (experimentData["type"] == "dms_reactivity") 
+		// 	? "Reactivity"
+		// 	: "Occupancy";
 
 		var data = experimentData["data"]
 		if (data == null) { // can happen
@@ -265,7 +266,7 @@ var BrowserController = Class.extend({
 		var nDataRows = data.length;
 
 		// Define chart dimensions including axis panelMargins
-		var panelMargin = {top: 15, right: 60, bottom: 30, left: 70}
+		var panelMargin = {top: 15, right: 60, bottom: 30, left: 35}
 		var panelTotDims = {x: 898, y: 100}
 
 		// for showing length string
@@ -325,13 +326,13 @@ var BrowserController = Class.extend({
 			.call(xAxis);
 
 		// Add y-axis label
-		chart.append("text")
-	        .attr("transform", "rotate(-90)")
-	        .attr("y", panelMargin.left) // this is actually X direction, because we rotated.
-	        .attr("x", panelMargin.top - panelDims.y)
-	        .attr("dy", "-2.7em")
-	        .style("text-anchor", "middle")
-	        .text(yLabelText);
+		// chart.append("text")
+	 //        .attr("transform", "rotate(-90)")
+	 //        .attr("y", panelMargin.left) // this is actually X direction, because we rotated.
+	 //        .attr("x", panelMargin.top - panelDims.y)
+	 //        .attr("dy", "-2.7em")
+	 //        .style("text-anchor", "middle")
+	 //        .text(yLabelText);
 
         // Add length label
         var panelDimsX = panelDims.x;
@@ -372,9 +373,9 @@ var BrowserController = Class.extend({
 		// for showing length string
 		var lengthOffset = 10
 
-		var yLabelText = (experimentData["type"] == "dms_reactivity") 
-			? "Reactivity"
-			: "Occupancy";
+		// var yLabelText = (experimentData["type"] == "dms_reactivity") 
+		// 	? "Reactivity"
+		// 	: "Occupancy";
 
 		var data = experimentData["data"]
 		if (data == null) { // can happen
@@ -385,7 +386,7 @@ var BrowserController = Class.extend({
 		var nChartRows = Math.ceil(nDataRows / this.nucsPerRow);
 
 		// Define chart dimensions including axis panelMargins
-		var panelMargin = {top: 15, right: 60, bottom: 30, left: 70}
+		var panelMargin = {top: 15, right: 60, bottom: 30, left: 35}
 		var panelTotDims = {x: 898, y: 100}
 
 		// dims without margins
@@ -510,13 +511,13 @@ var BrowserController = Class.extend({
 		        // .text("Nucleotide");
 
 			// Add y-axis label
-			chart.append("text")
-		        .attr("transform", "rotate(-90)")
-		        .attr("y", panelMargin.left) // this is actually X direction, because we rotated.
-		        .attr("x", (-panelYOffset - (panelMargin.top + (panelDims.y / 2))))
-		        .attr("dy", "-2.7em")
-		        .style("text-anchor", "middle")
-		        .text(yLabelText);
+			// chart.append("text")
+		 //        .attr("transform", "rotate(-90)")
+		 //        .attr("y", panelMargin.left) // this is actually X direction, because we rotated.
+		 //        .attr("x", (-panelYOffset - (panelMargin.top + (panelDims.y / 2))))
+		 //        .attr("dy", "-2.7em")
+		 //        .style("text-anchor", "middle")
+		 //        .text(yLabelText);
 
 	        // Add length label
 	        var panelDimsX = panelDims.x * (nucsThisRow / this.nucsPerRow);

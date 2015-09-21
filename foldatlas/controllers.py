@@ -177,7 +177,7 @@ class NucleotideMeasurementView():
     def __init__(self, transcript_id, strain_id):
         self.transcript_id = transcript_id
         self.strain_id = strain_id
-        self.build_entries([1, 2])
+        self.build_entries([1])
 
     def build_entries(self, experiment_ids):
 

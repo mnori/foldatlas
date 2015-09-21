@@ -1,3 +1,11 @@
+live = False
+
+if live:
+	app_base_url = "http://52.89.80.163"
+	static_base_url = "/static"
+else:
+	app_base_url = "http://foldatlas.dev"
+	static_base_url = "http://static.foldatlas.dev"
 
 # This defines hostname, database name, username and password for connecting to the DB.
 database_uri = "mysql+mysqlconnector://root:vagrant@127.0.0.1/foldatlas?charset=utf8&use_unicode=0"
@@ -41,9 +49,6 @@ structures_in_vivo = {
 }
 
 base_path = "/vagrant/foldatlas"
-
-static_base_url = "/static"
-app_base_url = "http://foldatlas.dev"
 
 genoverse_base = static_base_url+"/genoverse"
 
