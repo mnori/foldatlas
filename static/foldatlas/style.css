@@ -395,12 +395,29 @@ table.coverage-table td.yes {
 	right: 1px;
 }
 
+svg#forna-key {
+	width: 120px;
+	height: 92px;
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	min-width: 0;
+	min-height: 0;
+	z-index: 5;
+}
+
 #forna-container {
 	position: absolute;
 	width: 630px;
 	height: 630px;
+}
+
+#forna-outer_container {
+	position: absolute;
+	width: 630px;
+	height: 630px;
 	top: 40px;
-	right: 1px;
+	right: 1px;	
 }
 
 #forna-overlay {

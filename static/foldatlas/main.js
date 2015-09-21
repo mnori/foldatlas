@@ -188,7 +188,9 @@ var BrowserController = Class.extend({
 		if (measurementData) {
 			var transcriptID = this.getTranscriptID();
 			this.drawNucleotideMeasurements(measurementData[1], transcriptID);
-			this.drawNucleotideMeasurements(measurementData[2], transcriptID);
+
+			// disable ribosome profiling .. for now
+			// this.drawNucleotideMeasurements(measurementData[2], transcriptID);
 		}
 	},
 
