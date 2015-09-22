@@ -529,6 +529,7 @@ svg#forna-key {
 
 .help-example-image {
 	width: 700px;
+	position: relative;
 }
 
 .help-example-image-full {
@@ -544,6 +545,18 @@ svg#forna-key {
 	border: 2px solid #C7D2EF;
 	tab-size: 4;
 	overflow: auto;
+}
+
+.help-marker {
+	text-align: center;
+	border-radius: 50%;
+	border: 2px solid #f00;
+	font-size: 14px;
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	line-height: 18px;
+	background: #fff;
 }
 
 /* D3nome-specific *********************************************************************/

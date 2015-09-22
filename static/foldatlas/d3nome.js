@@ -892,7 +892,7 @@
 			.attr("style", $.proxy(function(d) {
 				var leftVal = this.viewXScale(d.start);
 				var topVal = this.transcriptLaneMargin + getYPos(d) + this.transcriptHeight;
-				var out = 	"left: "+(Math.round(leftVal) + this.horizMargin)+"px; "+
+				var out = 	"left: "+Math.round(leftVal)+"px; "+
 							"top: "+topVal+"px";
 				return out;
 			}, this))

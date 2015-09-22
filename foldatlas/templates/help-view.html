@@ -5,9 +5,36 @@
     FoldAtlas includes a genome browser called <i>d3nome</i>, which shows intron and exon boundaries for each transcript, along with features that are near to the transcript of interest. This facilitates genome exploration and identification of interesting transcripts.
 </p>
 
-[show a picture of the genome browser here]
+<div class="help-example-image">
+    <img style="width: 700px;" src="{{ settings.static_base_url }}/assets/help/d3nome.png" />
 
-[show bullet list describing each element]
+    <div class="help-marker" style="top: 20px; left: 35px;">1</div>
+    <div class="help-marker" style="top: 178px; left: 108px;">2</div>
+    <div class="help-marker" style="top: 77px; left: 310px;">3</div>
+    <div class="help-marker" style="top: 219px; left: 339px;">4</div>
+    <div class="help-marker" style="top: 219px; left: 566px;">5</div>
+</div>
+
+<p>
+    <ol>
+        <li>
+            <b>Navigation bar:</b>
+            This shows the chromosome coordinates, and can be clicked and dragged to change the region of the chromosome displayed.
+        </li><li>
+            <b>Viewing area:</b>
+            Clicking and dragging this region will change the region of the chromosome displayed. The mouse wheel can also be used here to zoom in and out.
+        </li><li>
+            <b>Gene:</b>
+            Genes are marked using boxes, with curved lines indicating introns. Filled boxes indicate coding sequence (CDS), whilst unfilled boxes are untranslated regions (UTRs). Green genes are transcribed on the forward strand, whilst red genes are transcribed on the reverse strand. Clicking the gene label will show detailed information about the gene.
+        </li><li>
+            <b>Resize bar:</b>
+            Can be dragged downward to increase the view region.
+        </li><li>
+            <b>Chromosome selector:</b>
+            This menu can be used to change the chromosome displayed.
+        </li>
+    </ol>
+</p>
 
 <h2>Searching for transcripts</h2>
 <h3>Go to a known transcript ID</h3>
@@ -158,22 +185,22 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
 <p>
     <ol>
         <li>
-            <b>Structure Prediction Run:</b>
+            <b>Structure prediction run:</b>
             This represents a single genome-scale RNA structure prediction run. At present all of these have been generated using the RNAstructure [REF] method.
         </li><li>
             <b>Structure:</b>
             Represents a single structure that has been predicted as part of a structure prediction run. This is generated from a single transcript sequence. Includes a free energy estimate and data for PCA plots.
         </li><li>
-            <b>Structure Position:</b>
+            <b>Structure position:</b>
             Stores the base pairing attributes of a single nucleotide position within a structure prediction. The base pairing information can be used to plot RNA structure diagrams.
         </li><li>
-            <b>Nucleotide Experiment:</b>
+            <b>Nucleotide experiment:</b>
             Represents a genome-scale experiment that involves taking measurements at specific nucleotide positions. At present this is used to represent DMS reactivity data. In the future, data from SHAPE and ribosome profiling experiments will also be represented by this entity.
         </li><li>
-            <b>Nucleotide Measurement Set:</b>
+            <b>Nucleotide measurement Set:</b>
             Represents a set of DMS measurements for a single transcript. Includes a property to store a per-nucleotide coverage value for the entire transcript.
         </li><li>
-            <b>Nucleotide Measurement:</b>
+            <b>Nucleotide measurement:</b>
             Represents a single DMS reactivity measurement, at a specific nucleotide position.
         </li>
     </ol>
