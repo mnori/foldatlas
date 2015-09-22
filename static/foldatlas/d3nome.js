@@ -102,7 +102,9 @@
 			"<div id=\"d3nome-canvas-container\" style=\"width: "+this.totSvgDims.x+"px;\">"+
 				"<svg id=\"d3nome-canvas\"></svg>"+
 			"</div>"+
-			"<div id=\"d3nome-resize-bar\" class=\"ui-resizable-handle ui-resizable-s\" style=\"width: "+this.totSvgDims.x+"px;\">"+
+			"<div id=\"d3nome-resize-bar\" class=\"ui-resizable-handle ui-resizable-s\" style=\""+
+					"width: "+this.innerSvgDims.x+"px; "+
+					"left: "+this.horizMargin+"px;\">"+
 				"..."+
 			"</div>";
 
@@ -221,14 +223,15 @@
 		var styleStr = 
 			"width: "+this.viewDims.x+"px; "+
 			"height: "+(this.viewDims.y - this.navHeight)+"px; "+
-			"top: "+(this.navHeight * 2)+"px;";
+			"top: "+(this.navHeight * 2)+"px; "+
+			"left: "+(this.horizMargin)+"px;";
 		d3.select("#d3nome-overlay").attr("style", styleStr)
 		d3.select("#d3nome-underlay").attr("style", styleStr)
 	},
 
 	calcDims: function() {
-		this.navDims = {x: this.totSvgDims.x, y: this.navHeight};
-		this.viewDims = {x: this.totSvgDims.x, y: (this.totSvgDims.y - this.navDims.y)};
+		this.navDims = {x: this.innerSvgDims.x, y: this.navHeight};
+		this.viewDims = {x: this.innerSvgDims.x, y: (this.innerSvgDims.y - this.navDims.y)};
 	},
 
 	// Set up the chromosome scrollbar.
@@ -301,7 +304,7 @@
 		    .attr("class", "d3nome-x d3nome-axis")
 		    .attr("width", this.navDims.x)
 		    .attr("height", this.navDims.y)
-		    .attr("transform", "translate("+0+","+(this.navDims.y)+")")
+		    .attr("transform", "translate("+this.horizMargin+","+(this.navDims.y)+")")
 		    .call(this.viewXAxis)
 
 		// add grid lines too
@@ -380,7 +383,7 @@
 		this.navBoxNode
 		    .selectAll("rect")
 		    .attr("height", this.navDims.y)
-		    .attr("transform", "translate("+0+","+0+")")
+		    .attr("transform", "translate("+this.horizMargin+","+0+")")
 
 	 	// navbar - add x axis
 		svg.append("g")
@@ -388,7 +391,7 @@
 		    .attr("id", "navbar-x-axis")
 		    .attr("width", this.navDims.x)
 		    .attr("height", this.navDims.y)
-		    .attr("transform", "translate(0,"+this.navDims.y+")")
+		    .attr("transform", "translate("+this.horizMargin+","+this.navDims.y+")")
 		    .call(this.navXAxis)
 
 		this.updateBrush(this.navBoundaries);
@@ -415,12 +418,12 @@
 			.attr("class", "d3nome-grid-bg")
 			.attr("width", this.viewDims.x)
 			.attr("height",	this.viewDims.y)
-			.attr("x", 0)
+			.attr("x", this.horizMargin)
 			.attr("y", this.navDims.y + 1)
 
 		this.gridElement = this.viewElement.append("g")
 		    .attr("class", "d3nome-x d3nome-grid")
-		    .attr("transform", "translate("+0+","+(this.viewDims.y + 1)+")")
+		    .attr("transform", "translate("+this.horizMargin+","+(this.viewDims.y + 1)+")")
 			.call(this.viewXGrid);
 	},
 
@@ -650,7 +653,7 @@
 			.attr('class', "d3nome-transcript")
 			.append("rect")
 			.attr("class", function(d) { return "d3nome-gene "+d.direction; })
-			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start) + this.horizMargin; }, this))
 			.attr("y", $.proxy(function(d, i) { 
 				return this.navDims.y + this.geneLaneMargin + getYPos(d); 
 			}, this))
@@ -870,7 +873,7 @@
 			.attr("style", $.proxy(function(d) {
 				var leftVal = this.viewXScale(d.start);
 				var topVal = this.transcriptLaneMargin + getYPos(d) + this.transcriptHeight;
-				var out = 	"left: "+Math.round(leftVal)+"px; "+
+				var out = 	"left: "+(Math.round(leftVal) + this.horizMargin)+"px; "+
 							"top: "+topVal+"px";
 				return out;
 			}, this))
@@ -901,7 +904,7 @@
 			.enter()
 			.append("rect")
 			.attr("class", function(d) { return "d3nome-feature-utr "+d.direction; })
-			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start) + this.horizMargin; }, this))
 			.attr("y", $.proxy(function(d, i) { 
 				return this.navDims.y + this.transcriptLaneMargin + getYPos(d); 
 			}, this))
@@ -917,7 +920,7 @@
 			.enter()
 			.append("rect")
 			.attr("class", function(d) { return "d3nome-feature-cds "+d.direction; })
-			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start); }, this))
+			.attr("x", $.proxy(function(d, i) { return this.viewXScale(d.start) + this.horizMargin; }, this))
 			.attr("y", $.proxy(function(d, i) { 
 				return this.navDims.y + this.transcriptLaneMargin + getYPos(d); 
 			}, this))
@@ -938,11 +941,11 @@
 				var bulgeOffset = this.intronBulgeOffset;
 
 				var yOffset = this.navDims.y + this.transcriptLaneMargin + getYPos(d) + 1;
-				var startStr = this.viewXScale(d.start)+" "+yOffset;
-				var endStr = this.viewXScale(d.end + 1)+" "+yOffset;
+				var startStr = (this.viewXScale(d.start) + this.horizMargin)+" "+yOffset;
+				var endStr = (this.viewXScale(d.end + 1) + this.horizMargin)+" "+yOffset;
 
-				var control1 = this.viewXScale(d.start+bulgeOffset)+" "+(yOffset-bulge);
-				var control2 = this.viewXScale((d.end + 1)-bulgeOffset)+" "+(yOffset-bulge);
+				var control1 = (this.viewXScale(d.start+bulgeOffset) + this.horizMargin)+" "+(yOffset-bulge);
+				var control2 = (this.viewXScale((d.end + 1)-bulgeOffset) + this.horizMargin)+" "+(yOffset-bulge);
 
 				return "M"+startStr+" C "+control1+", "+control2+", "+endStr;
 			}, this))
