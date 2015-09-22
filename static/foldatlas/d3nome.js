@@ -230,8 +230,8 @@
 	},
 
 	calcDims: function() {
-		this.navDims = {x: this.innerSvgDims.x, y: this.navHeight};
-		this.viewDims = {x: this.innerSvgDims.x, y: (this.innerSvgDims.y - this.navDims.y)};
+		this.navDims = {x: this.totSvgDims.x - (this.horizMargin * 2), y: this.navHeight};
+		this.viewDims = {x: this.totSvgDims.x - (this.horizMargin * 2), y: (this.totSvgDims.y - this.navDims.y)};
 	},
 
 	// Set up the chromosome scrollbar.
