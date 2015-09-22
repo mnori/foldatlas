@@ -172,9 +172,7 @@
 	initChromosomeSelector: function() {
 
 		// Transform native element to fancy jquery version
-		$("#d3nome-chromosome-selector").selectmenu({
-			width: 150
-		});
+		$("#d3nome-chromosome-selector").selectmenu({width: 150});
 
 		$("#d3nome-chromosome-selector").on(
 			"selectmenuselect",
@@ -185,6 +183,8 @@
 				}
 			}, this)
 		);
+
+		$("#d3nome-chromosome-selector-button").css({"right": (10 + this.horizMargin)+"px"});
 	},
 
 	chrIDToInd: function(chrID) {
@@ -413,13 +413,16 @@
 		    .tickSize(this.viewDims.y - this.navDims.y)
 		    .outerTickSize(0);
 
-		// using rect gives us a nice background
+		// Light grey background for the main gene display area
 		this.viewElement.append("rect")
 			.attr("class", "d3nome-grid-bg")
 			.attr("width", this.viewDims.x)
 			.attr("height",	this.viewDims.y)
 			.attr("x", this.horizMargin)
 			.attr("y", this.navDims.y + 1)
+
+		// White backgrounded flanks to stop the genes poking out the sides
+		
 
 		this.gridElement = this.viewElement.append("g")
 		    .attr("class", "d3nome-x d3nome-grid")

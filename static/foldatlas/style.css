@@ -689,7 +689,7 @@ svg#forna-key {
 .d3nome-container .ui-selectmenu-button {
 	position: absolute;
 	bottom: 10px;
-	right: 20px;
+	/*right: 20px;*/
 	z-index: 20;
 
 	/* generic button shiz */
