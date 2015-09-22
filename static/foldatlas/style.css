@@ -658,6 +658,12 @@ svg#forna-key {
 	fill: #f6f6f6;
 }
 
+.d3nome-flank-overlay {
+	position: absolute;
+	background-color: #fff;
+	z-index: 9000;
+}
+
 .d3nome-grid path,
 .d3nome-grid line {
 	fill: none;

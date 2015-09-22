@@ -47,7 +47,7 @@
 
 		// total dimensions of the browser 
 		// TODO use config values
-		this.horizMargin = 10;
+		this.horizMargin = 20;
 
 		this.innerSvgDims = {x: 902, y: 300}
 		this.totSvgDims = {x: 902 + (this.horizMargin * 2), y: 300};
@@ -106,7 +106,9 @@
 					"width: "+this.innerSvgDims.x+"px; "+
 					"left: "+this.horizMargin+"px;\">"+
 				"..."+
-			"</div>";
+			"</div>"+
+			"<div class=\"d3nome-flank-overlay l\"></div>"+
+			"<div class=\"d3nome-flank-overlay r\"></div>";
 
 		// Draw chromosome select menu
 		buf += 
@@ -219,6 +221,7 @@
 		this.loadData();
 	},
 
+	// Change all the overlay dimensions to reflect the new height of the plotting area
 	setOverlayDims: function() {
 		var styleStr = 
 			"width: "+this.viewDims.x+"px; "+
@@ -227,6 +230,22 @@
 			"left: "+(this.horizMargin)+"px;";
 		d3.select("#d3nome-overlay").attr("style", styleStr)
 		d3.select("#d3nome-underlay").attr("style", styleStr)
+
+		// Set size of left flank cover - this prevents genes poking out the sides
+		$(".d3nome-flank-overlay.l").css({
+			"top": (this.navHeight * 2)+"px",
+			"left": "0px",
+			"width": this.horizMargin+"px",
+			"height": (this.viewDims.y - this.navHeight)+"px"
+		});
+
+		// Same but for the right hand side
+		$(".d3nome-flank-overlay.r").css({
+			"top": (this.navHeight * 2)+"px",
+			"left": (this.viewDims.x + this.horizMargin + 1)+"px",
+			"width": this.horizMargin+"px",
+			"height": (this.viewDims.y - this.navHeight)+"px"
+		});
 	},
 
 	calcDims: function() {
@@ -397,21 +416,12 @@
 		this.updateBrush(this.navBoundaries);
 
 		// this.loadData(this.chromosomes[this.selectedChromosome].id, this.navBoundaries[0], this.navBoundaries[1]);
-
 		this.loadData();
 	},
 
 	setXGrid: function() {
 		this.viewElement.selectAll(".d3nome-x.d3nome-grid").remove()
-		this.viewElement.selectAll(".d3nome-x.d3nome-grid rect").remove()
-
-		this.viewXGrid = d3.svg.axis()
-		    .scale(this.viewXScale)
-		    .orient("top")
-		    .ticks(8)
-		    .tickFormat("")
-		    .tickSize(this.viewDims.y - this.navDims.y)
-		    .outerTickSize(0);
+		this.viewElement.selectAll(".d3nome-grid-bg").remove()
 
 		// Light grey background for the main gene display area
 		this.viewElement.append("rect")
@@ -419,10 +429,16 @@
 			.attr("width", this.viewDims.x)
 			.attr("height",	this.viewDims.y)
 			.attr("x", this.horizMargin)
-			.attr("y", this.navDims.y + 1)
+			.attr("y", this.navDims.y + 1);
 
-		// White backgrounded flanks to stop the genes poking out the sides
-		
+		// Add the gridlines on top of the grey background
+		this.viewXGrid = d3.svg.axis()
+		    .scale(this.viewXScale)
+		    .orient("top")
+		    .ticks(8)
+		    .tickFormat("")
+		    .tickSize(this.viewDims.y - this.navDims.y)
+		    .outerTickSize(0);
 
 		this.gridElement = this.viewElement.append("g")
 		    .attr("class", "d3nome-x d3nome-grid")
