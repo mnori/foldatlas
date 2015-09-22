@@ -713,11 +713,12 @@ svg#forna-key {
 	line-height: 15px;
 	position: relative;
 	padding-left: 20px;
+	font-family: Ubuntu, Tahoma, Geneva, sans-serif;
 }
 
 /* Adds the arrow to the select button */
 .d3nome-container .ui-selectmenu-button .ui-selectmenu-text:before {
-    position:absolute;
+    position: absolute;
     font-family: FontAwesome;
     top:0;
     left: 0px;
@@ -755,6 +756,7 @@ svg#forna-key {
 	font-size: 16px;
 	padding: 5px 10px;
 	background-image: none;
+	font-family: Ubuntu, Tahoma, Geneva, sans-serif;
 }
 
 #d3nome-chromosome-selector-menu .ui-menu-item {

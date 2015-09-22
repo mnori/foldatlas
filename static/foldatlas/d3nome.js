@@ -43,11 +43,14 @@
 		this.selectedChromosome = config.selectedChromosome; 
 
 		// function for fetching and parsing data into the right format.
-		this.fetchData = this.config.fetchData 
+		this.fetchData = this.config.fetchData;
 
 		// total dimensions of the browser 
 		// TODO use config values
-		this.totSvgDims = {x: 902, y: 300}
+		this.horizMargin = 10;
+
+		this.innerSvgDims = {x: 902, y: 300}
+		this.totSvgDims = {x: 902 + (this.horizMargin * 2), y: 300};
 
 		// Left / right padding
 		// Prevents labels being chopped off at the sides
@@ -96,7 +99,7 @@
 
 		// Draw canvas and its resize bar
 		var buf = 	
-			"<div id=\"d3nome-canvas-container\" style=\"width: "+this.totSvgDims.x+"px; \">"+
+			"<div id=\"d3nome-canvas-container\" style=\"width: "+this.totSvgDims.x+"px;\">"+
 				"<svg id=\"d3nome-canvas\"></svg>"+
 			"</div>"+
 			"<div id=\"d3nome-resize-bar\" class=\"ui-resizable-handle ui-resizable-s\" style=\"width: "+this.totSvgDims.x+"px;\">"+
@@ -121,8 +124,11 @@
 
 		// Add the HTML to the container
 		$(this.config.container).html(buf);
-		
-		$(this.config.container).css({width: this.totSvgDims.x+"px"});
+		$(this.config.container).css({
+			"width": this.totSvgDims.x+"px",
+			"margin-left": (-this.horizMargin)+"px",
+			"margin-right": (-this.horizMargin)+"px"
+		});
 
 		// Initialise the chromosome selector menu
 		this.initChromosomeSelector();
@@ -146,6 +152,7 @@
 
 			// set the new canvas height
 			$("#d3nome-canvas").height(this.totSvgDims.y);
+			$("#d3nome-canvas").width(this.totSvgDims.x);
 
 			// must also set the overlay height
 			this.setOverlayDims();
