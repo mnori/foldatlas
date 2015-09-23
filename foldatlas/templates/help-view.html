@@ -2,7 +2,7 @@
 
 <h2>Genome browser</h2>
 <p>
-    FoldAtlas includes a genome browser called <i>d3nome</i>, which shows intron and exon boundaries for each transcript, along with features that are near to the transcript of interest. This facilitates genome exploration and identification of interesting transcripts.
+    FoldAtlas includes a simple genome browser called <i>d3nome</i>, which shows intron and exon boundaries for each transcript, along with features that are near to the transcript of interest. This facilitates genome exploration and identification of interesting transcripts.
 </p>
 
 <div class="help-example-image">
@@ -39,7 +39,7 @@
 <h2>Searching for transcripts</h2>
 <h3>Go to a known transcript ID</h3>
 <p>
-    To search for a known transcript identifier (e.g. the TAIR identifier "AT1G01010.1"), hit <b>Search</b> in the title bar, followed by the <b>Transcript ID</b> tab. Next, the transcript transcript ID should be entered and the <b>Search</b> button pressed. This will search the FoldAtlas database and jump to the profile page of the first match.
+    To search for a known transcript identifier (e.g. the TAIR [REF] identifier "AT1G01010.1"), <b>Search</b> in the title bar should be pressed, followed by the <b>Transcript ID</b> tab. Next, the transcript transcript ID should be entered and the <b>Search</b> button pressed. This will search the FoldAtlas database and jump to the profile page of the first match.
 </p>
 <img class="help-example-image" src="{{ settings.static_base_url }}/assets/help/search-transcript-id.png" />
 
@@ -72,13 +72,13 @@
 </p><p>
     Clicking a dot shows detailed information about the structure. A red dot colour indicates lower free energy, i.e. a more favourable structure. The minimum free energy (MFE) structure is visualised by default.
 </p><p>
-    The method for using PCA with RNA structures has been described in an earlier work [REF], and involves generating a vector of length <i>n</i>, where <i>n</i> is the number of nucleotides. The value at each position in the vector is set to either 0 if the corresponding base is unpaired, or 1 if paired. The vectors are then entered into the PCA method [REF], with each vector position as a dimension.
+    The method for using PCA with RNA structures has been described in an earlier work [REF], and involves generating a vector of length <i>n</i>, where <i>n</i> is the number of nucleotides. The value at each position in the vector is set to either 0 if the corresponding base is unpaired, or 1 if paired. The vectors are then entered into the PCA method, with each vector position as a dimension.
 </p>
 
 <h3>Circle plots for base pairing visualisation</h3>
 <img class="help-example-image-small" src="{{ settings.static_base_url }}/assets/help/circle.png" />
 <p>
-    The circle plot can be used to intuitively visualise base pairing in a predicted RNA structure [REF]. Bases are arranged in a circle according to their sequence position, and lines drawn between bases indicate pairing. The free energy estimate is displayed in the top right corner.
+    The circle plot can be used to intuitively visualise base pairing in a predicted RNA structure. Bases are arranged in a circle according to their sequence position, and lines drawn between bases indicate pairing. The free energy estimate is displayed in the top right corner.
 </p>
 
 <h3>Structure diagrams for fold visualisation</h3>
@@ -222,7 +222,7 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
             A feature describes start and stop boundaries within a chromosome that correspond to coding sequences (CDSs), untranslated regions (UTRs) or introns. By combining  features and chromosome sequences, it is possible to find the sequence of a transcript.
         </li><li>
             <b>Gene Location:</b>
-            A gene location contains redundant information about the start and stop boundaries of a gene with respect to the genome sequence of a particular strain. This data is used to quickly calculate gene lengths, and to visualise gene boundaries in the integrated <i>d3nome</i> genome browser.
+            A gene location contains redundant information about the start and stop boundaries of a gene with respect to the genome sequence of a particular strain. These data are used to quickly calculate gene lengths, and to visualise gene boundaries in the integrated <i>d3nome</i> genome browser.
         </li><li>
             <b>Gene:</b>
             FoltAtlas gene entities are generic, i.e. are shared between different strains. A gene can therefore have multiple strain-specific locations, and can also be associated with multiple transcripts, representing alternative splice forms.
@@ -234,6 +234,20 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
 </p>
 
 <h2>References</h2>
+
+<ul>
+    <li>
+        Lamesch, P. <i>et al</i>., 2011. The Arabidopsis Information Resource (TAIR): improved gene annotation and new tools. Nucleic Acids Research 40, D1202–1210.
+    </li><li>
+        Mathews, D. <i>et al</i>., 2004. Incorporating chemical modification constraints into a dynamic programming algorithm for prediction of RNA secondary structure. PNAS 101, 7287–7292.
+    </li><li>
+        Ding, Y. <i>et al</i>., 2014. In vivo genome-wide profiling of RNA secondary structure reveals novel regulatory features. Nature 505, 696–700.
+    </li><li>
+        Deigan, K. <i>et al</i>., 2008. Accurate SHAPE directed RNA structure determination. PNAS 106, 97-102.
+    </li><li>
+        Halvorsen, M. <i>et al</i>., 2010. Disease-associated mutations that alter the RNA structural ensemble. PLoS Genetics 6, e1001074.
+    </li>
+</ul>
 
 <!--
 
