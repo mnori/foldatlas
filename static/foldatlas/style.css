@@ -793,3 +793,11 @@ svg#forna-key {
 	background-image: none;
 }
 
+.ref {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.ref.highlighted {
+	background-color: #beb;
+}

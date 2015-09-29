@@ -27,6 +27,8 @@ var BrowserController = Class.extend({
 			this.onBackForward(url);
 		}, this));
 
+		this.initHelpLinks();
+
 	},
 
 	// URLS //////////////////////////////////////////////////////////
@@ -34,6 +36,10 @@ var BrowserController = Class.extend({
 	// This countains all the dynamic URL mappings to JS and titles
 	routeUrl: function(urlIn) {
 		urlIn = ""+urlIn;
+
+		if (urlIn.indexOf("#") != -1) { // internal # link - ignore
+			return;
+		}
 
 		if (urlIn.indexOf("/search") != -1) {
 			this.showHideLoading(); // just for consistency
@@ -71,7 +77,28 @@ var BrowserController = Class.extend({
 			$("#help").html(html);
 			$("#transcript-data").empty();
 			this.hideLoading();
+			this.initHelpLinks();
 		});
+	},
+
+	initHelpLinks: function() {
+		// Attach listeners to each element
+		$(".ref-link").each($.proxy(function(key, element) {
+			var element = $(element)
+			element.click(function() {
+
+				// Highlight reference when link is clicked.
+				// Remove highlighting from all other references.
+				var id = element.attr("href").replace("#", "");
+				$(".ref-link").each($.proxy(function(key, element) {
+					var element = $(element);
+					element.removeClass("highlighted");
+				}, this))
+				$("#"+id).addClass("highlighted");
+
+				console.log($("#"+id))
+			})
+		}, this));
 	},
 
 	getTranscriptID: function(urlIn) {
@@ -751,7 +778,7 @@ var CoverageSearchController = Class.extend({
 			$("#search-coverage-data").html(results);
 
 			$(".transcript-row").each($.proxy(function(key, element) {
-				element = $(element)
+				var element = $(element)
 				element.click($.proxy(function(ev) {
 					ev.preventDefault()
 					var transcript_id = element.attr("data-transcript-id")
