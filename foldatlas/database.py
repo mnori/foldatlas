@@ -667,26 +667,36 @@ class PcaImporter():
     
     def process_transcript_id(self, experiment_config, transcript_id):
 
+        # Fetch all of the structures matching the given transcript ID.
         # this is an implicit join - no need to use join() here.
         results = db_session \
-            .query(Structure, StructurePosition) \
+            .query(Structure) \
             .filter(
-                StructurePosition.structure_id==Structure.id,
                 Structure.structure_prediction_run_id==experiment_config["structure_prediction_run_id"],
                 Structure.transcript_id==transcript_id
             ) \
-            .order_by(Structure.id, StructurePosition.position) \
+            .order_by(Structure.id) \
             .all()
 
-        # Get all the structures and structure_position elements for this transcript_id
-        # Also keep a store of the structure objects
+        # Map the data into a nice structure, including binary vectors describing what's
+        # paired and unpaired.
         structure_vecs = {}
         structures = {}
-        for structure, structure_position in results:
-            if structure.id not in structure_vecs:
-                structure_vecs[structure.id] = []
-            structure_vecs[structure.id].append(1 if structure_position.paired_to_position != 0 else 0)
+        for structure in results:
+
+            # Map structure IDs to structures
             structures[structure.id] = structure
+
+            # Initialise binary vector
+            structure_vec = []
+
+            # Fill the binary vector
+            bits = structure.structure.split("\t")
+            for value_str in bits:
+                structure_vec.append(1 if value_str != "0" else 0)
+
+            # Store the vector
+            structure_vecs[structure.id] = structure_vec
 
         # Do PCA using structure vectors
         pca_results = self.do_pca(structure_vecs)
