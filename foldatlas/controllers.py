@@ -515,7 +515,7 @@ class StructureDiagramView():
         dot_bracket_str = ""
 
         # Get sequence string from Transcript entity
-        seq_str = str(results[0][1].get_sequence().seq)
+        seq_str = results[0][1].get_sequence_str()
 
         for curr_position in range(1, len(positions) + 1):
             paired_to_position = positions[curr_position - 1]
@@ -620,35 +620,44 @@ class StructureDownloader():
 
     def generateTxt(self):
 
-        # NOTE - more than 20 structures is likely to crash this shizzle
-        # probably need to look at a chunk based system
-
+        # Fetch the data
         results = db_session \
-            .query(Structure, StructurePosition, StructurePredictionRun) \
+            .query(Structure, StructurePredictionRun, Transcript) \
             .filter(
-                Structure.structure_prediction_run_id.in_(self.structure_prediction_run_ids),
                 StructurePredictionRun.id==Structure.structure_prediction_run_id,
+                Structure.structure_prediction_run_id.in_(self.structure_prediction_run_ids),
                 Structure.transcript_id==self.transcript_id,
-                Structure.id==StructurePosition.structure_id
+                Transcript.id==self.transcript_id
             ) \
-            .order_by(Structure.structure_prediction_run_id, Structure.id, StructurePosition.position) \
+            .order_by(
+                Structure.structure_prediction_run_id, 
+                Structure.id
+            ) \
             .all()
 
+        # Generate tab delimited text from the data
         buf = ""
         for result in results:
             structure = result[0]
-            structure_position = result[1]
-            run = result[2]
+            run = result[1]
+            transcript = result[2]
 
-            buf +=  str(structure.id)+"\t"+ \
-                    str(run.description)+"\t"+ \
-                    str(structure.transcript_id)+"\t"+ \
-                    str(structure.energy)+"\t"+ \
-                    str(structure.pc1)+"\t"+ \
-                    str(structure.pc2)+"\t"+ \
-                    str(structure_position.letter.replace("T", "U"))+"\t"+ \
-                    str(structure_position.position)+"\t"+ \
-                    str(structure_position.paired_to_position)+"\n"
+            seq_str = transcript.get_sequence_str()
+            positions = structure.get_positions()
+
+            for curr_position in range(1, len(positions) + 1):
+                paired_to_position = positions[curr_position - 1]
+                letter = seq_str[curr_position - 1].replace("T", "U")
+
+                buf +=  str(structure.id)+"\t"+ \
+                        str(run.description)+"\t"+ \
+                        str(structure.transcript_id)+"\t"+ \
+                        str(structure.energy)+"\t"+ \
+                        str(structure.pc1)+"\t"+ \
+                        str(structure.pc2)+"\t"+ \
+                        str(letter)+"\t"+ \
+                        str(curr_position)+"\t"+ \
+                        str(paired_to_position)+"\n"
 
         return buf
 

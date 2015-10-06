@@ -111,6 +111,9 @@ class Transcript(Base):
         else:
             return None
 
+    def get_sequence_str(self, strain_id=None):
+        return str(self.get_sequence(strain_id).seq)
+
 # Describes a strain.
 class Strain(Base):
     __tablename__ = "strain"
