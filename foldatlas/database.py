@@ -23,16 +23,16 @@ Base.query = db_session.query_property()
 
 import models
 
-from models import Strain, Gene, Transcript, Feature, NucleotideMeasurement, \
+from models import Strain, Gene, Transcript, Feature, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, NucleotideMeasurementSet, \
-    Structure
+    Structure, NucleotideMeasurement
 
 def import_db():
     try:
 
         print("Rebuilding schema...")
 
-        # Delete the whole DB and recreate again
+        # Delete the whole DB and recreate again, much more reliable than using ORM
         db_session.execute("DROP DATABASE "+settings.db_name)
         db_session.execute("CREATE DATABASE "+settings.db_name)
         db_session.execute("USE "+settings.db_name)
@@ -44,13 +44,21 @@ def import_db():
         # Add the annotations
         SequenceImporter().execute() 
 
-        # Add DMS reactivities
-        NucleotideMeasurementImporter().execute(settings.dms_reactivities_experiment)
-        NucleotideMeasurementSetImporter().execute(settings.dms_reactivities_experiment)
+        # Add DMS reactivities. This should be raw reactivities from plus and minus first
+        # Includes adding coverage
+        # ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
+
+        ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
+        CoverageImporter().execute(settings.dms_reactivities_experiment)
+
+        # Now normalise the data
+
+
+        # CoverageImporter().execute(settings.dms_reactivities_experiment)
         
-        # Add ribosome profiling
-        NucleotideMeasurementImporter().execute(settings.ribosome_profile_experiment)
-        NucleotideMeasurementSetImporter().execute(settings.ribosome_profile_experiment)
+        # Add ribosome profiling (Disabled for now...)
+        # ReactivitiesImporter().execute(settings.ribosome_profile_experiment)
+        # CoverageImporter().execute(settings.ribosome_profile_experiment)
 
         # Import all available RNA structures
         StructureImporter().execute(settings.structures_in_silico)
@@ -449,7 +457,8 @@ class TranscriptAligner():
         return transcript_ids
 
 # Loads coverage data from a single file into the database.
-class NucleotideMeasurementSetImporter():
+# TODO ditch this and put coverages in ReactivitiesRaw instead
+class CoverageImporter():
     def execute(self, experiment_config):
         from sqlalchemy import update
 
@@ -482,7 +491,7 @@ class NucleotideMeasurementSetImporter():
         db_session.commit()
 
 # Inserts DMS reactivities into the DB.
-class NucleotideMeasurementImporter():
+class ReactivitiesImporter():
 
     def execute(self, experiment_config):
 
@@ -634,7 +643,7 @@ class StructureImporter():
 
                 else:
                     to_pos = bits[4]
-                    structure.add_position(to_pos)
+                    structure.structure.add_value(to_pos)
 
         db_session.add(structure)
         db_session.commit() # insert remaining data into DB
