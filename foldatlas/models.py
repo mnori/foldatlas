@@ -257,36 +257,58 @@ class NucleotideMeasurementSet(Base):
     nucleotide_measurement_run_id = Column(Integer, ForeignKey("nucleotide_measurement_run.id"))
     transcript_id = Column(String(256), ForeignKey("transcript.id"))
     coverage = Column(Float, nullable=False) 
+    positions = Column(Text, nullable=False)
 
-    def __init__(self, nucleotide_measurement_run_id=None, transcript_id=None, coverage=None):
+    def __init__(
+            self, 
+            nucleotide_measurement_run_id=None, 
+            transcript_id=None, 
+            coverage=None,
+            positions=""):
 
         self.nucleotide_measurement_run_id = nucleotide_measurement_run_id
         self.transcript_id = transcript_id
         self.coverage = coverage
+        self.positions = positions
+
+    # TODO mix these methods in somehow with those of Structure - since similar data is used
+    # Add a single position to the structure. The value points to another place that this 
+    # particular position pairs with.
+    def add_position(self, value):
+        value = str(value)
+        if self.structure == "":
+            self.structure = value
+        else:
+            self.structure += "\t"+value
+
+    # Get positions array by extracting the structure string
+    def get_positions(self):
+        positions = list(map(int, self.structure.split("\t")))
+        return positions
 
     def __repr__(self):
         return "<NucleotideMeasurementSet %r>" % (self.id)
 
 # Represents one measurement, at a particular nucleotide position.
-class NucleotideMeasurement(Base):
-    __tablename__ = "nucleotide_measurement"
+# class NucleotideMeasurement(Base):
+#     __tablename__ = "nucleotide_measurement"
 
-    nucleotide_measurement_set_id = Column(Integer, 
-        ForeignKey("nucleotide_measurement_set.id"), primary_key=True, autoincrement=True)
+#     nucleotide_measurement_set_id = Column(Integer, 
+#         ForeignKey("nucleotide_measurement_set.id"), primary_key=True, autoincrement=True)
 
-    # if there's no measurement at a position, there is no corresponding row.
-    position = Column(Integer, autoincrement=False, primary_key=True) 
-    measurement = Column(Float, nullable=False) 
+#     # if there's no measurement at a position, there is no corresponding row.
+#     position = Column(Integer, autoincrement=False, primary_key=True) 
+#     measurement = Column(Float, nullable=False) 
 
-    def __init__(self, nucleotide_measurement_set_id=None, position=None, measurement=None):
-        self.nucleotide_measurement_set_id = nucleotide_measurement_set_id
-        self.position = position
-        self.measurement = measurement
+#     def __init__(self, nucleotide_measurement_set_id=None, position=None, measurement=None):
+#         self.nucleotide_measurement_set_id = nucleotide_measurement_set_id
+#         self.position = position
+#         self.measurement = measurement
 
-    def __repr__(self):
-        return "<NucleotideMeasurement %r-%r-%r-%r>" % (
-            self.nucleotide_measurement_set_id, self.position, self.measurement
-        )
+#     def __repr__(self):
+#         return "<NucleotideMeasurement %r-%r-%r-%r>" % (
+#             self.nucleotide_measurement_set_id, self.position, self.measurement
+#         )
 
 # Represents a structure prediction for a single RNA sequence
 class Structure(Base):
@@ -318,7 +340,7 @@ class Structure(Base):
         else:
             self.structure += "\t"+value
 
-    # Get positions array by unmapping the structure string
+    # Get positions array by extracting the structure string
     def get_positions(self):
         positions = list(map(int, self.structure.split("\t")))
         return positions
