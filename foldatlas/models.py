@@ -45,9 +45,7 @@ class Transcript(Base):
         else:
             strain_sql = ""
 
-
         # given the transcript ID, fetch the feature sequences in the correct order.
-        # TODO wrap this up - have a Transcript.get_sequences() method
         sql = """
             SELECT 
                 feature.strain_id, 
@@ -317,42 +315,11 @@ class Structure(Base):
         else:
             self.structure += "\t"+value
 
+    # Get positions array by unmapping the structure string
+    def get_positions(self):
+        positions = list(map(int, self.structure.split("\t")))
+        return positions
+
     def __repr__(self):
         return "<Structure %r>" % (self.id)
 
-# Represents a single position within an RNA sequence structure prediction
-# class StructurePosition(Base):
-
-#     __tablename__ = "structure_position"
-
-#     structure_id = Column(Integer, ForeignKey("structure.id"), primary_key=True)
-#     position = Column(Integer, primary_key=True, autoincrement=False)
-#     paired_to_position = Column(Integer, nullable=True) # null means unpaired
-#     letter = Column(Enum("T", "A", "C", "G"), nullable=False)
-
-#     def __init__(self, structure_id, position, paired_to_position, letter):
-#         self.structure_id = structure_id
-#         self.position = position
-#         self.paired_to_position = paired_to_position
-#         self.letter = letter
-
-#     def __repr__(self):
-#         return "<StructurePosition %r-%r>" % (self.structure_id, self.position)
-
-# Represents a single row of ClustalW alignment data. 
-# Each row is a combination of strain and transcript.
-# TODO add type field(s), so we can store splices/unspliced/different methods etc.
-# class AlignmentEntry(Base):
-#     __tablename__ = "alignment_entry"
-
-#     transcript_id = Column(String(256), ForeignKey("transcript.id"), primary_key=True)
-#     strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
-#     sequence = Column(Text, nullable=False)
-
-#     def __init__(self, transcript_id=None, strain_id=None, sequence=None):
-#         self.transcript_id = transcript_id
-#         self.strain_id = strain_id
-#         self.sequence = sequence
-
-#     def __repr__(self):
-#         return "<AlignmentEntry %r-%r>" % (self.transcript_id, self.strain_id)

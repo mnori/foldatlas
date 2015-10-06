@@ -596,6 +596,13 @@ class StructureImporter():
             for line in ct_file:
                 # if it's an energy line, we're looking at a brand new structure
 
+                # the .ct format is a bit annoying because it's not tab delimited.
+                # instead it's delimited by variable numbers of spaces.
+
+                # calling split() with no parameter makes it split on any length 
+                # of whitespace - i.e. so that each element is 1 word
+                # from_pos = bits[0]
+
                 bits = line.strip().split()
 
                 if len(bits) != 6: # brand new structure
@@ -626,23 +633,8 @@ class StructureImporter():
                     n_structs += 1
 
                 else:
-                    # the .ct format is a bit annoying because it's not tab delimited.
-                    # instead it's delimited by variable numbers of spaces.
-
-                    # calling split() with no parameter makes it split on any length 
-                    # of whitespace - i.e. so that each element is 1 word
-                    # from_pos = bits[0]
                     to_pos = bits[4]
-                    # letter = bits[1]
-
                     structure.add_position(to_pos)
-
-                    # structure_position = StructurePosition(
-                    #     structure_id=structure.id,
-                    #     position=from_pos,
-                    #     paired_to_position=to_pos,
-                    # )
-                    # db_session.add(structure_position)
 
         db_session.add(structure)
         db_session.commit() # insert remaining data into DB

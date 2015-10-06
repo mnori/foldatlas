@@ -480,7 +480,7 @@ class StructureView():
         if not self.empty:
             self.data_json = json.dumps(data)
 
-# Plots an RNA structure using the RNAplot program from the ViennaRNA package.
+# Plots a single RNA structure using the RNAplot program from the ViennaRNA package.
 class StructureDiagramView():
     def __init__(self, structure_id):
         self.structure_id = structure_id
@@ -500,22 +500,33 @@ class StructureDiagramView():
 
         # get all the positions
         results = db_session \
-            .query(StructurePosition) \
-            .filter(StructurePosition.structure_id==self.structure_id) \
-            .order_by(StructurePosition.position) \
+            .query(Structure, Transcript) \
+            .filter(
+                Structure.id==self.structure_id,
+                Transcript.id==Structure.transcript_id
+            ) \
             .all()
+
+        # Get position values from Structure entity
+        positions = results[0][0].get_positions()
 
         # build dot bracket string
         n_reverse = n_forward = 0
-        dot_bracket_str = seq_str = ""
-        for result in results:
-            seq_str += result.letter
-            if result.paired_to_position == 0:
+        dot_bracket_str = ""
+
+        # Get sequence string from Transcript entity
+        seq_str = str(results[0][1].get_sequence().seq)
+
+        for curr_position in range(1, len(positions) + 1):
+            paired_to_position = positions[curr_position - 1]
+
+            # seq_str += result.letter
+            if paired_to_position == 0:
                 dot_bracket_str += "."
-            elif result.paired_to_position < result.position:
+            elif paired_to_position < curr_position:
                 n_reverse += 1
                 dot_bracket_str += ")"
-            elif result.paired_to_position > result.position:
+            elif paired_to_position > curr_position:
                 n_forward += 1
                 dot_bracket_str += "("
             else:
@@ -527,13 +538,6 @@ class StructureDiagramView():
             "sequence": seq_str.replace("T", "U"),
             "structure": dot_bracket_str
         }
-
-        # RNA.cvar.rna_plot_type = 1
-        # coords = RNA.get_xy_coordinates(bp_string)
-        # xs = np.array([coords.get(i).X for i in range(len(bp_string))])
-        # ys = np.array([coords.get(i).Y for i in range(len(bp_string))])
-
-        # return zip(xs,ys)
 
     # Grab 2d coords from viennaRNA
     # There is a python2 wrapper for vienna RNA but not python 3 compatible
@@ -583,24 +587,26 @@ class StructureCirclePlotView():
 
         # get all the positions
         results = db_session \
-            .query(StructurePosition) \
-            .filter(StructurePosition.structure_id==self.structure_id) \
-            .order_by(StructurePosition.position) \
+            .query(Structure) \
+            .filter(Structure.id==self.structure_id) \
             .all()
+
+        positions = results[0].get_positions()
 
         # build the output. backward facing links are left blank
         # results must be shifted back to array indexes, since they start at 1 in the DB.
-        for result in results:
-            if      result.paired_to_position == None or \
-                    result.paired_to_position < result.position:
+        for curr_position in range(1, len(positions) + 1):
+            paired_to_position = positions[curr_position - 1]
+
+            if      paired_to_position == 0 or \
+                    paired_to_position < curr_position:
 
                 link = None
             else:
-                link = result.paired_to_position - 1
+                link = paired_to_position - 1
 
             out.append({
-                "name": str(result.position - 1),
-                "label": result.letter,
+                "name": str(curr_position - 1),
                 "link": link
             })
 
