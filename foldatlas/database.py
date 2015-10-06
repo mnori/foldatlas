@@ -25,13 +25,20 @@ import models
 
 from models import Strain, Gene, Transcript, Feature, NucleotideMeasurement, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, NucleotideMeasurementSet, \
-    Structure, StructurePosition
+    Structure
 
 def import_db():
     try:
 
         print("Rebuilding schema...")
-        Base.metadata.drop_all(bind=engine)
+
+        # Delete the whole DB and recreate again
+        db_session.execute("DROP DATABASE "+settings.db_name)
+        db_session.execute("CREATE DATABASE "+settings.db_name)
+        db_session.execute("USE "+settings.db_name)
+        db_session.commit()
+
+        # Create all the tables.
         Base.metadata.create_all(bind=engine)
 
         # Add the annotations
@@ -581,6 +588,9 @@ class StructureImporter():
                 self.parse_ct(structure_filepath, transcript_id, experiment_config)
 
     def parse_ct(self, ct_filepath, transcript_id, experiment_config):
+
+        structure = None
+
         n_structs = 0
         with open(ct_filepath) as ct_file:
             for line in ct_file:
@@ -589,6 +599,11 @@ class StructureImporter():
                 bits = line.strip().split()
 
                 if len(bits) != 6: # brand new structure
+
+                    # save existing structure to DB
+                    if structure != None:
+                        db_session.add(structure)
+
                     # Parse the energy out using regex
                     search = re.search('ENERGY = (-[0-9\.]+)', line)
 
@@ -599,13 +614,12 @@ class StructureImporter():
 
                     energy = search.group(1)
 
-                    # Insert the new structure row
+                    # Create the new structure object, we'll commit it later...
                     structure = Structure(
                         structure_prediction_run_id=experiment_config["structure_prediction_run_id"],
                         transcript_id=transcript_id,
                         energy=energy
                     )
-                    db_session.add(structure)
 
                     # insert the experiment into the DB. can now access ID
                     db_session.commit() 
@@ -617,18 +631,20 @@ class StructureImporter():
 
                     # calling split() with no parameter makes it split on any length 
                     # of whitespace - i.e. so that each element is 1 word
-                    from_pos = bits[0]
+                    # from_pos = bits[0]
                     to_pos = bits[4]
-                    letter = bits[1]
+                    # letter = bits[1]
 
-                    structure_position = StructurePosition(
-                        structure_id=structure.id,
-                        position=from_pos,
-                        paired_to_position=to_pos,
-                        letter=letter
-                    )
-                    db_session.add(structure_position)
+                    structure.add_position(to_pos)
 
+                    # structure_position = StructurePosition(
+                    #     structure_id=structure.id,
+                    #     position=from_pos,
+                    #     paired_to_position=to_pos,
+                    # )
+                    # db_session.add(structure_position)
+
+        db_session.add(structure)
         db_session.commit() # insert remaining data into DB
         print ("["+str(n_structs)+"] structures added")
 

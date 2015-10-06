@@ -13,6 +13,8 @@ database_uri = "mysql+mysqlconnector://root:vagrant@127.0.0.1/foldatlas?charset=
 # Points to the general data folder
 data_folder = "/vagrant/sauce_data"
 
+db_name="foldatlas"
+
 # Points to structure data folder, which contains a *lot* of files
 structure_data_folder = "/vagrant/structure_data"
 

@@ -11,7 +11,7 @@ from sqlalchemy import and_
 
 import json, database, settings, uuid, os, subprocess
 from models import Feature, Transcript, NucleotideMeasurement, \
-    NucleotideMeasurementSet, Structure, StructurePosition, GeneLocation, \
+    NucleotideMeasurementSet, Structure, GeneLocation, \
     NucleotideMeasurementRun, StructurePredictionRun
 
 from utils import ensure_dir

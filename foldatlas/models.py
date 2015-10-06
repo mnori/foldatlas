@@ -298,35 +298,46 @@ class Structure(Base):
     energy = Column(Float, nullable=False)
     pc1 = Column(Float, nullable=False, default=0)
     pc2 = Column(Float, nullable=False, default=0)
+    structure = Column(Text, nullable=False)
 
-    def __init__(self, structure_prediction_run_id, transcript_id, energy, pc1=0, pc2=0):
+    def __init__(self, structure_prediction_run_id, transcript_id, energy, structure="", pc1=0, pc2=0):
         self.structure_prediction_run_id = structure_prediction_run_id
         self.transcript_id = transcript_id
         self.energy = energy
         self.pc1 = pc1
         self.pc2 = pc2
+        self.structure = structure
+
+    # Add a single position to the structure. The value points to another place that this 
+    # particular position pairs with.
+    def add_position(self, value):
+        value = str(value)
+        if self.structure == "":
+            self.structure = value
+        else:
+            self.structure += "\t"+value
 
     def __repr__(self):
         return "<Structure %r>" % (self.id)
 
 # Represents a single position within an RNA sequence structure prediction
-class StructurePosition(Base):
+# class StructurePosition(Base):
 
-    __tablename__ = "structure_position"
+#     __tablename__ = "structure_position"
 
-    structure_id = Column(Integer, ForeignKey("structure.id"), primary_key=True)
-    position = Column(Integer, primary_key=True, autoincrement=False)
-    paired_to_position = Column(Integer, nullable=True) # null means unpaired
-    letter = Column(Enum("T", "A", "C", "G"), nullable=False)
+#     structure_id = Column(Integer, ForeignKey("structure.id"), primary_key=True)
+#     position = Column(Integer, primary_key=True, autoincrement=False)
+#     paired_to_position = Column(Integer, nullable=True) # null means unpaired
+#     letter = Column(Enum("T", "A", "C", "G"), nullable=False)
 
-    def __init__(self, structure_id, position, paired_to_position, letter):
-        self.structure_id = structure_id
-        self.position = position
-        self.paired_to_position = paired_to_position
-        self.letter = letter
+#     def __init__(self, structure_id, position, paired_to_position, letter):
+#         self.structure_id = structure_id
+#         self.position = position
+#         self.paired_to_position = paired_to_position
+#         self.letter = letter
 
-    def __repr__(self):
-        return "<StructurePosition %r-%r>" % (self.structure_id, self.position)
+#     def __repr__(self):
+#         return "<StructurePosition %r-%r>" % (self.structure_id, self.position)
 
 # Represents a single row of ClustalW alignment data. 
 # Each row is a combination of strain and transcript.

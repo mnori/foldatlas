@@ -11,7 +11,11 @@ Vagrant.configure(2) do |config|
         # this sets up a shared folder in /vagrant/sauce_data, pointing to all the source data. useful for importing stuff
         config.vm.synced_folder "~/data_input/foldatlas", "/vagrant/sauce_data"
 
+        # JIC setup for structures
         # another folder will point to the structures
-        config.vm.synced_folder "/media/shares/Research-Groups/Yiliang-Ding/data_analysis_Ding_2013/MAC/Yin/Mapping_F/raw_data/structures", "/vagrant/structure_data"
+        # config.vm.synced_folder "/media/shares/Research-Groups/Yiliang-Ding/data_analysis_Ding_2013/MAC/Yin/Mapping_F/raw_data/structures", "/vagrant/structure_data"
+
+        # home setup for structures
+        config.vm.synced_folder "~/data_input/foldatlas_structures", "/vagrant/structure_data"
     end
 end
