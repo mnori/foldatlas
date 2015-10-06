@@ -9,23 +9,20 @@ from Bio.SeqRecord import SeqRecord
 import database
 import settings
 
-class ValuesStr():
-    def __init__(self, values_str):
-        self.values_str = values_str
+# Add a single position to the structure. The value points to another place that this 
+# particular position pairs with.
+def values_str_add(str_in, value):
+    value = str(value)
+    if str_in == "":
+        str_in = value
+    else:
+        str_in += "\t"+value
+    return str_in
 
-    # Add a single position to the structure. The value points to another place that this 
-    # particular position pairs with.
-    def add_value(self, value):
-        value = str(value)
-        if self.structure == "":
-            self.structure = value
-        else:
-            self.structure += "\t"+value
-
-    # Get positions array by extracting the structure string
-    def get_values(self):
-        positions = list(map(int, self.structure.split("\t")))
-        return positions
+# Get positions array by extracting the values_str string
+def values_str_unpack(str_in):
+    positions = list(map(int, str_in.split("\t")))
+    return positions
 
 # A Gene describes a locus identifier for a gene, plus any metadata associated with the locus.
 # Genes are generic - they can be associated with multiple strains.
@@ -286,23 +283,6 @@ class NucleotideMeasurementSet(Base):
         self.transcript_id = transcript_id
         self.coverage = coverage
 
-    # !!
-    # TODO mix these methods in somehow with those of Structure - since similar data is used
-
-    # Add a single position to the structure. The value points to another place that this 
-    # particular position pairs with.
-    def add_position(self, value):
-        value = str(value)
-        if self.structure == "":
-            self.structure = value
-        else:
-            self.structure += "\t"+value
-
-    # Get positions array by extracting the structure string
-    def get_positions(self):
-        positions = list(map(int, self.structure.split("\t")))
-        return positions
-
     def __repr__(self):
         return "<ReactivitiesNormalised %r>" % (self.id)
 
@@ -346,7 +326,13 @@ class Structure(Base):
         self.energy = energy
         self.pc1 = pc1
         self.pc2 = pc2
-        self.structure = ValuesStr(structure)
+        self.structure = structure
+
+    def add_value(self, value):
+        self.structure = values_str_add(self.structure, value)
+
+    def get_values(self):
+        return values_str_unpack(self.structure)
 
     def __repr__(self):
         return "<Structure %r>" % (self.id)

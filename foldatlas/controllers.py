@@ -508,7 +508,7 @@ class StructureDiagramView():
             .all()
 
         # Get position values from Structure entity
-        positions = results[0][0].get_positions()
+        positions = results[0][0].get_values()
 
         # build dot bracket string
         n_reverse = n_forward = 0
@@ -591,7 +591,7 @@ class StructureCirclePlotView():
             .filter(Structure.id==self.structure_id) \
             .all()
 
-        positions = results[0].get_positions()
+        positions = results[0].get_values()
 
         # build the output. backward facing links are left blank
         # results must be shifted back to array indexes, since they start at 1 in the DB.
@@ -643,7 +643,7 @@ class StructureDownloader():
             transcript = result[2]
 
             seq_str = transcript.get_sequence_str()
-            positions = structure.get_positions()
+            positions = structure.get_values()
 
             for curr_position in range(1, len(positions) + 1):
                 paired_to_position = positions[curr_position - 1]

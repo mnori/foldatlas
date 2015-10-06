@@ -643,7 +643,7 @@ class StructureImporter():
 
                 else:
                     to_pos = bits[4]
-                    structure.structure.add_value(to_pos)
+                    structure.add_value(to_pos)
 
         db_session.add(structure)
         db_session.commit() # insert remaining data into DB
