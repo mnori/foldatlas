@@ -218,8 +218,8 @@ class GeneLocation(Base):
     def __repr__(self):
         return "<GeneLocation "+self.gene_id+", "+self.strain_id+">";
 
-class NucleotideExperiment(Base):
-    __tablename__ = "nucleotide_experiment"
+class NucleotideMeasurementRun(Base):
+    __tablename__ = "nucleotide_measurement_run"
 
     id = Column(Integer, primary_key=True, autoincrement=False)
     strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=False)
@@ -231,7 +231,7 @@ class NucleotideExperiment(Base):
         self.description = description
 
     def __repr__(self):
-        return "<NucleotideExperiment %r>" % (self.id)
+        return "<NucleotideMeasurementRun %r>" % (self.id)
 
 class StructurePredictionRun(Base):
     __tablename__ = "structure_prediction_run"
@@ -248,18 +248,18 @@ class StructurePredictionRun(Base):
     def __repr__(self):
         return "<StructurePredictionRun %r>" % (self.id)
 
-# Represents a coverage measurement for a single transcript
+# Represents coverage measurements for a single transcript
 class NucleotideMeasurementSet(Base):
     __tablename__ = "nucleotide_measurement_set"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    nucleotide_experiment_id = Column(Integer, ForeignKey("nucleotide_experiment.id"))
+    nucleotide_measurement_run_id = Column(Integer, ForeignKey("nucleotide_measurement_run.id"))
     transcript_id = Column(String(256), ForeignKey("transcript.id"))
     coverage = Column(Float, nullable=False) 
 
-    def __init__(self, nucleotide_experiment_id=None, transcript_id=None, coverage=None):
+    def __init__(self, nucleotide_measurement_run_id=None, transcript_id=None, coverage=None):
 
-        self.nucleotide_experiment_id = nucleotide_experiment_id
+        self.nucleotide_measurement_run_id = nucleotide_measurement_run_id
         self.transcript_id = transcript_id
         self.coverage = coverage
 

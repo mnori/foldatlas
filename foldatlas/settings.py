@@ -17,7 +17,7 @@ data_folder = "/vagrant/sauce_data"
 structure_data_folder = "/vagrant/structure_data"
 
 dms_reactivities_experiment = {
-	"nucleotide_experiment_id": 1,
+	"nucleotide_measurement_run_id": 1,
 	"strain_id": "Col_0",
 	"nucleotides_filepath": data_folder+"/log_react_f_N1A_cdna_n_before.formatted.txt",
 	"coverage_filepath": data_folder+"/reactivities_coverage_orig.txt",
@@ -25,7 +25,7 @@ dms_reactivities_experiment = {
 }
 
 ribosome_profile_experiment = {
-	"nucleotide_experiment_id": 2,
+	"nucleotide_measurement_run_id": 2,
 	"strain_id": "Col_0",
 	"nucleotides_filepath": data_folder+"/p_site_counts_all.txt",
 	"coverage_filepath": data_folder+"/riboseq_coverage.txt",

@@ -12,7 +12,7 @@ from sqlalchemy import and_
 import json, database, settings, uuid, os, subprocess
 from models import Feature, Transcript, NucleotideMeasurement, \
     NucleotideMeasurementSet, Structure, StructurePosition, GeneLocation, \
-    NucleotideExperiment, StructurePredictionRun
+    NucleotideMeasurementRun, StructurePredictionRun
 
 from utils import ensure_dir
 
@@ -181,12 +181,12 @@ class NucleotideMeasurementView():
 
     def build_entries(self, experiment_ids):
 
-        from models import NucleotideExperiment
+        from models import NucleotideMeasurementRun
 
         # Load experiments
         experiments = db_session \
-            .query(NucleotideExperiment) \
-            .filter(NucleotideExperiment.id.in_(experiment_ids)) \
+            .query(NucleotideMeasurementRun) \
+            .filter(NucleotideMeasurementRun.id.in_(experiment_ids)) \
             .all()
 
         # Load measurements
@@ -194,7 +194,7 @@ class NucleotideMeasurementView():
         measurements_data = db_session \
             .query(NucleotideMeasurementSet, NucleotideMeasurement) \
             .filter(
-                NucleotideMeasurementSet.nucleotide_experiment_id.in_(experiment_ids),
+                NucleotideMeasurementSet.nucleotide_measurement_run_id.in_(experiment_ids),
                 NucleotideMeasurementSet.transcript_id==self.transcript_id,
                 NucleotideMeasurementSet.id==NucleotideMeasurement.nucleotide_measurement_set_id
             ) \
@@ -224,7 +224,7 @@ class NucleotideMeasurementView():
             measurement_set = row[0]
             measurement = row[1]
 
-            experiment_id = measurement_set.nucleotide_experiment_id
+            experiment_id = measurement_set.nucleotide_measurement_run_id
             pos = measurement.position - 1
             data[experiment_id]["data"][pos]["measurement"] = measurement.measurement
 
@@ -349,7 +349,7 @@ class CoverageSearcher():
 
         # The experiment ID to sort by. Ideally this should have a value for each
         # transcript, otherwise there will be some missing transcripts...
-        self.nucleotide_experiment_id = 1
+        self.nucleotide_measurement_run_id = 1
 
     def fetch_page_count(self):
         # better to do the imports closer to where they are needed
@@ -359,7 +359,7 @@ class CoverageSearcher():
         transcript_count = db_session \
             .query(func.count('*')) \
             .select_from(NucleotideMeasurementSet) \
-            .filter(NucleotideMeasurementSet.nucleotide_experiment_id==self.nucleotide_experiment_id) \
+            .filter(NucleotideMeasurementSet.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id) \
             .scalar()
 
         page_count = ceil(transcript_count / self.page_size)
@@ -374,7 +374,7 @@ class CoverageSearcher():
         # results = db_session \
         #     .query(NucleotideMeasurementSet, Transcript, GeneLocation,) \
         #     .filter(
-        #         NucleotideMeasurementSet.nucleotide_experiment_id==self.nucleotide_experiment_id,
+        #         NucleotideMeasurementSet.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
         #         Transcript.id==NucleotideMeasurementSet.transcript_id,
         #         Transcript.gene_id==GeneLocation.gene_id,
         #         GeneLocation.strain_id==settings.reference_strain_id # get this for gene len
@@ -399,7 +399,7 @@ class CoverageSearcher():
         results = db_session \
             .query(NucleotideMeasurementSet, Transcript, GeneLocation, Structure, ) \
             .filter(
-                NucleotideMeasurementSet.nucleotide_experiment_id==self.nucleotide_experiment_id,
+                NucleotideMeasurementSet.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
                 Transcript.id==NucleotideMeasurementSet.transcript_id,
                 Transcript.gene_id==GeneLocation.gene_id,
                 GeneLocation.strain_id==settings.reference_strain_id, # get this for gene len
@@ -648,8 +648,8 @@ class StructureDownloader():
 
 # Generates plain text nucleotide measurements for user download
 class NucleotideMeasurementDownloader():
-    def __init__(self, nucleotide_experiment_id, transcript_id):
-        self.nucleotide_experiment_id = nucleotide_experiment_id
+    def __init__(self, nucleotide_measurement_run_id, transcript_id):
+        self.nucleotide_measurement_run_id = nucleotide_measurement_run_id
         self.transcript_id = transcript_id
 
     def generateTxt(self):
@@ -663,7 +663,7 @@ class NucleotideMeasurementDownloader():
         results = db_session \
             .query(NucleotideMeasurementSet, NucleotideMeasurement) \
             .filter(
-                NucleotideMeasurementSet.nucleotide_experiment_id==self.nucleotide_experiment_id,
+                NucleotideMeasurementSet.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
                 NucleotideMeasurementSet.transcript_id==self.transcript_id,
                 NucleotideMeasurementSet.id==NucleotideMeasurement.nucleotide_measurement_set_id
             ) \

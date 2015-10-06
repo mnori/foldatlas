@@ -24,7 +24,7 @@ Base.query = db_session.query_property()
 import models
 
 from models import Strain, Gene, Transcript, Feature, NucleotideMeasurement, \
-    GeneLocation, NucleotideExperiment, StructurePredictionRun, NucleotideMeasurementSet, \
+    GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, NucleotideMeasurementSet, \
     Structure, StructurePosition
 
 def import_db():
@@ -83,7 +83,7 @@ class SequenceImporter():
     # limit on genes to process - for testing purposes
     # None means it imports everything
     # gene_limit = 10
-    gene_limit = 100
+    gene_limit = 10
 
     # Set to true for testing
     chr1_only = False
@@ -465,7 +465,7 @@ class NucleotideMeasurementSetImporter():
 
                 update_q = update(NucleotideMeasurementSet) \
                     .where(and_(
-                        NucleotideMeasurementSet.nucleotide_experiment_id==experiment_config["nucleotide_experiment_id"],
+                        NucleotideMeasurementSet.nucleotide_measurement_run_id==experiment_config["nucleotide_measurement_run_id"],
                         NucleotideMeasurementSet.transcript_id==transcript_id,
                     ))\
                     .values(coverage=coverage)
@@ -480,8 +480,8 @@ class NucleotideMeasurementImporter():
     def execute(self, experiment_config):
 
         # Add the experiment
-        experiment = NucleotideExperiment(
-            id=experiment_config["nucleotide_experiment_id"],
+        experiment = NucleotideMeasurementRun(
+            id=experiment_config["nucleotide_measurement_run_id"],
             strain_id=experiment_config["strain_id"],
             description=experiment_config["description"]
         )
@@ -511,7 +511,7 @@ class NucleotideMeasurementImporter():
 
                 # Add set object. Will add coverage after going through reactivities
                 measurement_set = NucleotideMeasurementSet(
-                    nucleotide_experiment_id=experiment_config["nucleotide_experiment_id"],
+                    nucleotide_measurement_run_id=experiment_config["nucleotide_measurement_run_id"],
                     transcript_id=transcript_id,
                     coverage=0
                 )
