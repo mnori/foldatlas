@@ -21,8 +21,7 @@ structure_data_folder = "/vagrant/structure_data"
 dms_reactivities_experiment = {
 	"nucleotide_measurement_run_id": 1,
 	"strain_id": "Col_0",
-	"nucleotides_filepath": data_folder+"/log_react_f_N1A_cdna_n_before.formatted.txt",
-	"coverage_filepath": data_folder+"/reactivities_coverage_orig.txt",
+	"nucleotides_filepath": data_folder+"/a_thaliana_compiled_counts.txt",
 	"description": "DMS reactivities"
 }
 
@@ -30,7 +29,7 @@ ribosome_profile_experiment = {
 	"nucleotide_measurement_run_id": 2,
 	"strain_id": "Col_0",
 	"nucleotides_filepath": data_folder+"/p_site_counts_all.txt",
-	"coverage_filepath": data_folder+"/riboseq_coverage.txt",
+	# "coverage_filepath": data_folder+"/riboseq_coverage.txt", # just get coverage from summed counts
 	"description": "Ribosome occupancies",
 }
 
@@ -49,6 +48,8 @@ structures_in_vivo = {
 	"sauce_filepath": structure_data_folder+"/in_vivo_structures",
 	"sauce_ext": "_con.ct",
 }
+
+transcripts_fasta_filepath = data_folder+"/transcripts.fasta"
 
 base_path = "/vagrant/foldatlas"
 

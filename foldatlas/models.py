@@ -264,48 +264,81 @@ class StructurePredictionRun(Base):
     def __repr__(self):
         return "<StructurePredictionRun %r>" % (self.id)
 
-# Represents coverage measurements for a single transcript
+# Represents plus and minus counts for calculating reactivities. Before normalisation.
+class RawReactivities(Base):
+
+    __tablename__ = "raw_reactivities"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nucleotide_measurement_run_id = Column(Integer, ForeignKey("nucleotide_measurement_run.id"))
+    transcript_id = Column(String(256), ForeignKey("transcript.id"))
+    minus_values = Column(Text, nullable=False)
+    plus_values = Column(Text, nullable=False)
+
+    def __init__(
+            self,
+            nucleotide_measurement_run_id,
+            transcript_id,
+            minus_values,
+            plus_values):
+
+        self.nucleotide_measurement_run_id = nucleotide_measurement_run_id
+        self.transcript_id = transcript_id
+        self.minus_values = minus_values
+        self.plus_values = plus_values
+
+    def __repr__(self):
+        return "<RawReactivities %r>" % (self.id)
+
+# Represents nucleotide specific measurements for a single transcript
+# Generated from mappping
+# Can represent normalised reactivities or alternatively ribosome profiling counts.
 class NucleotideMeasurementSet(Base):
     __tablename__ = "nucleotide_measurement_set"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     nucleotide_measurement_run_id = Column(Integer, ForeignKey("nucleotide_measurement_run.id"))
     transcript_id = Column(String(256), ForeignKey("transcript.id"))
+
+    # Average number of mappings per base before any normalisation is applied
     coverage = Column(Float, nullable=False) 
+    values = Column(Text, nullable=False)
 
     def __init__(
             self, 
-            nucleotide_measurement_run_id=None, 
-            transcript_id=None, 
-            coverage=None):
+            nucleotide_measurement_run_id, 
+            transcript_id, 
+            coverage,
+            values):
 
         self.nucleotide_measurement_run_id = nucleotide_measurement_run_id
         self.transcript_id = transcript_id
         self.coverage = coverage
+        self.values = values
 
     def __repr__(self):
-        return "<ReactivitiesNormalised %r>" % (self.id)
+        return "<NucleotideMeasurementSet %r>" % (self.id)
 
-# Represents one measurement, at a particular nucleotide position.
-class NucleotideMeasurement(Base):
-    __tablename__ = "nucleotide_measurement"
+# # Represents one measurement, at a particular nucleotide position.
+# class NucleotideMeasurement(Base):
+#     __tablename__ = "nucleotide_measurement"
 
-    nucleotide_measurement_set_id = Column(Integer, 
-        ForeignKey("nucleotide_measurement_set.id"), primary_key=True, autoincrement=True)
+#     nucleotide_measurement_set_id = Column(Integer, 
+#         ForeignKey("nucleotide_measurement_set.id"), primary_key=True, autoincrement=True)
 
-    # if there's no measurement at a position, there is no corresponding row.
-    position = Column(Integer, autoincrement=False, primary_key=True) 
-    measurement = Column(Float, nullable=False) 
+#     # if there's no measurement at a position, there is no corresponding row.
+#     position = Column(Integer, autoincrement=False, primary_key=True) 
+#     measurement = Column(Float, nullable=False) 
 
-    def __init__(self, nucleotide_measurement_set_id=None, position=None, measurement=None):
-        self.nucleotide_measurement_set_id = nucleotide_measurement_set_id
-        self.position = position
-        self.measurement = measurement
+#     def __init__(self, nucleotide_measurement_set_id=None, position=None, measurement=None):
+#         self.nucleotide_measurement_set_id = nucleotide_measurement_set_id
+#         self.position = position
+#         self.measurement = measurement
 
-    def __repr__(self):
-        return "<NucleotideMeasurement %r-%r-%r-%r>" % (
-            self.nucleotide_measurement_set_id, self.position, self.measurement
-        )
+#     def __repr__(self):
+#         return "<NucleotideMeasurement %r-%r-%r-%r>" % (
+#             self.nucleotide_measurement_set_id, self.position, self.measurement
+#         )
 
 # Represents a structure prediction for a single RNA sequence
 class Structure(Base):

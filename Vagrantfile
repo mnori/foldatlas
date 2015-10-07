@@ -9,7 +9,7 @@ Vagrant.configure(2) do |config|
         v.customize ["modifyvm", :id, "--memory", 4096, "--ioapic", "on", "--cpus", 2]
 
         # this sets up a shared folder in /vagrant/sauce_data, pointing to all the source data. useful for importing stuff
-        config.vm.synced_folder "~/data_input/foldatlas", "/vagrant/sauce_data"
+        config.vm.synced_folder "~/data/foldatlas", "/vagrant/sauce_data"
 
         # JIC setup for structures
         # another folder will point to the structures

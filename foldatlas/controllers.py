@@ -10,9 +10,7 @@ from sqlalchemy import and_
 # import forgi.graph.bulge_graph as fgb
 
 import json, database, settings, uuid, os, subprocess
-from models import Feature, Transcript, NucleotideMeasurement, \
-    NucleotideMeasurementSet, Structure, GeneLocation, \
-    NucleotideMeasurementRun, StructurePredictionRun
+from models import Feature, Transcript, NucleotideMeasurementSet, Structure, GeneLocation, NucleotideMeasurementRun, StructurePredictionRun
 
 from utils import ensure_dir
 

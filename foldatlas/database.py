@@ -15,6 +15,7 @@ from Bio import AlignIO
 import settings, os
 import sys
 import re
+import math
 
 engine = create_engine(settings.database_uri, convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
@@ -25,7 +26,7 @@ import models
 
 from models import Strain, Gene, Transcript, Feature, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, NucleotideMeasurementSet, \
-    Structure, NucleotideMeasurement
+    Structure, RawReactivities
 
 def import_db():
     try:
@@ -49,7 +50,7 @@ def import_db():
         # ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
 
         ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
-        CoverageImporter().execute(settings.dms_reactivities_experiment)
+        # CoverageImporter().execute(settings.dms_reactivities_experiment)
 
         # Now normalise the data
 
@@ -101,7 +102,7 @@ class SequenceImporter():
     gene_limit = 10
 
     # Set to true for testing
-    chr1_only = False
+    chr1_only = True
 
     # Only import these genes. Can be None or a list.
     # filter_genes = ["AT3G29370", "AT3G48550", "AT2G31360"]
@@ -495,7 +496,7 @@ class ReactivitiesImporter():
 
     def execute(self, experiment_config):
 
-        # Add the experiment
+        # Add the run entity
         experiment = NucleotideMeasurementRun(
             id=experiment_config["nucleotide_measurement_run_id"],
             strain_id=experiment_config["strain_id"],
@@ -507,53 +508,139 @@ class ReactivitiesImporter():
         print("Inserting data from ["+experiment_config["nucleotides_filepath"]+"] ...")
 
         transcript_ids = get_inserted_transcript_ids()
+        transcripts = self.load_transcript_seqs()
 
-        # Open the DMS reactivities file. These are normalised already.
+        n = 0
+
         with open(experiment_config["nucleotides_filepath"], "r") as input_file:
-            for line in input_file: # each line = 1 transcript
-        
-                bits = line.strip().split("\t")
-                transcript_id = bits[0]
-                transcript_len = len(bits) - 1
+            while True:
+
+                n += 1
+                if n % 1000 == 0:
+                    print("Reached ["+str(n)+"] genes")
+
+                plus_line = input_file.readline().strip()
+                if plus_line == "": # reached the end of the file
+                    break
+                minus_line = input_file.readline().strip()
+
+                transcript_id, plus_counts = self.unpack_counts(plus_line)
+                transcript_id, minus_counts = self.unpack_counts(minus_line)
 
                 # skip transcripts not already in DB
                 if transcript_id not in transcript_ids:
                     continue
 
-                if len(bits) <= 1: # no measurements present
-                    continue
+                print("Inserting reactivities for ["+transcript_id+"]")
 
-                count_strs = bits[1:]
-
-                # Add set object. Will add coverage after going through reactivities
-                measurement_set = NucleotideMeasurementSet(
+                # add the raw data
+                measurement_set = RawReactivities(
                     nucleotide_measurement_run_id=experiment_config["nucleotide_measurement_run_id"],
                     transcript_id=transcript_id,
-                    coverage=0
+                    minus_values="\t".join(list(map(str, minus_counts))),
+                    plus_values="\t".join(list(map(str, plus_counts)))
                 )
                 db_session.add(measurement_set)
-                db_session.commit()
+                db_session.commit() 
+                
+                # # normalise the data and add that too
+                normalised_reactivities = self.norm_2_8(
+                    transcripts, plus_counts, minus_counts)
 
-                # go through reactivity entries, adding each to the database.
-                position = 0
-                for count_str in count_strs:
-                    position += 1
-                    if (count_str != "NA"): # skip adding "NA" entries.
-                        obj = NucleotideMeasurement(
-                            nucleotide_measurement_set_id=measurement_set.id,
-                            position=position, 
-                            measurement=float(count_str)
-                        )
-                        db_session.add(obj)
+                # exit()
 
-                db_session.commit() # insert all the reactivity measurement rows into the DB
+    # Carry out 2-8% normalisation using plus and minus values for a given transcript
+    # Could potentially add other normalisation methods as well
+    def norm_2_8(self, transcripts, plus_counts, minus_counts):
+        log_plus_counts = self.log_counts(plus_counts)
+        log_minus_counts = self.log_counts(minus_counts)
+
+        sum_plus = sum(log_plus_counts)
+        sum_minus = sum(log_minus_counts)
+
+        if (sum_plus == 0 or sum_minus == 0):
+            return
+
+        length = len(plus_counts)
+
+        scaled_plus
+        scaled_minus
+
+        # out = []
+        # print(log_plus_counts)
+        # print(log_minus_counts)
+        # exit()
+
+        return out
+
+    # helper for norm_2_8
+    def log_counts(self, counts):
+        out = []
+        for count in counts:
+            out.append(math.log(float(count + 1), math.e))
+        return out
+
+    def scale_log_counts(self, log_counts)
+
+    # Get all the transcript sequences from transcripts.fasta
+    def load_transcript_seqs(self):
+        out = {}
+        for record in SeqIO.parse(settings.transcripts_fasta_filepath, "fasta"):
+            out[record.id] = str(record.seq)
+        return out
+
+    def unpack_counts(self, line):
+        bits = line.split()
+        transcript_id = bits[0]
+        counts = list(map(int, bits[3:]))
+        return transcript_id, counts
+
+        # # Open the DMS reactivities file. These are normalised already.
+        # with open(experiment_config["nucleotides_filepath"], "r") as input_file:
+        #     for line in input_file: # each line = 1 transcript
+        
+        #         bits = line.strip().split("\t")
+        #         transcript_id = bits[0]
+        #         transcript_len = len(bits) - 1
+
+        #         # skip transcripts not already in DB
+        #         if transcript_id not in transcript_ids:
+        #             continue
+
+        #         if len(bits) <= 1: # no measurements present
+        #             continue
+
+        #         count_strs = bits[1:]
+
+        #         # Add set object. Will add coverage after going through reactivities
+        #         measurement_set = NucleotideMeasurementSet(
+        #             nucleotide_measurement_run_id=experiment_config["nucleotide_measurement_run_id"],
+        #             transcript_id=transcript_id,
+        #             coverage=0
+        #         )
+        #         db_session.add(measurement_set)
+        #         db_session.commit()
+
+        #         # go through reactivity entries, adding each to the database.
+        #         position = 0
+        #         for count_str in count_strs:
+        #             position += 1
+        #             if (count_str != "NA"): # skip adding "NA" entries.
+        #                 obj = NucleotideMeasurement(
+        #                     nucleotide_measurement_set_id=measurement_set.id,
+        #                     position=position, 
+        #                     measurement=float(count_str)
+        #                 )
+        #                 db_session.add(obj)
+
+        #         db_session.commit() # insert all the reactivity measurement rows into the DB
 
 
-                # add the coverage
-                # ...
+        #         # add the coverage
+        #         # ...
 
 
-                print("Added ["+transcript_id+"] ("+str(position)+" positions)")
+        #         print("Added ["+transcript_id+"] ("+str(position)+" positions)")
 
         input_file.close()
 
