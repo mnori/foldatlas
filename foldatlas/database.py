@@ -545,42 +545,143 @@ class ReactivitiesImporter():
                 
                 # # normalise the data and add that too
                 normalised_reactivities = self.norm_2_8(
-                    transcripts, plus_counts, minus_counts)
+                    transcripts[transcript_id], plus_counts, minus_counts)
+
+                if transcript_id == "AT1G01070.1":
+                    exit()
+
+                if normalised_reactivities == None:
+                    continue
 
                 # exit()
 
     # Carry out 2-8% normalisation using plus and minus values for a given transcript
     # Could potentially add other normalisation methods as well
-    def norm_2_8(self, transcripts, plus_counts, minus_counts):
+    def norm_2_8(self, seq, plus_counts, minus_counts):
+
+        plus_counts = self.remove_ignored(plus_counts, seq)
+        minus_counts = self.remove_ignored(minus_counts, seq)
+
+        # Take logs
         log_plus_counts = self.log_counts(plus_counts)
         log_minus_counts = self.log_counts(minus_counts)
 
-        sum_plus = sum(log_plus_counts)
-        sum_minus = sum(log_minus_counts)
+        # Get summed logs, excluding None values
+        sum_log_plus = sum(filter(None, log_plus_counts))
+        sum_log_minus = sum(filter(None, log_minus_counts))
 
-        if (sum_plus == 0 or sum_minus == 0):
-            return
+        # Skip if empty
+        if sum_log_plus == 0 or sum_log_minus == 0:
+            return None
 
-        length = len(plus_counts)
+        # Take the length of the non None values only
+        length = len(list(filter(None, log_plus_counts)))
 
-        scaled_plus
-        scaled_minus
+        # Scale log counts by their averages
+        scaled_log_plus = self.scale_log_counts(log_plus_counts, sum_log_plus, length)
+        scaled_log_minus = self.scale_log_counts(log_minus_counts, sum_log_minus, length)
 
-        # out = []
-        # print(log_plus_counts)
-        # print(log_minus_counts)
+        # Subtract minus from plus, whilst making sure that there is at least 1 value > 0
+        has_data = False
+        minus_subbed = []
+
+        # print(seq)
+ 
+        for pos in range(0, len(scaled_log_plus)):
+            if scaled_log_plus[pos] == None:
+                minus_subbed.append(None)
+            else:
+                subbed = max(0, scaled_log_plus[pos] - scaled_log_minus[pos])
+                if subbed > 0 and has_data == False:
+                    print("pos ["+str(pos)+"] detected (0-ind) = ["+str(subbed)+"]")
+                    has_data = True
+                minus_subbed.append(subbed)
+
+        # print(minus_subbed)
+
+        # ensure there is actually normalised data after minus subbed
+        if not has_data:
+            print("No data!")
+            return None
+
+        # do the 2-8% normalisation step
+        # normalised = minus_subbed
+        normalised = self.scale_by_2_8(minus_subbed)
+
+        print(seq)
+        print(normalised)
+        
+        # print(normalised)
+        return normalised
+
+        # # out = []
+        # print(scaled_log_plus)
+        # print(scaled_log_minus)
         # exit()
 
+        # Subtract minus from plus
+
+        # Do 2-8% normalisation
+
+        return out
+
+    # Sets ignored bases in the list to None
+    def remove_ignored(self, values, seq):
+        out = []
+        for pos in range(0, len(values)):
+            if seq[pos] == "T" or seq[pos] == "G":
+                out.append(None)
+            else:
+                out.append(values[pos])
         return out
 
     # helper for norm_2_8
     def log_counts(self, counts):
         out = []
         for count in counts:
-            out.append(math.log(float(count + 1), math.e))
+            if count == None:
+                out.append(None)
+            else:
+                out.append(math.log(float(count + 1), math.e))
         return out
 
-    def scale_log_counts(self, log_counts)
+    # Divide each log count value by the average log count, helper for norm_2_8
+    def scale_log_counts(self, log_counts, sum_log_counts, length):
+        out = []
+        for log_count in log_counts:
+            if log_count == None:
+                out.append(None)
+            else:
+                # this is correct, same result as the original version
+                out.append(log_count / (sum_log_counts / length))
+        return out
+
+    def scale_by_2_8(self, minus_subbed):
+        norm_values = []
+        for value in minus_subbed:
+            if value != None and value > 0: # only consider values > 0
+                norm_values.append(float(value))
+
+        # Sort with highest values at the top
+        norm_values.sort(reverse = True)
+
+        # Generate 2-8% list
+        v8 = norm_values[
+            int(round(len(norm_values)*0.02)) : int(round(len(norm_values)*0.08)) + 1]
+
+        # Generate average of the 2-8% list
+        mean_28 = float(sum(v8)) / len(v8)
+
+        # Divide everything by the average of the 2-8%
+        out = []
+        for i in range(0, len(minus_subbed)):
+            value = minus_subbed[i]
+            if value == None:
+                out.append(None)
+            else:
+                out.append(minus_subbed[i] / mean_28)
+
+        return out # return the result
 
     # Get all the transcript sequences from transcripts.fasta
     def load_transcript_seqs(self):
