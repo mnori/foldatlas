@@ -675,18 +675,23 @@ class NucleotideMeasurementDownloader():
 
         # Use the ORM to grab all the measurements
         results = db_session \
-            .query(NucleotideMeasurementSet, NucleotideMeasurement) \
+            .query(NucleotideMeasurementSet) \
             .filter(
                 NucleotideMeasurementSet.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
-                NucleotideMeasurementSet.transcript_id==self.transcript_id,
-                NucleotideMeasurementSet.id==NucleotideMeasurement.nucleotide_measurement_set_id
+                NucleotideMeasurementSet.transcript_id==self.transcript_id
             ) \
             .all()
         
+        measurement_set = results[0]
+        # TODO detect whether float or int and use the correct unpacker.
+        # Needed for raw count values download option
+        unpacked = values_str_unpack_float(measurement_set.values)
+
         # index measurements by pos
         measurements = {}
-        for result in results:
-            measurements[result[1].position] = result[1].measurement
+        for pos in range(0, len(unpacked)):
+            value = unpacked[pos]
+            measurements[pos + 1] = "NA" if value == None else value
 
         # build the output string
         buf = ""
