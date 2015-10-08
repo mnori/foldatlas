@@ -541,19 +541,22 @@ class ReactivitiesImporter():
                     plus_values="\t".join(list(map(str, plus_counts)))
                 )
                 db_session.add(measurement_set)
-                db_session.commit() 
                 
                 # # normalise the data and add that too
                 normalised_reactivities = self.norm_2_8(
                     transcripts[transcript_id], plus_counts, minus_counts)
 
-                if transcript_id == "AT1G01070.1":
-                    exit()
-
                 if normalised_reactivities == None:
                     continue
 
-                # exit()
+                normalised_set = NucleotideMeasurementSet(
+                    nucleotide_measurement_run_id=experiment_config["nucleotide_measurement_run_id"],
+                    transcript_id=transcript_id,
+                    coverage=1,
+                    values="\t".join(list(map(str, normalised_reactivities)))
+                )
+                db_session.add(normalised_set)
+                db_session.commit() 
 
     # Carry out 2-8% normalisation using plus and minus values for a given transcript
     # Could potentially add other normalisation methods as well
@@ -593,7 +596,6 @@ class ReactivitiesImporter():
             else:
                 subbed = max(0, scaled_log_plus[pos] - scaled_log_minus[pos])
                 if subbed > 0 and has_data == False:
-                    print("pos ["+str(pos)+"] detected (0-ind) = ["+str(subbed)+"]")
                     has_data = True
                 minus_subbed.append(subbed)
 
@@ -607,23 +609,9 @@ class ReactivitiesImporter():
         # do the 2-8% normalisation step
         # normalised = minus_subbed
         normalised = self.scale_by_2_8(minus_subbed)
-
-        print(seq)
-        print(normalised)
         
         # print(normalised)
         return normalised
-
-        # # out = []
-        # print(scaled_log_plus)
-        # print(scaled_log_minus)
-        # exit()
-
-        # Subtract minus from plus
-
-        # Do 2-8% normalisation
-
-        return out
 
     # Sets ignored bases in the list to None
     def remove_ignored(self, values, seq):
@@ -653,7 +641,7 @@ class ReactivitiesImporter():
                 out.append(None)
             else:
                 # this is correct, same result as the original version
-                out.append(log_count / (sum_log_counts / length))
+                out.append(float(log_count) / (float(sum_log_counts) / float(length)))
         return out
 
     def scale_by_2_8(self, minus_subbed):

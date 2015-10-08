@@ -20,9 +20,16 @@ def values_str_add(str_in, value):
     return str_in
 
 # Get positions array by extracting the values_str string
-def values_str_unpack(str_in):
+def values_str_unpack_int(str_in):
     positions = list(map(int, str_in.split("\t")))
     return positions
+
+def values_str_unpack_float(str_in):
+    out = []
+    bits = str_in.split("\t")
+    for bit in bits:
+        out.append(None if bit == "None" else float(bit))
+    return out
 
 # A Gene describes a locus identifier for a gene, plus any metadata associated with the locus.
 # Genes are generic - they can be associated with multiple strains.
@@ -365,7 +372,7 @@ class Structure(Base):
         self.structure = values_str_add(self.structure, value)
 
     def get_values(self):
-        return values_str_unpack(self.structure)
+        return values_str_unpack_int(self.structure)
 
     def __repr__(self):
         return "<Structure %r>" % (self.id)

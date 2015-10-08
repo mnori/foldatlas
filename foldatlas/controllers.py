@@ -10,7 +10,9 @@ from sqlalchemy import and_
 # import forgi.graph.bulge_graph as fgb
 
 import json, database, settings, uuid, os, subprocess
-from models import Feature, Transcript, NucleotideMeasurementSet, Structure, GeneLocation, NucleotideMeasurementRun, StructurePredictionRun
+from models import Feature, Transcript, NucleotideMeasurementSet, Structure, \
+    GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, \
+    values_str_unpack_float
 
 from utils import ensure_dir
 
@@ -190,11 +192,10 @@ class NucleotideMeasurementView():
         # Load measurements
         seq_str = str(Transcript(self.transcript_id).get_sequence(self.strain_id).seq)
         measurements_data = db_session \
-            .query(NucleotideMeasurementSet, NucleotideMeasurement) \
+            .query(NucleotideMeasurementSet) \
             .filter(
                 NucleotideMeasurementSet.nucleotide_measurement_run_id.in_(experiment_ids),
-                NucleotideMeasurementSet.transcript_id==self.transcript_id,
-                NucleotideMeasurementSet.id==NucleotideMeasurement.nucleotide_measurement_set_id
+                NucleotideMeasurementSet.transcript_id==self.transcript_id
             ) \
             .all()
 
@@ -216,15 +217,15 @@ class NucleotideMeasurementView():
                 })
             data[experiment.id] = experiment_data
 
-        # Add measurements to each experiment
-        for row in measurements_data: # add values where present
-
-            measurement_set = row[0]
-            measurement = row[1]
-
+        # Add measurements to each experiment json element
+        # Loop since we might be dealing with > 1 measurement set
+        for measurement_set in measurements_data:
             experiment_id = measurement_set.nucleotide_measurement_run_id
-            pos = measurement.position - 1
-            data[experiment_id]["data"][pos]["measurement"] = measurement.measurement
+            measurements = values_str_unpack_float(measurement_set.values)
+
+            for pos in range(0, len(measurements)):
+                measurement = measurements[pos]
+                data[experiment_id]["data"][pos]["measurement"] = measurement
 
         # For each experiment, check whether there is no data and set empty flags accordingly.
         self.empty = True # all empty flag
