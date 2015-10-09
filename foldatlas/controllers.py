@@ -1,18 +1,10 @@
 from database import db_session
 from sqlalchemy import and_
 
-# # try to use python2 module in python3
-# from past import autotranslate
-# autotranslate(['forgi'])
-
-# this import is slow. almost certainly due to autotranslate.
-# might have to build a pre-translated version of this module.
-# import forgi.graph.bulge_graph as fgb
-
 import json, database, settings, uuid, os, subprocess
 from models import Feature, Transcript, NucleotideMeasurementSet, Structure, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, \
-    values_str_unpack_float
+    values_str_unpack_float, values_str_unpack_int, RawReactivities
 
 from utils import ensure_dir
 
@@ -666,14 +658,42 @@ class NucleotideMeasurementDownloader():
         self.nucleotide_measurement_run_id = nucleotide_measurement_run_id
         self.transcript_id = transcript_id
 
-    def generateTxt(self):
-        strain_id = settings.reference_strain_id
+    # Retrieves raw reactivity values and outputs as text
+    def get_raw(self):
+        seq_str = Transcript(self.transcript_id).get_sequence_str()
+
+        # Use the ORM to grab raw data
+        results = db_session \
+            .query(RawReactivities) \
+            .filter(
+                RawReactivities.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
+                RawReactivities.transcript_id==self.transcript_id
+            ) \
+            .all()
+        
+        measurement_set = results[0]
+
+        # Get the raw read counts out
+        minus_unpacked = values_str_unpack_int(measurement_set.minus_values)
+        plus_unpacked = values_str_unpack_int(measurement_set.plus_values)
+
+        # Build and return the output
+        buf = ""
+        for n in range(0, len(minus_unpacked)):
+            buf +=  str(n + 1)+"\t"+ \
+                    seq_str[n]+"\t"+ \
+                    str(minus_unpacked[n])+"\t"+ \
+                    str(plus_unpacked[n])+"\n"
+
+        return buf
+
+    # Retrieves normalised reactivities and outputs as text
+    def get_normalised(self):
 
         # Grab sequence string
-        seq_str = str(Transcript(self.transcript_id) \
-            .get_sequence(settings.reference_strain_id).seq)
+        seq_str = Transcript(self.transcript_id).get_sequence_str()
 
-        # Use the ORM to grab all the measurements
+        # Use the ORM to grab all the normalised stuff
         results = db_session \
             .query(NucleotideMeasurementSet) \
             .filter(

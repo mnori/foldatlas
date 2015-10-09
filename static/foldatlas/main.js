@@ -241,8 +241,11 @@ var BrowserController = Class.extend({
 			buf = 
 				"<h2 class=\"bar\">"+
 					experimentData["description"]+
+					"<a href=\"/download/raw_measurements/"+experimentData["id"]+"/"+this.getTranscriptID()+"\" target=\"_blank\" class=\"button download r\">"+
+						"<i class=\"fa fa-download\"></i> Download Raw"+
+					"</a>"+
 					"<a href=\"/download/measurements/"+experimentData["id"]+"/"+this.getTranscriptID()+"\" target=\"_blank\" class=\"button download\">"+
-						"<i class=\"fa fa-download\"></i> Download"+
+						"<i class=\"fa fa-download\"></i> Download Normalised"+
 					"</a>"+
 				"</h2>"+
 				"<svg id=\""+overviewID+"\"></svg>"+

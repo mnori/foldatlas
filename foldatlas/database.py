@@ -492,6 +492,7 @@ class CoverageImporter():
         db_session.commit()
 
 # Inserts DMS reactivities into the DB.
+# Includes the normalisation step that starts from raw reactivities
 class ReactivitiesImporter():
 
     def execute(self, experiment_config):
@@ -549,14 +550,27 @@ class ReactivitiesImporter():
                 if normalised_reactivities == None:
                     continue
 
+                coverage = self.calc_coverage(plus_counts, minus_counts)
+
                 normalised_set = NucleotideMeasurementSet(
                     nucleotide_measurement_run_id=experiment_config["nucleotide_measurement_run_id"],
                     transcript_id=transcript_id,
-                    coverage=1,
+                    coverage=coverage,
                     values="\t".join(list(map(str, normalised_reactivities)))
                 )
                 db_session.add(normalised_set)
                 db_session.commit() 
+
+    # Calc and return average coverage per base, plus and minus lanes summed
+    def calc_coverage(self, plus_counts, minus_counts):
+        tot = 0
+        n = 0
+        for pos in range(0, len(minus_counts)):
+            if minus_counts[pos] != None:
+                n += 1
+                tot += minus_counts[pos]
+                tot += plus_counts[pos]
+        return tot / n
 
     # Carry out 2-8% normalisation using plus and minus values for a given transcript
     # Could potentially add other normalisation methods as well
@@ -747,6 +761,8 @@ def get_inserted_transcript_ids():
 class StructureImporter():
 
     def execute(self, experiment_config):
+
+        print("Adding ["+experiment_config["description"]+"]")
 
         # Add the new experiment row to the DB
         experiment = StructurePredictionRun(

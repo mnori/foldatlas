@@ -94,7 +94,12 @@ def download_structure(transcript_id):
 
 @app.route("/download/measurements/<experiment_id>/<transcript_id>")
 def download_measurements(experiment_id, transcript_id):
-	buf = NucleotideMeasurementDownloader(experiment_id, transcript_id).generateTxt()
+	buf = NucleotideMeasurementDownloader(experiment_id, transcript_id).get_normalised()
+	return Response(buf, mimetype='text/plain')
+
+@app.route("/download/raw_measurements/<experiment_id>/<transcript_id>")
+def download_raw_measurements(experiment_id, transcript_id):
+	buf = NucleotideMeasurementDownloader(experiment_id, transcript_id).get_raw()
 	return Response(buf, mimetype='text/plain')
 
 @app.route("/download/all")
