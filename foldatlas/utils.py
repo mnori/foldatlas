@@ -49,7 +49,10 @@ class FastaExporter():
             .all()
 
 		n = 0
-		output_handle = open(settings.data_folder+"/transcripts.fasta", "w")
+
+		target_filepath = settings.data_folder+"/transcripts.fasta"
+
+		output_handle = open(target_filepath, "w")
 		for result in results:
 			transcript_id = result[0]
 			seq_record = Transcript(transcript_id).get_sequence()
@@ -66,7 +69,8 @@ class FastaExporter():
 				print("["+str(n)+"] sequences written")
 
 		output_handle.close()
-		print("...Finished exporting")
+
+		print("...Saved transcripts to ["+target_filepath+"]")
 
 # Split big fasta file into smaller ones. This is for doing HPC structure predictions
 class FastaSplitter():

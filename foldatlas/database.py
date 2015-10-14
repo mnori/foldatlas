@@ -33,27 +33,29 @@ def import_db():
 
         print("Rebuilding schema...")
 
-        # Delete the whole DB and recreate again, much more reliable than using ORM
+        # # Delete the whole DB and recreate again, much more reliable than using ORM
         db_session.execute("DROP DATABASE "+settings.db_name)
         db_session.execute("CREATE DATABASE "+settings.db_name)
         db_session.execute("USE "+settings.db_name)
         db_session.commit()
 
-        # Create all the tables.
+        # # Create all the tables.
         Base.metadata.create_all(bind=engine)
 
-        # Add the annotations
+        # # Add the annotations
         SequenceImporter().execute() 
 
+        # Quick way of emptying out reactivities for testing purposes.
+        # db_session.execute("TRUNCATE TABLE raw_reactivities")
+        # db_session.execute("TRUNCATE TABLE nucleotide_measurement_set")
+        # db_session.execute("DELETE FROM nucleotide_measurement_run")
+        # db_session.commit()
+
+        ##########################################################
+
         # Add DMS reactivities. This should be raw reactivities from plus and minus first
-        # Includes adding coverage
-        # ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
-
+        # Includes adding coverage and normalisation
         ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
-        # CoverageImporter().execute(settings.dms_reactivities_experiment)
-
-        # Now normalise the data
-
 
         # CoverageImporter().execute(settings.dms_reactivities_experiment)
         
@@ -99,10 +101,10 @@ class SequenceImporter():
     # limit on genes to process - for testing purposes
     # None means it imports everything
     # gene_limit = 10
-    gene_limit = 10
+    gene_limit = None
 
     # Set to true for testing
-    chr1_only = True
+    chr1_only = False
 
     # Only import these genes. Can be None or a list.
     # filter_genes = ["AT3G29370", "AT3G48550", "AT2G31360"]
@@ -497,6 +499,9 @@ class ReactivitiesImporter():
 
     def execute(self, experiment_config):
 
+        # Wipe the tables
+
+
         # Add the run entity
         experiment = NucleotideMeasurementRun(
             id=experiment_config["nucleotide_measurement_run_id"],
@@ -517,8 +522,8 @@ class ReactivitiesImporter():
             while True:
 
                 n += 1
-                if n % 1000 == 0:
-                    print("Reached ["+str(n)+"] genes")
+                if n % 100 == 0:
+                    print("Imported ["+str(n)+"] transcript reactivity sets")
 
                 plus_line = input_file.readline().strip()
                 if plus_line == "": # reached the end of the file
@@ -532,7 +537,7 @@ class ReactivitiesImporter():
                 if transcript_id not in transcript_ids:
                     continue
 
-                print("Inserting reactivities for ["+transcript_id+"]")
+                # print("Inserting reactivities for ["+transcript_id+"]")
 
                 # add the raw data
                 measurement_set = RawReactivities(
@@ -545,7 +550,7 @@ class ReactivitiesImporter():
                 
                 # # normalise the data and add that too
                 normalised_reactivities = self.norm_2_8(
-                    transcripts[transcript_id], plus_counts, minus_counts)
+                    transcript_id, transcripts[transcript_id], plus_counts, minus_counts)
 
                 if normalised_reactivities == None:
                     continue
@@ -574,7 +579,11 @@ class ReactivitiesImporter():
 
     # Carry out 2-8% normalisation using plus and minus values for a given transcript
     # Could potentially add other normalisation methods as well
-    def norm_2_8(self, seq, plus_counts, minus_counts):
+    def norm_2_8(self, transcript_id, seq, plus_counts, minus_counts):
+
+        if len(seq) != len(plus_counts):
+            print("Skipped ["+transcript_id+"] due to length mismatch")
+            return None
 
         plus_counts = self.remove_ignored(plus_counts, seq)
         minus_counts = self.remove_ignored(minus_counts, seq)
@@ -617,7 +626,6 @@ class ReactivitiesImporter():
 
         # ensure there is actually normalised data after minus subbed
         if not has_data:
-            print("No data!")
             return None
 
         # do the 2-8% normalisation step
