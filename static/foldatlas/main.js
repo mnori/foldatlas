@@ -1,6 +1,6 @@
 /**
  * Front end code for FoldAtlas.
- * @author Matthew Norris <matthew.norris@jic.ac.uk>
+ * @author Matthew Norris <matthew.norris@jic.ac.uk> 2015
  */
 
 // Create the browser controller class
@@ -939,7 +939,7 @@ var StructureExplorer = Class.extend({
 
 		dataValues = dataIn["data"];
 
-		var margin = {top: 10, right: 10, bottom: 20, left: 20};
+		var margin = {top: 10, right: 5, bottom: 20, left: 25};
 		var totDims = {x: 250, y: 250};
 		var panelDims = {
 			x: totDims.x - margin.left - margin.right,
