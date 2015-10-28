@@ -12,6 +12,14 @@ p, li {
 	line-height: 1.4em;
 }
 
+a:link, a:visited {
+	color: #000;
+}
+a:hover, a:active {
+	background-color: #2f3b5d;
+	color: #fff;
+}
+
 /*** BUTTONS ***/
 
 .button {
