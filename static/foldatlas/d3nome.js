@@ -199,11 +199,18 @@
 
 	// coords - 2 element array
 	jumpToPosition: function(chrInd, coords, updateMenu) {
+
+		var oldChrInd = this.selectedChromosome;
 		this.selectedChromosome = chrInd;
+
+		if (oldChrInd != this.selectedChromosome) { 
+			// New chromosome selected. Must update the top brush range
+			this.initViewer();
+		}
 
 		// make sure coords are within the chromosome's range
 		var chrLen = this.chromosomes[this.selectedChromosome].length;
-		coords = [
+		var coords = [
 			coords[0] < 0 ? 0 : coords[0],
 			coords[1] >= chrLen ? chrLen - 1 : coords[1]
 		];
