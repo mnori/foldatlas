@@ -362,49 +362,56 @@ class CoverageSearcher():
         from models import Structure, GeneLocation
 
         # optional in vivo query - will include some non-in vivo results
+        q = db_session \
+            .query(NucleotideMeasurementSet, Transcript, GeneLocation,) \
+            .filter(
+                NucleotideMeasurementSet.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
+                Transcript.id==NucleotideMeasurementSet.transcript_id,
+                Transcript.gene_id==GeneLocation.gene_id,
+                GeneLocation.strain_id==settings.reference_strain_id # get this for gene len
+            ) \
+            .outerjoin(( # Left join to find in-vivo structures for structure indicator
+                Structure, 
+                and_(
+                    Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
+
+                    # this filters so it's only in vivo considered
+                    Structure.structure_prediction_run_id==2 
+                ) 
+            )) \
+            .add_entity(Structure) \
+            .group_by(NucleotideMeasurementSet.transcript_id) \
+            .order_by(NucleotideMeasurementSet.coverage.desc()) \
+            .offset((int(page_num) - 1) * self.page_size) \
+            .limit(str(self.page_size)) \
+
+        results = q.all()
+
+        # # get the SQL so we can optimise the query
+        # from sqlalchemy.dialects import postgresql
+        # q_str = str(q.statement.compile(dialect=postgresql.dialect()))
+        # print(q_str)
+
+
+        # mandatory in vivo query - just for screenshot purposes
         # results = db_session \
-        #     .query(NucleotideMeasurementSet, Transcript, GeneLocation,) \
+        #     .query(NucleotideMeasurementSet, Transcript, GeneLocation, Structure, ) \
         #     .filter(
         #         NucleotideMeasurementSet.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
         #         Transcript.id==NucleotideMeasurementSet.transcript_id,
         #         Transcript.gene_id==GeneLocation.gene_id,
-        #         GeneLocation.strain_id==settings.reference_strain_id # get this for gene len
-        #     ) \
-        #     .outerjoin(( # Left join to find in-vivo structures for structure indicator
-        #         Structure, 
-        #         and_(
-        #             Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
+        #         GeneLocation.strain_id==settings.reference_strain_id, # get this for gene len
+        #         Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
 
-        #             # this filters so it's only in vivo considered
-        #             Structure.structure_prediction_run_id==2 
-        #         ) 
-        #     )) \
+        #         # this filters so it's only in vivo considered
+        #         Structure.structure_prediction_run_id==2    
+        #     ) \
         #     .add_entity(Structure) \
         #     .group_by(NucleotideMeasurementSet.transcript_id) \
         #     .order_by(NucleotideMeasurementSet.coverage.desc()) \
         #     .offset((int(page_num) - 1) * self.page_size) \
         #     .limit(str(self.page_size)) \
         #     .all()
-
-        # mandatory in vivo query
-        results = db_session \
-            .query(NucleotideMeasurementSet, Transcript, GeneLocation, Structure, ) \
-            .filter(
-                NucleotideMeasurementSet.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
-                Transcript.id==NucleotideMeasurementSet.transcript_id,
-                Transcript.gene_id==GeneLocation.gene_id,
-                GeneLocation.strain_id==settings.reference_strain_id, # get this for gene len
-                Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
-
-                # this filters so it's only in vivo considered
-                Structure.structure_prediction_run_id==2    
-            ) \
-            .add_entity(Structure) \
-            .group_by(NucleotideMeasurementSet.transcript_id) \
-            .order_by(NucleotideMeasurementSet.coverage.desc()) \
-            .offset((int(page_num) - 1) * self.page_size) \
-            .limit(str(self.page_size)) \
-            .all()
 
         out = []
         for result in results:
