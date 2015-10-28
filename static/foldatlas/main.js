@@ -48,7 +48,6 @@ var BrowserController = Class.extend({
 
 		} else if (urlIn.indexOf("/transcript/") != -1) {
 			var transcriptID = this.getTranscriptID(urlIn);
-			console.log("Transcript selected!");
 			this.selectTranscript(transcriptID);
 			document.title = "FoldAtlas: "+transcriptID;
 
@@ -95,8 +94,6 @@ var BrowserController = Class.extend({
 					element.removeClass("highlighted");
 				}, this))
 				$("#"+id).addClass("highlighted");
-
-				console.log($("#"+id))
 			})
 		}, this));
 	},
