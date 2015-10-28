@@ -166,10 +166,10 @@
 </p>
 <img class="help-example-image" src="{{ settings.static_base_url }}/assets/help/measurements-chart.png" />
 
-<h3>Downloading DMS measurements</h3>
-<img class="help-example-image" src="{{ settings.static_base_url }}/assets/help/dms-download.png" />
+<h3>Downloading probing data</h3>
+<img class="help-example-image" src="{{ settings.static_base_url }}/assets/help/probing-download.png" />
 <p>
-   The <b>Download</b> button can be used to obtain a tab-delimited text file containing the DMS reactivity measurements for a given transcript. The following snippet illustrates 10 bases from the AT1G01620.1 transcript:
+   <b>Download Normalised</b> can be used to obtain a tab-delimited text file containing the normalised DMS reactivity measurements for a given transcript. The following snippet illustrates 11 bases from the AT1G01620.1 transcript:
 </p>
 
 <pre class="help-pre">
@@ -196,6 +196,35 @@
     </ol>
 </p>
 
+<p>
+   <b>Download Raw</b> can be used to obtain a text file containing raw adduct counts for DMS and control lanes. This snippet illustrates 11 bases from the AT1G01620.1 transcript:
+</p>
+
+<pre class="help-pre">
+<u>1   2   3    4    </u>
+75  U   145  176
+76  G   80   0
+77  U   292  2
+78  A   125  447
+79  G   148  157
+80  A   92   704
+81  A   78   1195
+82  A   50   182
+83  A   66   0
+84  G   192  499
+85  A   16   262
+</pre>
+
+<p>
+    The columns include, from left to right:
+    <ol>
+        <li>The nucleotide position. Numbers start from 1.</li>
+        <li>The base type letter.</li>
+        <li>Adduct count from the control lane.</li>
+        <li>Adduct count from the DMS lane.</li>
+    </ol>
+</p>
+
 <h2>Database download</h2>
 
 The entire FoldAtlas MySQL database can be downloaded as an SQL file by using the <b>Download All</b> button:
@@ -209,7 +238,8 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
 <h3>Structural entities</h3>
 
 <p>
-    <ol>
+    Structural entities include RNA structure prediction data, along with the probing data that were used to generate them.
+    <ul>
         <li>
             <b>Structure Prediction Run:</b>
             This represents an RNA structure prediction run. At present there is just one of these, generated using the RNAstructure 
@@ -230,14 +260,14 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
             <b>Nucleotide Measurement Set:</b>
             Represents normalised reactivities, generated from raw reactivities. Includes a property to store a per-nucleotide coverage value for the entire transcript, and a string containing the individual measurements.
         </li>
-    </ol>
+    </ul>
 </p>
 
 <h3>Genomic entities</h3>
 
 <p>
     Other FoldAtlas tables deal with representing genomic data structures. These are used by the genome browser and also to generate RNA sequences. These cover gene and transcript identifiers. Genomic entities include:
-    <ol>
+    <ul>
         <li>
             <b>Strain:</b>
             A strain represents a single sequenced accession of a particular organism. At present, the only strain stored in FoldAtlas is Col0, which represents the <i>A. thaliana</i> reference genome. Future versions of FoldAtlas will include additional strains and organisms.
@@ -257,7 +287,7 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
             <b>Transcript:</b>
             The transcript is a generic entity that can be shared amongst multiple strains, with the transcript sequence represented by chromosome sequence and strain-specific features that cover the chromosome sequence.
         </li>
-    </ol>
+    </ul>
 </p>
 
 <h2>References</h2>
