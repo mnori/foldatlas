@@ -357,9 +357,14 @@ class CoverageSearcher():
         return page_count
 
     def fetch_transcript_data(self, page_num):
-
+        from utils import Timeline
         from sqlalchemy import func, and_
         from models import Structure, GeneLocation
+
+        # TODO optimise this slow query
+        # Slowness is caused by GROUP BY statement
+        # Could fix using a subquery - 
+        # e.g. http://stackoverflow.com/questions/15626493/left-join-only-first-row
 
         # optional in vivo query - will include some non-in vivo results
         q = db_session \
@@ -375,23 +380,27 @@ class CoverageSearcher():
                 and_(
                     Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
 
-                    # this filters so it's only in vivo considered
+                    # this filters so it's only in vivo joined against
                     Structure.structure_prediction_run_id==2 
                 ) 
             )) \
             .add_entity(Structure) \
-            .group_by(NucleotideMeasurementSet.transcript_id) \
+            .group_by(Transcript.id) \
             .order_by(NucleotideMeasurementSet.coverage.desc()) \
             .offset((int(page_num) - 1) * self.page_size) \
             .limit(str(self.page_size)) \
 
+        # GROUP BY eliminates structures with the same transcript ID \
+
         results = q.all()
 
-        # # get the SQL so we can optimise the query
-        # from sqlalchemy.dialects import postgresql
-        # q_str = str(q.statement.compile(dialect=postgresql.dialect()))
-        # print(q_str)
+        # tl.log("c")
+        # tl.dump()
 
+        # get the SQL so we can optimise the query
+        # from sqlalchemy.dialects import postgresql
+        # q_str = str(q.statement.compile(compile_kwargs={"literal_binds": True}))
+        # print(q_str)
 
         # mandatory in vivo query - just for screenshot purposes
         # results = db_session \
