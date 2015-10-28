@@ -225,12 +225,10 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
             Represents a genome-scale experiment that involves taking measurements at specific nucleotide positions. At present this is used to represent DMS reactivity data. In the future, data from SHAPE and ribosome profiling experiments will also be represented by this entity.
         </li><li>
             <b>Raw Reactivities:</b>
+            This represents raw adduct counts, generated from mapping reads in an RNA structure-seq experiment. Includes a text field containing the tab delimited adduct counts.
         </li><li>
             <b>Nucleotide Measurement Set:</b>
             Represents a set of DMS measurements for a single transcript. Includes a property to store a per-nucleotide coverage value for the entire transcript, and a string containing the individual measurements.
-        </li><li>
-            <b>Nucleotide measurement:</b>
-            Represents a single DMS reactivity measurement, at a specific nucleotide position.
         </li>
     </ol>
 </p>
@@ -254,7 +252,7 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
             A gene location contains redundant information about the start and stop boundaries of a gene with respect to the genome sequence of a particular strain. These data are used to quickly calculate gene lengths, and to visualise gene boundaries in the integrated <i>d3nome</i> genome browser.
         </li><li>
             <b>Gene:</b>
-            FoltAtlas gene entities are generic, i.e. are shared between different strains. A gene can therefore have multiple strain-specific locations, and can also be associated with multiple transcripts, representing alternative splice forms.
+            FoldAtlas gene entities are generic, i.e. are shared between different strains. A gene can therefore have multiple strain-specific locations, and can also be associated with multiple transcripts, representing alternative splice forms.
         </li><li>
             <b>Transcript:</b>
             The transcript is a generic entity that can be shared amongst multiple strains, with the transcript sequence represented by chromosome sequence and strain-specific features that cover the chromosome sequence.
