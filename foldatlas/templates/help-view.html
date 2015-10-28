@@ -221,14 +221,14 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
             <b>Structure:</b>
             Represents a single structure that has been predicted as part of a structure prediction run. This is generated from a single transcript sequence. Includes a free energy estimate, data for PCA plots, and a string containing tab delimited pairing data.
         </li><li>
-            <b>Nucleotide Experiment:</b>
+            <b>Nucleotide Measurement Run:</b>
             Represents a genome-scale experiment that involves taking measurements at specific nucleotide positions. At present this is used to represent DMS reactivity data. In the future, data from SHAPE and ribosome profiling experiments will also be represented by this entity.
         </li><li>
             <b>Raw Reactivities:</b>
             This represents raw adduct counts, generated from mapping reads in an RNA structure-seq experiment. Includes a text field containing the tab delimited adduct counts.
         </li><li>
             <b>Nucleotide Measurement Set:</b>
-            Represents a set of DMS measurements for a single transcript. Includes a property to store a per-nucleotide coverage value for the entire transcript, and a string containing the individual measurements.
+            Represents normalised reactivities, generated from raw reactivities. Includes a property to store a per-nucleotide coverage value for the entire transcript, and a string containing the individual measurements.
         </li>
     </ol>
 </p>
