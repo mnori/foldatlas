@@ -211,24 +211,23 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
 <p>
     <ol>
         <li>
-            <b>Structure prediction run:</b>
-            This represents a single genome-scale RNA structure prediction run. At present all of these have been generated using the RNAstructure 
+            <b>Structure Prediction Run:</b>
+            This represents an RNA structure prediction run. At present there is just one of these, generated using the RNAstructure 
 
                 (<a class="ref-link" href="#mathews_2004">Mathews <i>et al</i>., 2004</a>)
                 
             method.
         </li><li>
             <b>Structure:</b>
-            Represents a single structure that has been predicted as part of a structure prediction run. This is generated from a single transcript sequence. Includes a free energy estimate and data for PCA plots.
+            Represents a single structure that has been predicted as part of a structure prediction run. This is generated from a single transcript sequence. Includes a free energy estimate, data for PCA plots, and a string containing tab delimited pairing data.
         </li><li>
-            <b>Structure position:</b>
-            Stores the base pairing attributes of a single nucleotide position within a structure prediction. The base pairing information can be used to plot RNA structure diagrams.
-        </li><li>
-            <b>Nucleotide experiment:</b>
+            <b>Nucleotide Experiment:</b>
             Represents a genome-scale experiment that involves taking measurements at specific nucleotide positions. At present this is used to represent DMS reactivity data. In the future, data from SHAPE and ribosome profiling experiments will also be represented by this entity.
         </li><li>
-            <b>Nucleotide measurement Set:</b>
-            Represents a set of DMS measurements for a single transcript. Includes a property to store a per-nucleotide coverage value for the entire transcript.
+            <b>Raw Reactivities:</b>
+        </li><li>
+            <b>Nucleotide Measurement Set:</b>
+            Represents a set of DMS measurements for a single transcript. Includes a property to store a per-nucleotide coverage value for the entire transcript, and a string containing the individual measurements.
         </li><li>
             <b>Nucleotide measurement:</b>
             Represents a single DMS reactivity measurement, at a specific nucleotide position.
