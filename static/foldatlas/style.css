@@ -34,6 +34,10 @@ a:hover, a:active {
 	text-shadow: none;
 }
 
+.button:hover {
+	color: #000;
+}
+
 .button:active {
 	border: 1px solid #666;
 	padding: 9px 10px 5px 10px;
