@@ -2,10 +2,11 @@
 # note - this is not used in the development environment, since it's better to use 
 # Flask's built in web server for that.
 
-import sys
+import logging, sys
+logging.basicConfig(stream=sys.stderr)
+
 sys.path.insert(0, '/vagrant/foldatlas')
 
-import sys
 print(sys.version)
 
 # now do the import

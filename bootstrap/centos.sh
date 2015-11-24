@@ -32,6 +32,8 @@ foldatlas_wsgi.conf (END)
 
 
 
+/usr/local/bin/pip3.4
+
 HOST: v0622.nbi.ac.uk
 USER: norrism
 PASS: 5Y5THNR2
