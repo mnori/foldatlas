@@ -46,7 +46,7 @@ structures_in_vivo = {
 	"strain_id": "Col_0",
 	"description": "In vivo experimental structure prediction",
 	"sauce_filepath": structure_data_folder+"/in_vivo_structures",
-	"sauce_ext": "_con.ct",
+	"sauce_ext": ".ct",
 }
 
 transcripts_fasta_filepath = data_folder+"/transcripts.fasta"
