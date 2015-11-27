@@ -33,35 +33,21 @@ def import_db():
 
         print("Rebuilding schema...")
 
-        # # Delete the whole DB and recreate again, much more reliable than using ORM
+        # # # Delete the whole DB and recreate again, much more reliable than using ORM
         db_session.execute("DROP DATABASE "+settings.db_name)
         db_session.execute("CREATE DATABASE "+settings.db_name)
         db_session.execute("USE "+settings.db_name)
         db_session.commit()
 
-        # # Create all the tables.
+        # Create all the tables.
         Base.metadata.create_all(bind=engine)
 
         # # Add the annotations
         SequenceImporter().execute() 
 
-        # Quick way of emptying out reactivities for testing purposes.
-        # db_session.execute("TRUNCATE TABLE raw_reactivities")
-        # db_session.execute("TRUNCATE TABLE nucleotide_measurement_set")
-        # db_session.execute("DELETE FROM nucleotide_measurement_run")
-        # db_session.commit()
-
-        ##########################################################
-
         # Add DMS reactivities. This should be raw reactivities from plus and minus first
         # Includes adding coverage and normalisation
         ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
-
-        # CoverageImporter().execute(settings.dms_reactivities_experiment)
-        
-        # Add ribosome profiling (Disabled for now...)
-        # ReactivitiesImporter().execute(settings.ribosome_profile_experiment)
-        # CoverageImporter().execute(settings.ribosome_profile_experiment)
 
         # Import all available RNA structures
         StructureImporter().execute(settings.structures_in_silico)
@@ -71,10 +57,28 @@ def import_db():
         PcaImporter().execute(settings.structures_in_silico)
         PcaImporter().execute(settings.structures_in_vivo)
 
-        # DISABLED STUFF #########################################################
+
+
+
+        # DISABLED STUFF 
+
+        #########################################################
         # Do alignments so we can see polymorphism
         # Disabled - for now...
         # TranscriptAligner().align() 
+
+        # Quick way of emptying out reactivities for testing purposes.
+        # db_session.execute("TRUNCATE TABLE raw_reactivities")
+        # db_session.execute("TRUNCATE TABLE nucleotide_measurement_set")
+        # db_session.execute("DELETE FROM nucleotide_measurement_run")
+        # db_session.commit()
+
+        # CoverageImporter().execute(settings.dms_reactivities_experiment)
+        # Add ribosome profiling (Disabled for now...)
+        # ReactivitiesImporter().execute(settings.ribosome_profile_experiment)
+        # CoverageImporter().execute(settings.ribosome_profile_experiment)
+
+        ##########################################################
 
         print("Import Complete.")
 
@@ -703,7 +707,7 @@ class ReactivitiesImporter():
     def unpack_counts(self, line):
         bits = line.split()
         transcript_id = bits[0]
-        counts = list(map(int, bits[3:]))
+        counts = list(map(float, bits[3:]))
         return transcript_id, counts
 
         # # Open the DMS reactivities file. These are normalised already.

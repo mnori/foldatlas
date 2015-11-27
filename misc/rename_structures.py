@@ -1,8 +1,8 @@
+# Renames .ct files to their transcript IDs.
+
 import os
 import shutil
 from os.path import expanduser
-
-# Renames .ct files to their transcript IDs.
 
 def rename_folder(folder_filepath):
 	folder_filepath = expanduser(folder_filepath)
