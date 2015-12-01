@@ -23,10 +23,10 @@ function import_db() {
 	pretty_print "Importing database..."
 
 	# stops mysql crashing out on import
-	echo "SET GLOBAL max_allowed_packet=1073741824;" | mysql -u root -pvagrant
+	echo "SET GLOBAL max_allowed_packet=1073741824;" | mysql -u root -pjGEHL3qT6sdntJD9pfyB8f3hGzBajLW2
 
 	# does the actual import
-	mysql -uroot -pvagrant foldatlas < foldatlas.sql
+	mysql -uroot -pjGEHL3qT6sdntJD9pfyB8f3hGzBajLW2 foldatlas < foldatlas.sql
 	rm foldatlas.sql
 
 	echo "Done."

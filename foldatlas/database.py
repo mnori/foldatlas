@@ -33,25 +33,25 @@ def import_db():
 
         print("Rebuilding schema...")
 
-        # # # Delete the whole DB and recreate again, much more reliable than using ORM
-        db_session.execute("DROP DATABASE "+settings.db_name)
-        db_session.execute("CREATE DATABASE "+settings.db_name)
-        db_session.execute("USE "+settings.db_name)
-        db_session.commit()
+        # # # # Delete the whole DB and recreate again, much more reliable than using ORM
+        # db_session.execute("DROP DATABASE "+settings.db_name)
+        # db_session.execute("CREATE DATABASE "+settings.db_name)
+        # db_session.execute("USE "+settings.db_name)
+        # db_session.commit()
 
-        # Create all the tables.
-        Base.metadata.create_all(bind=engine)
+        # # # Create all the tables.
+        # Base.metadata.create_all(bind=engine)
 
-        # # Add the annotations
-        SequenceImporter().execute() 
+        # # # # Add the annotations
+        # SequenceImporter().execute() 
 
-        # Add DMS reactivities. This should be raw reactivities from plus and minus first
-        # Includes adding coverage and normalisation
-        ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
+        # # # Add DMS reactivities. This should be raw reactivities from plus and minus first
+        # # # Includes adding coverage and normalisation
+        # ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
 
-        # Import all available RNA structures
-        StructureImporter().execute(settings.structures_in_silico)
-        StructureImporter().execute(settings.structures_in_vivo)
+        # # # Import all available RNA structures
+        # StructureImporter().execute(settings.structures_in_silico)
+        # StructureImporter().execute(settings.structures_in_vivo)
 
         # Do PCA analysis on the structures
         PcaImporter().execute(settings.structures_in_silico)
@@ -905,6 +905,8 @@ class PcaImporter():
 
         # Do PCA using structure vectors
         pca_results = self.do_pca(structure_vecs)
+        if pca_results == None:
+            return
 
         # Add the PC data to the DB
         for structure_id in structures:
@@ -920,6 +922,10 @@ class PcaImporter():
     def do_pca(self, structure_vecs):
         from sklearn import decomposition
         data = list(structure_vecs.values())
+
+        if len(data) < 2: # Need at least 2 structures to do PCA.
+            print("Warning - PCA failed, not enough structures.")
+            return None
 
         # Do PCA.
         # Results always listed in the order that they were added.
