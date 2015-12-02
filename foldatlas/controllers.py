@@ -361,46 +361,87 @@ class CoverageSearcher():
         from sqlalchemy import func, and_
         from models import Structure, GeneLocation
 
-        # TODO optimise this slow query
-        # Slowness is caused by GROUP BY statement
-        # Could fix using a subquery - 
-        # e.g. http://stackoverflow.com/questions/15626493/left-join-only-first-row
+        offset = (int(page_num) - 1) * self.page_size
+        limit = self.page_size
 
-        # optional in vivo query - will include some non-in vivo results
-        q = db_session \
-            .query(NucleotideMeasurementSet, Transcript, GeneLocation,) \
-            .filter(
-                NucleotideMeasurementSet.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
-                Transcript.id==NucleotideMeasurementSet.transcript_id,
-                Transcript.gene_id==GeneLocation.gene_id,
-                GeneLocation.strain_id==settings.reference_strain_id # get this for gene len
-            ) \
-            .outerjoin(( # Left join to find in-vivo structures for structure indicator
-                Structure, 
-                and_(
-                    Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
+        sql = (
+            "SELECT "
+            "   transcript.id AS transcript_id, "
+            "   gene_location.start AS gene_start, "
+            "   gene_location.end AS gene_end, "
+            "   jnms.coverage AS coverage, "
+            "   jnms.structure_transcript_id AS structure_transcript_id "
+            "FROM ( "
+            "   SELECT "
+            "       nms.*, "
+            "       structure.transcript_id AS structure_transcript_id "
+            "       FROM ( "
+            "           SELECT nucleotide_measurement_set.* "
+            "           FROM nucleotide_measurement_set "
+            "           ORDER BY nucleotide_measurement_set.coverage DESC "
+            "           LIMIT "+str(limit)+" OFFSET "+str(offset)+" "
+            "       ) AS nms LEFT OUTER JOIN structure ON "
+            "           structure.transcript_id = nms.transcript_id AND "
+            "           structure.structure_prediction_run_id = 2 "
+            ") AS jnms, "
+            "   transcript, "
+            "   gene_location "
+            "WHERE "
+            "   jnms.nucleotide_measurement_run_id = 1 AND "
+            "   transcript.id = jnms.transcript_id AND "
+            "   transcript.gene_id = gene_location.gene_id AND "
+            "   gene_location.strain_id = 'Col_0' "
+            "GROUP BY jnms.transcript_id "
+            
+        )
 
-                    # this filters so it's only in vivo joined against
-                    Structure.structure_prediction_run_id==2 
-                ) 
-            )) \
-            .add_entity(Structure) \
-            .group_by(Transcript.id) \
-            .order_by(NucleotideMeasurementSet.coverage.desc()) \
-            .offset((int(page_num) - 1) * self.page_size) \
-            .limit(str(self.page_size)) \
+        results = database.engine.execute(sql)
+
+        out = []
+        for row in results:
+            out.append({
+                "transcript_id": row["transcript_id"],
+                "gene_length": (row["gene_end"] - row["gene_start"]) + 1,
+                "coverage": row["coverage"],
+                "has_structure": False if (row["structure_transcript_id"] == None) else True
+            })
+
+        return out
+
+        # q = db_session \
+        #     .query(NucleotideMeasurementSet, Transcript, GeneLocation,) \
+        #     .filter(
+        #         NucleotideMeasurementSet.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
+        #         Transcript.id==NucleotideMeasurementSet.transcript_id,
+        #         Transcript.gene_id==GeneLocation.gene_id,
+        #         GeneLocation.strain_id==settings.reference_strain_id # get this for gene len
+        #     ) \
+        #     .outerjoin(( # Left join to find in-vivo structures for structure indicator
+        #         Structure, 
+        #         and_(
+        #             Structure.transcript_id==NucleotideMeasurementSet.transcript_id,
+
+        #             # this filters so it's only in vivo joined against
+        #             Structure.structure_prediction_run_id==2 
+        #         ) 
+        #     )) \
+        #     .add_entity(Structure) \
+        #     .group_by(Transcript.id) \
+        #     .order_by(NucleotideMeasurementSet.coverage.desc()) \
+        #     .offset((int(page_num) - 1) * self.page_size) \
+        #     .limit(str(self.page_size)) \
 
         # GROUP BY eliminates structures with the same transcript ID \
 
-        results = q.all()
+        # results = q.all()
 
         # tl.log("c")
         # tl.dump()
 
         # get the SQL so we can optimise the query
-        from sqlalchemy.dialects import postgresql
-        q_str = str(q.statement.compile(compile_kwargs={"literal_binds": True}))
-        print(q_str)
+        # from sqlalchemy.dialects import postgresql
+        # q_str = str(q.statement.compile(compile_kwargs={"literal_binds": True}))
+        # print(q_str)
 
         # mandatory in vivo query - just for screenshot purposes
         # results = db_session \
@@ -421,16 +462,6 @@ class CoverageSearcher():
         #     .offset((int(page_num) - 1) * self.page_size) \
         #     .limit(str(self.page_size)) \
         #     .all()
-
-        out = []
-        for result in results:
-            out.append({
-                "measurement_set": result[0],
-                "structure": result[3],
-                "gene_length": (result[2].end - result[2].start) + 1
-            })
-
-        return out
 
 class StructureView():
     def __init__(self, transcript_id, strain_id):

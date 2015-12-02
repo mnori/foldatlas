@@ -20,13 +20,22 @@ function import_db() {
 	tar xvzf foldatlas.sql.tar.gz
 	echo "Done."
 
+	
+	# PASSWORD=jGEHL3qT6sdntJD9pfyB8f3hGzBajLW2
+	PASSWORD=vagrant
+
 	pretty_print "Importing database..."
 
 	# stops mysql crashing out on import
-	echo "SET GLOBAL max_allowed_packet=1073741824;" | mysql -u root -pjGEHL3qT6sdntJD9pfyB8f3hGzBajLW2
+	echo "SET GLOBAL max_allowed_packet=1073741824;" | mysql -u root -p$PASSWORD
 
 	# does the actual import
-	mysql -uroot -pjGEHL3qT6sdntJD9pfyB8f3hGzBajLW2 foldatlas < foldatlas.sql
+
+	# live password
+	# mysql -uroot -pjGEHL3qT6sdntJD9pfyB8f3hGzBajLW2 foldatlas < foldatlas.sql
+
+	# local version
+	mysql -uroot -p$PASSWORD foldatlas < foldatlas.sql
 	rm foldatlas.sql
 
 	echo "Done."
