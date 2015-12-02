@@ -398,9 +398,9 @@ class CoverageSearcher():
         # tl.dump()
 
         # get the SQL so we can optimise the query
-        # from sqlalchemy.dialects import postgresql
-        # q_str = str(q.statement.compile(compile_kwargs={"literal_binds": True}))
-        # print(q_str)
+        from sqlalchemy.dialects import postgresql
+        q_str = str(q.statement.compile(compile_kwargs={"literal_binds": True}))
+        print(q_str)
 
         # mandatory in vivo query - just for screenshot purposes
         # results = db_session \
