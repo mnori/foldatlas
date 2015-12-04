@@ -20,6 +20,29 @@ a:hover, a:active {
 	color: #fff;
 }
 
+#info-panel {
+	text-align: left;
+	/*background-color: rgba(0, 0, 0, 0.7);
+	box-shadow: 0px 0px 40px #000;
+	margin: 30px auto 30px auto;*/
+	/*width: 600px;
+	padding: 20px;*/
+	font-size: 16px;
+	color: #ccc;
+	width: 964px;
+	text-shadow: 0px 0px 10px #000;
+	margin: 30px auto 30px auto;
+	line-height: 1.5em;
+}
+
+#info-panel a:link, #info-panel a:visited {
+	color: #fff;
+}
+
+#info-panel a:hover, #info-panel a:active {
+	background-color: #000;
+}
+
 /*** BUTTONS ***/
 
 .button {
@@ -102,7 +125,7 @@ h1 .button {
 #main-container {
 	box-shadow: 0px 0px 40px #000;
 	margin: 30px auto 30px auto;
-	width: 964px;;
+	width: 964px;
 }
 
 #header {
