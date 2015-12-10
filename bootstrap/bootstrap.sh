@@ -72,7 +72,6 @@ function install() {
 	
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	pretty_print "Installing misc python dependencies"
-	pip3 install future
 	pip3 install biopython
 	pip3 install Flask
 	pip3 install mysql-connector-python --allow-external mysql-connector-python
@@ -92,10 +91,6 @@ function install() {
 	apt-add-repository -y ppa:j-4/vienna-rna
 	apt-get -y update
 	apt-get -y install vienna-rna
-
-	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-	pretty_print "Installing pstoedit"
-	apt-get -y install pstoedit
 
 	# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
