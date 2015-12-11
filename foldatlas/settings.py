@@ -1,14 +1,20 @@
-live = False
+live = True
 
 if live:
-	app_base_url = "http://52.89.80.163"
+	app_base_url = "http://52.34.119.251/" # if this is wrong, some ajax will fail
 	static_base_url = "/static"
+	static_path = "/var/www/foldatlas/static"
+	dbuser = "root"
+	dbpassword = "s7Alvwh801mcZ" # don't put the real live password here. change it on server instead.
 else:
 	app_base_url = "http://foldatlas.dev"
 	static_base_url = "http://static.foldatlas.dev"
+	static_path = "/vagrant/static"
+	dbuser = "root"
+	dbpassword = "vagrant"
 
 # This defines hostname, database name, username and password for connecting to the DB.
-database_uri = "mysql+mysqlconnector://root:vagrant@127.0.0.1/foldatlas?charset=utf8&use_unicode=0"
+database_uri = "mysql+mysqlconnector://"+dbuser+":"+dbpassword+"@127.0.0.1/foldatlas?charset=utf8&use_unicode=0"
 
 # Points to the general data folder
 data_folder = "/vagrant/sauce_data"

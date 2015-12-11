@@ -392,7 +392,7 @@ class CoverageSearcher():
             "   transcript.gene_id = gene_location.gene_id AND "
             "   gene_location.strain_id = 'Col_0' "
             "GROUP BY jnms.transcript_id "
-            
+            "ORDER BY coverage DESC"
         )
 
         results = database.engine.execute(sql)
