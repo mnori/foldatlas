@@ -21,7 +21,7 @@ def values_str_add(str_in, value):
 
 # Get positions array by extracting the values_str string
 def values_str_unpack_int(str_in):
-    positions = list(map(int, str_in.split("\t")))
+    positions = list(map(float, str_in.split("\t")))
     return positions
 
 def values_str_unpack_float(str_in):
