@@ -18,7 +18,9 @@ import re
 import math
 
 engine = create_engine(settings.database_uri, convert_unicode=True)
-db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+
+# Autoflush = true is important to prevent errors on EC2
+db_session = scoped_session(sessionmaker(autocommit=False, autoflush=True, bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
 

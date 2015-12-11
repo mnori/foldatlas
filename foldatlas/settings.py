@@ -1,7 +1,7 @@
 live = True
 
 if live:
-	app_base_url = "http://52.34.119.251/" # if this is wrong, some ajax will fail
+	app_base_url = "http://www.foldatlas.com/" # if this is wrong, some ajax will fail
 	static_base_url = "/static"
 	static_path = "/var/www/foldatlas/static"
 	dbuser = "root"
