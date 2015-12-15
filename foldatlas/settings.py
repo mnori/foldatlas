@@ -1,4 +1,4 @@
-live = True
+live = False
 
 if live:
 	app_base_url = "http://www.foldatlas.com/" # if this is wrong, some ajax will fail

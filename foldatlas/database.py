@@ -49,15 +49,15 @@ def import_db():
 
         # # # Add DMS reactivities. This should be raw reactivities from plus and minus first
         # # # Includes adding coverage and normalisation
-        # ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
+        ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
 
         # # # Import all available RNA structures
         # StructureImporter().execute(settings.structures_in_silico)
         # StructureImporter().execute(settings.structures_in_vivo)
 
         # Do PCA analysis on the structures
-        PcaImporter().execute(settings.structures_in_silico)
-        PcaImporter().execute(settings.structures_in_vivo)
+        # PcaImporter().execute(settings.structures_in_silico)
+        # PcaImporter().execute(settings.structures_in_vivo)
 
 
 
@@ -504,7 +504,6 @@ class CoverageImporter():
 class ReactivitiesImporter():
 
     def execute(self, experiment_config):
-
         # Wipe the tables
 
 
@@ -645,8 +644,9 @@ class ReactivitiesImporter():
     def remove_ignored(self, values, seq):
         out = []
         for pos in range(0, len(values)):
-            if seq[pos] == "T" or seq[pos] == "G":
-                out.append(None)
+            letter = seq[pos]
+            if letter in ["U", "T", "G"]:
+                out.append(None) # ignored nuc
             else:
                 out.append(values[pos])
         return out
