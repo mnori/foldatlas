@@ -7,8 +7,14 @@ from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, Cover
 import settings
 import database
 from utils import FastaExporter, FastaSplitter
+from database import db_session
 
 app = Flask(__name__)
+
+# db_session
+@app.teardown_appcontext
+def close_db(error):
+	db_session.close()
 
 @app.route('/static/<path:path>/<filename>')
 def send_static(path, filename):
