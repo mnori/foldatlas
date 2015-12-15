@@ -5,7 +5,7 @@
 import logging, sys
 logging.basicConfig(stream=sys.stderr)
 
-sys.path.insert(0, '/vagrant/foldatlas')
+sys.path.insert(0, '/var/www/foldatlas/static')
 
 print(sys.version)
 
