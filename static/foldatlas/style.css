@@ -20,6 +20,8 @@ a:hover, a:active {
 	color: #fff;
 }
 
+svg { max-height: 100%;}
+
 #info-panel {
 	text-align: left;
 	/*background-color: rgba(0, 0, 0, 0.7);

@@ -97,6 +97,8 @@
 
 	draw: function() {
 
+		console.log("draw() invoked");
+
 		// Draw canvas and its resize bar
 		var buf = 	
 			"<div id=\"d3nome-canvas-container\" style=\"width: "+this.totSvgDims.x+"px;\">"+
@@ -154,9 +156,11 @@
 			var newSvgHeight = this.initialSvgDims.y + heightDiff;
 			this.totSvgDims.y = newSvgHeight;
 
+			console.log("this.totSvgDims.y: "+this.totSvgDims.y);
+
 			// set the new canvas height
-			$("#d3nome-canvas").height(this.totSvgDims.y);
-			$("#d3nome-canvas").width(this.totSvgDims.x);
+			$("#d3nome-canvas").attr("height", this.totSvgDims.y);
+			$("#d3nome-canvas").attr("width", this.totSvgDims.x);
 
 			// must also set the overlay height
 			this.setOverlayDims();
