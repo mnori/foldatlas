@@ -245,7 +245,7 @@ var BrowserController = Class.extend({
 						"<i class=\"fa fa-download\"></i> Download Normalised"+
 					"</a>"+
 				"</h2>"+
-				"<svg id=\""+overviewID+"\"></svg>"+
+				"<div id=\""+overviewID+"_container\"><svg id=\""+overviewID+"\"></svg></div>"+
 				"<a href=\"#\" id=\""+moreDetailID+"\" class=\"nucleotide-detail button\">"+
 					"<i class=\"fa fa-arrow-circle-down\"></i>&nbsp;"+
 					"More detail"+
@@ -309,8 +309,12 @@ var BrowserController = Class.extend({
 
 		// Init the chart's container element
 		var chart = d3.select("#"+svgID)
-			.attr("width", panelTotDims.x)
-			.attr("height", panelTotDims.y)
+		var chartContainer = d3.select("#"+svgID+"_container")
+		var styleStr = 
+			"width: "+panelTotDims.x+"px; "+
+			"height: "+panelTotDims.y+"px; ";
+		chart.attr("style", styleStr);
+		chartContainer.attr("style", styleStr);
 
 		var maxY = d3.max(data, function(d) { return d.measurement; });
 		var maxX = data.length;
