@@ -77,6 +77,30 @@
         #header {
             background: url("{{ settings.static_base_url }}/assets/header-bg.png");
         }
+
+        /* explicitly specify the fonts, so it looks the same between browsers / platforms */
+        @font-face {
+            font-family: UbuntuFA;
+            src: url("{{ settings.static_base_url }}/assets/ubuntu_fonts/Ubuntu-R.ttf");
+        }
+
+        @font-face {
+            font-family: UbuntuFA;
+            src: url("{{ settings.static_base_url }}/assets/ubuntu_fonts/Ubuntu-B.ttf");
+            font-weight: bold;
+        }
+
+        @font-face {
+            font-family: UbuntuMonoFA;
+            src: url("{{ settings.static_base_url }}/assets/ubuntu_fonts/UbuntuMono-R.ttf");
+        }
+
+        @font-face {
+            font-family: UbuntuMonoFA;
+            src: url("{{ settings.static_base_url }}/assets/ubuntu_fonts/UbuntuMono-B.ttf");
+            font-weight: bold;
+        }
+
     </style>
 
   </head>

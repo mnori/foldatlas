@@ -5,7 +5,7 @@ body {
 	height: auto;
 	position: relative;
 	background-color: #2f3b5d;
-	font-family: Ubuntu, Tahoma, Geneva, sans-serif;
+	font-family: UbuntuFA, Tahoma, Geneva, sans-serif;
 }
 
 p, li {
@@ -274,7 +274,7 @@ h2.bar {
 }
 
 .alignment-container {
-	font-family: Ubuntu Mono, monospace;
+	font-family: UbuntuMonoFA, monospace;
 }
 
 .alignment-row {
@@ -317,7 +317,7 @@ h2.bar {
 }
 
 .tick > text {
-	font: 16px Ubuntu Mono, monospace;
+	font: 16px UbuntuMonoFA, monospace;
 }
 
 .line {
@@ -551,7 +551,7 @@ svg#forna-key {
 	border: 1px solid #888;
 	background-color: none;
 	font-size: 16px;
-	font-family: Ubuntu, Tahoma, Geneva, sans-serif
+	font-family: UbuntuFA, Tahoma, Geneva, sans-serif
 }
 
 /* /PAGINATION ********************************************************/
@@ -733,13 +733,13 @@ svg#forna-key {
 }
 
 .d3nome-x > .tick > text {
-	font: 16px Ubuntu Mono, monospace;
+	font: 16px UbuntuMonoFA, Courier New, monospace;
 	stroke: none;
 	fill: #000;
 }
 
 .d3nome-zoomed-out-message {
-	font: 16px Ubuntu Mono, monospace;
+	font: 16px UbuntuMonoFA, Courier New, monospace;
 }
 
 /** SELECT MENU **/
@@ -772,7 +772,7 @@ svg#forna-key {
 	line-height: 15px;
 	position: relative;
 	padding-left: 20px;
-	font-family: Ubuntu, Tahoma, Geneva, sans-serif;
+	font-family: UbuntuFA, Tahoma, Geneva, sans-serif;
 }
 
 /* Adds the arrow to the select button */
@@ -815,7 +815,7 @@ svg#forna-key {
 	font-size: 16px;
 	padding: 5px 10px;
 	background-image: none;
-	font-family: Ubuntu, Tahoma, Geneva, sans-serif;
+	font-family: UbuntuFA, Tahoma, Geneva, sans-serif;
 }
 
 #d3nome-chromosome-selector-menu .ui-menu-item {
