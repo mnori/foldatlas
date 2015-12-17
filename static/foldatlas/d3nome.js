@@ -156,11 +156,9 @@
 			var newSvgHeight = this.initialSvgDims.y + heightDiff;
 			this.totSvgDims.y = newSvgHeight;
 
-			console.log("this.totSvgDims.y: "+this.totSvgDims.y);
+			
 
-			// set the new canvas height
-			$("#d3nome-canvas").attr("height", this.totSvgDims.y);
-			$("#d3nome-canvas").attr("width", this.totSvgDims.x);
+			this.setSvgDims();
 
 			// must also set the overlay height
 			this.setOverlayDims();
@@ -264,6 +262,25 @@
 		this.viewDims = {x: this.totSvgDims.x - (this.horizMargin * 2), y: (this.totSvgDims.y - this.navDims.y)};
 	},
 
+	setSvgDims: function() {
+		console.log("setSvgDims() invoked");
+
+		// grab the elements
+		var canvasContainer = d3.select("#d3nome-canvas-container")
+		var svg = d3.select("#d3nome-canvas")
+
+		// set HTML width and height (not actually necessary)
+		// svg.attr("width", this.totSvgDims.x).attr("height", this.totSvgDims.y);
+		// canvasContainer.attr("width", this.totSvgDims.x).attr("height", this.totSvgDims.y);
+
+		// set style width and height
+		var styleStr = 
+			"width: "+this.totSvgDims.x+"px; "+
+			"height: "+this.totSvgDims.y+"px; ";
+		svg.attr("style", styleStr);
+		canvasContainer.attr("style", styleStr);
+	},
+
 	// Set up the chromosome scrollbar.
 	initViewer: function() {
 
@@ -273,9 +290,7 @@
 
 		var bp = this.chromosomes[this.selectedChromosome].length
 
-		var svg = d3.select("#d3nome-canvas")
-			.attr("width", this.totSvgDims.x)
-		    .attr("height", this.totSvgDims.y)
+		this.setSvgDims();
 
 		// view scales
 		this.viewXScale = d3.scale.linear()
@@ -323,6 +338,7 @@
 		this.zoomTranslate = this.zoom.translate();
 		this.zoomScale = this.zoom.scale();
 
+		var svg = d3.select("#d3nome-canvas");
 		this.viewElement = svg.append("g")
 			.attr("class", "d3nome-view")
 			.attr("width", this.viewDims.x)
