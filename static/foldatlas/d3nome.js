@@ -206,8 +206,8 @@
 		this.selectedChromosome = chrInd;
 
 		if (oldChrInd != this.selectedChromosome) { 
-			// New chromosome selected. Must update the top brush range
-			this.initViewer();
+			// New chromosome selected. Must whole thing
+			this.draw();
 		}
 
 		// make sure coords are within the chromosome's range
