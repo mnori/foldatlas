@@ -1,10 +1,13 @@
 # FoldAtlas
 Matthew Norris <Matthew.Norris@jic.ac.uk>
 
-## Prerequisites
+The live site is available at http://www.foldatlas.com
+
+## Installing locally
 
 - Latest version of Vagrant and Virtualbox
-- Preferably OSX or Linux 
+- Preferably OSX or Linux
+- Source data files, or a copy of the database
 
 ## Setting up the box
 
