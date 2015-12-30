@@ -1,3 +1,5 @@
+# Add this to crontab: 0,30 * * * * python3 /home/ubuntu/foldatlas/foldatlas/monitor.py
+
 import traceback
 import os
 import urllib.request  # the lib that handles the url stuff
