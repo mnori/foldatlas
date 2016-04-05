@@ -74,7 +74,16 @@ function install() {
 	pretty_print "Installing misc python dependencies"
 	pip3 install biopython
 	pip3 install Flask
-	pip3 install mysql-connector-python --allow-external mysql-connector-python
+
+	# echo https://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.1.3.tar.gz >> requirements.txt
+	# sudo -H pip3 install -r ./requirements.txt
+
+	# mysql-connector-python is a pain for some reason
+	# see https://stackoverflow.com/questions/31748278/how-do-you-install-mysql-connector-python-development-version-through-pip
+	git clone https://github.com/mysql/mysql-connector-python.git
+	cd mysql-connector-python
+	python3 ./setup.py build
+	python3 ./setup.py install
 	pip3 install Flask-SQLAlchemy
 	# pip3 install forgi # autotranslated, for now
 
