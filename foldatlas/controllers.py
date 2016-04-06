@@ -676,7 +676,16 @@ class StructureDownloader():
         return self.generate_txt(results)
 
     def generate_txt(self, results):
-        return "hello world"
+        # first we must extract and display the sequence, using the transcript object
+        transcript = results[0][2]
+
+        buf = ">"+self.transcript_id+"\n"
+        buf += transcript.get_sequence_str()+"\n"
+
+        # for row in results:
+        #     print(row)
+
+        return buf
 
     def generate_txt_old(self, results):
 
