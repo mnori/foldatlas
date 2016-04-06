@@ -6,7 +6,7 @@ from models import Feature, Transcript, NucleotideMeasurementSet, Structure, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, \
     values_str_unpack_float, values_str_unpack_int, RawReactivities
 
-from utils import ensure_dir, insert_newlines
+from utils import ensure_dir, insert_newlines, build_dot_bracket
 
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
@@ -547,30 +547,8 @@ class StructureDiagramView():
 
         # Get position values from Structure entity
         positions = results[0][0].get_values()
-
-        # build dot bracket string
-        n_reverse = n_forward = 0
-        dot_bracket_str = ""
-
-        # Get sequence string from Transcript entity
         seq_str = results[0][1].get_sequence_str()
-
-        for curr_position in range(1, len(positions) + 1):
-            paired_to_position = positions[curr_position - 1]
-
-            # seq_str += result.letter
-            if paired_to_position == 0:
-                dot_bracket_str += "."
-            elif paired_to_position < curr_position:
-                n_reverse += 1
-                dot_bracket_str += ")"
-            elif paired_to_position > curr_position:
-                n_forward += 1
-                dot_bracket_str += "("
-            else:
-                # should never happen
-                print("Error: cannot do self pairing!");
-                dot_bracket_str += "."
+        dot_bracket_str = build_dot_bracket(positions)
 
         return {
             "sequence": seq_str.replace("T", "U"),
@@ -675,19 +653,29 @@ class StructureDownloader():
 
         return self.generate_txt(results)
 
+    # Generates text using a more compact file format
     def generate_txt(self, results):
         # first we must extract and display the sequence, using the transcript object. output
         # in fasta-like format
         transcript = results[0][2]
-
         buf = ">"+self.transcript_id+"\n"
         buf += insert_newlines(transcript.get_sequence_str())+"\n"
 
-        
+        for result in results:
+            structure = result[0]
+            run = result[1]
+            transcript = result[2]
+            positions = structure.get_values()
 
-        # for row in results:
-        #     print(row)
+            # generate and add the header text for this structure
+            buf += (
+                ">sid_"+str(structure.id)+"\t"+
+                "ENERGY:"+str(structure.energy)+" kcal/mol\t"+
+                run.description+"\n")
 
+            # generate and add dot bracket text
+            buf += insert_newlines(build_dot_bracket(positions))+"\n"
+            
         return buf
 
     # Generates the older and far more cluttered txt format for structures
