@@ -95,7 +95,7 @@ def structure_circle_plot_ajax(structure_id):
 # can then just use experiment IDs for everything.
 @app.route("/download/structure/<transcript_id>")
 def download_structure(transcript_id):
-	buf = StructureDownloader([1, 2], transcript_id).generateTxt()
+	buf = StructureDownloader([1, 2], transcript_id).generate()
 	return Response(buf, mimetype='text/plain')
 
 @app.route("/download/measurements/<experiment_id>/<transcript_id>")

@@ -656,7 +656,7 @@ class StructureDownloader():
         self.structure_prediction_run_ids = structure_prediction_run_ids
         self.transcript_id = transcript_id
 
-    def generateTxt(self):
+    def generate(self):
 
         # Fetch the data
         results = db_session \
@@ -672,6 +672,13 @@ class StructureDownloader():
                 Structure.id
             ) \
             .all()
+
+        return self.generate_txt(results)
+
+    def generate_txt(self, results):
+        return "hello world"
+
+    def generate_txt_old(self, results):
 
         # Generate tab delimited text from the data
         buf = ""
