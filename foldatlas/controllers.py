@@ -6,7 +6,7 @@ from models import Feature, Transcript, NucleotideMeasurementSet, Structure, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, \
     values_str_unpack_float, values_str_unpack_int, RawReactivities
 
-from utils import ensure_dir
+from utils import ensure_dir, insert_newlines
 
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
@@ -676,17 +676,21 @@ class StructureDownloader():
         return self.generate_txt(results)
 
     def generate_txt(self, results):
-        # first we must extract and display the sequence, using the transcript object
+        # first we must extract and display the sequence, using the transcript object. output
+        # in fasta-like format
         transcript = results[0][2]
 
         buf = ">"+self.transcript_id+"\n"
-        buf += transcript.get_sequence_str()+"\n"
+        buf += insert_newlines(transcript.get_sequence_str())+"\n"
+
+        
 
         # for row in results:
         #     print(row)
 
         return buf
 
+    # Generates the older and far more cluttered txt format for structures
     def generate_txt_old(self, results):
 
         # Generate tab delimited text from the data
