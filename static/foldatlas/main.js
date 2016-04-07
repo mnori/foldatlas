@@ -1119,7 +1119,7 @@ var StructureExplorer = Class.extend({
 
 			$("#circle-plot").empty();
 			$("#circle-plot").append(
-				"<a href=\"#\" target=\"_blank\" id=\"circle-plot-dl-button\" class=\"button svg\">"+
+				"<a href=\"#\" target=\"_blank\" id=\"circle-plot-dl-button\" class=\"button svg\" download=\"circle-plot.png\">"+
 					"<i class=\"fa fa-download\"></i> SVG"+
 				"</a>"
 			)
@@ -1167,6 +1167,8 @@ var StructureExplorer = Class.extend({
 
 			svg.append("circle")
 				.attr("class", "circleplot-circle")
+				.attr("stroke", "#000")
+				.attr("fill", "#fff")
     			.attr("r", innerRadius);
 
 			var link = svg.append("g").selectAll(".circleplot-link"),
@@ -1181,6 +1183,9 @@ var StructureExplorer = Class.extend({
 				.enter().append("path")
 				.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
 				.attr("class", "circleplot-link")
+				.attr("stroke", "#000")
+				.attr("stroke-opacity", ".4")
+				.attr("fill", "none")
 				.attr("d", line)
 				.style("stroke", function(d) {
 					return getColour(d[0].key);
@@ -1227,6 +1232,7 @@ var StructureExplorer = Class.extend({
 			// Attach a tick line to each tick node
 			ticks.append("path")
 				.attr("class", "circleplot-tick")
+				.attr("stroke", "#000")
 				.attr("d", "M 0 -6 L 0 6")
 
 			this.browserController.hideLoading();
@@ -1272,6 +1278,8 @@ var StructureExplorer = Class.extend({
 	}
 });
 
+// Downloader for SVG images
+// see https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an
 var SvgDownloader = Class.extend({
 
 	// Connect the download link to an SVG download option

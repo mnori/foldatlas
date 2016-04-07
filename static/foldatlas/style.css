@@ -493,19 +493,7 @@ svg#forna-key {
 /*** CIRCLE PLOT ***/
 
 .circleplot-link {
-  stroke: #000;
-  stroke-opacity: .4;
-  fill: none;
   pointer-events: none;
-}
-
-.circleplot-circle {
-	stroke: #000;
-	fill: #fff;
-}
-
-.circleplot-tick {
-	stroke: #000;
 }
 
 /*** /CIRCLE PLOT ***/
