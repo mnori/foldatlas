@@ -222,6 +222,7 @@ var BrowserController = Class.extend({
 	// this should be a seperate class.
 	drawNucleotideMeasurements: function(experimentData, transcriptID) {
 		var detailedID = "nucleotide-measurements-overview_"+experimentData["id"];
+		var detailedContainerID = detailedID+"_container"
 		var overviewID = "nucleotide-measurements-detailed_"+experimentData["id"];
 
 		var moreDetailID = "more-detail_"+experimentData["id"];
@@ -246,7 +247,12 @@ var BrowserController = Class.extend({
 						"<i class=\"fa fa-download\"></i> Download Normalised"+
 					"</a>"+
 				"</h2>"+
-				"<div id=\""+overviewID+"_container\"><svg id=\""+overviewID+"\"></svg></div>"+
+				"<div id=\""+overviewID+"_container\" class=\"nm-container\">"+
+					"<a href=\"#\" target=\"_blank\" id=\"nm-overview-dl-button\" class=\"button svg\" download=\"nm-overview.svg\">"+
+						"<i class=\"fa fa-download\"></i>"+
+					"</a>"+
+					"<svg id=\""+overviewID+"\"></svg>"+
+				"</div>"+
 				"<a href=\"#\" id=\""+moreDetailID+"\" class=\"nucleotide-detail button\">"+
 					"<i class=\"fa fa-arrow-circle-down\"></i>&nbsp;"+
 					"More detail"+
@@ -255,21 +261,26 @@ var BrowserController = Class.extend({
 				"<i class=\"fa fa-arrow-circle-up\"></i>&nbsp;"+
 					"Less detail"+
 				"</a>"+
-				"<svg style=\"display: none;\" id=\""+detailedID+"\"></svg>";
+				"<div id=\""+detailedContainerID+"\" style=\"display: none;\" class=\"nm-container\">"+
+					"<a href=\"#\" target=\"_blank\" id=\"nm-detailed-dl-button\" class=\"button svg\" download=\"nm-detailed.svg\">"+
+						"<i class=\"fa fa-download\"></i>"+
+					"</a>"+
+					"<svg id=\""+detailedID+"\"></svg>"+
+				"</div>";
 			
 			$("#nucleotide-measurement-charts").append(buf)
 
 			// Add button event handlers
 			$("#"+moreDetailID).click($.proxy(function(ev) {
 				ev.preventDefault();
-				$("#"+detailedID).show();
+				$("#"+detailedContainerID).show();
 				$("#"+moreDetailID).hide();
 				$("#"+lessDetailID).show();
 			}, this))
 
 			$("#"+lessDetailID).click($.proxy(function(ev) {
 				ev.preventDefault();
-				$("#"+detailedID).hide();
+				$("#"+detailedContainerID).hide();
 				$("#"+moreDetailID).show();
 				$("#"+lessDetailID).hide();
 			}, this))
@@ -277,6 +288,9 @@ var BrowserController = Class.extend({
 			// Draw the charts
 			this.drawNucleotideMeasurementsOverview(overviewID, experimentData);
 			this.drawNucleotideMeasurementsDetailed(detailedID, experimentData);
+
+			new SvgDownloader(overviewID, "nm-overview-dl-button");
+			new SvgDownloader(detailedID, "nm-detailed-dl-button");
 		}
 	},
 

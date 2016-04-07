@@ -841,3 +841,7 @@ svg#forna-key {
 .ref.highlighted {
 	background-color: #beb;
 }
+
+.nm-container {
+	position: relative;
+}
