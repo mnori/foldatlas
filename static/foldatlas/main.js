@@ -1119,7 +1119,7 @@ var StructureExplorer = Class.extend({
 
 			$("#circle-plot").empty();
 			$("#circle-plot").append(
-				"<a href=\"#\" target=\"_blank\" class=\"button svg\">"+
+				"<a href=\"#\" target=\"_blank\" id=\"circle-plot-dl-button\" class=\"button svg\">"+
 					"<i class=\"fa fa-download\"></i> SVG"+
 				"</a>"
 			)
@@ -1229,9 +1229,8 @@ var StructureExplorer = Class.extend({
 				.attr("class", "circleplot-tick")
 				.attr("d", "M 0 -6 L 0 6")
 
-
-
 			this.browserController.hideLoading();
+			new SvgDownloader("circle-plot-svg", "circle-plot-dl-button")
 
 			// reorganise the data a bit
 			function prepareData(rawData) {
