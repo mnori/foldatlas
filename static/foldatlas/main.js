@@ -543,11 +543,9 @@ var BrowserController = Class.extend({
 				.attr("transform", "translate("+(-bgWidth / 2)+", "+10+")")
 				.attr("width", bgWidth)
 				.attr("height", 10)
-
-				// highlight nucleotides with missing reactivities
-				.attr("class", function(n, i) {
-					return (dataSlice[i].measurement == null) ? 
-						"missing-bg" : "not-missing-bg";
+				.style("fill", function(n, i) { 
+					var nucMissing = dataSlice[i].measurement == null
+					return nucMissing ? "#bbb" : "#fff"; 
 				})
 
 			// Add y-axis objects to the chart
@@ -601,6 +599,7 @@ var BrowserController = Class.extend({
 					")";
 				});
 
+			// Draw the rects for the bars
 			bar.append("rect")
 				.attr("height", function(d) { 
 					return yScale(maxY - d.measurement);
