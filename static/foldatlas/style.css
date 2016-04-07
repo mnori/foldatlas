@@ -338,9 +338,9 @@ h2.bar {
   stroke-width: 1px;
 }
 
-.nucleotide-measurement-bar {
+/*.nucleotide-measurement-bar {
 	fill: #c33;
-}
+}*/
 
 .missing-bg {
 	fill: #bbb;

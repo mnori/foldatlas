@@ -422,7 +422,8 @@ var BrowserController = Class.extend({
 			.attr("height", function(d) { 
 				return yScale(maxY - d.measurement);
 			})
-			.attr("width", barWidth);
+			.attr("width", barWidth)
+			.style("fill", "#c33");
 	},
 
 	// Visualises the measurement data.
