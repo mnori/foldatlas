@@ -98,6 +98,7 @@ a:hover, a:active {
 	margin: 0;
 	top: 5px;
 	right: 5px;
+	z-index: 10;
 }
 
 h1 .button {
@@ -514,7 +515,7 @@ svg#forna-key {
 	pointer-events: none;
 	opacity: 0;
 	margin: 0 none;
-	z-index: 9000;
+	z-index: 10;
 }
 
 .dot {

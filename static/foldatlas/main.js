@@ -832,6 +832,7 @@ var StructureExplorer = Class.extend({
 			this.fornaContainer.setPseudoknotStrength(0);
 			this.fornaContainer.stopAnimation();
 			this.addDmsColours();
+			new SvgDownloader("plotting-area", "fornac-dl-button");
 		}
 
 		$("#forna-interact-enable").click($.proxy(function(ev) {
@@ -1236,7 +1237,7 @@ var StructureExplorer = Class.extend({
 				.attr("d", "M 0 -6 L 0 6")
 
 			this.browserController.hideLoading();
-			new SvgDownloader("circle-plot-svg", "circle-plot-dl-button")
+			new SvgDownloader("circle-plot-svg", "circle-plot-dl-button");
 
 			// reorganise the data a bit
 			function prepareData(rawData) {
