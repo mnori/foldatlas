@@ -605,7 +605,20 @@ var BrowserController = Class.extend({
 				.attr("height", function(d) { 
 					return yScale(maxY - d.measurement);
 				})
-				.attr("width", barWidth);
+				.attr("width", barWidth)
+				.style("fill", "#c33");
+
+			// APPLY STYLES
+			var lineStyle = {	
+				"fill": "none",
+				"stroke": "#000",
+				"stroke-width": "1px"
+			}
+			chart.selectAll("path").style(lineStyle);
+	  		chart.selectAll("line").style(lineStyle)
+
+
+
 
 		} // End looping through chart rows
 	}
