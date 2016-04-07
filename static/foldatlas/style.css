@@ -89,6 +89,17 @@ a:hover, a:active {
 	margin-right: 30px;
 }
 
+#circle-plot {
+	position: relative;
+}
+
+.button.svg {
+	position: absolute;
+	margin: 0;
+	top: 5px;
+	right: 5px;
+}
+
 h1 .button {
 	display: inline-block;
 	vertical-align: bottom;

@@ -4,7 +4,7 @@
 
 <body>
 	<script>
-		function primeSvgDownload(svgID) {
+		function initSvgDownload(svgID, linkID) {
 
 			//get svg element.
 			var svg = document.getElementById(svgID);
@@ -28,7 +28,7 @@
 			var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
 
 			//set url value to a element's href attribute.
-			document.getElementById("link").href = url;
+			document.getElementById(linkID).href = url;
 			//you can download svg file by right click menu.
 
 			return false;
@@ -47,6 +47,6 @@
 		</style>
 	</svg><br />
 
-	<a href="javascript:void(0)" onclick="primeSvgDownload('svg')">Prime</a>
+	<a href="javascript:void(0)" onclick="initSvgDownload('svg', 'link')">Prime</a>
 	<a href="javascript:void(0)" id="link" target="_blank" download="test.svg">Download</a>
 </html>

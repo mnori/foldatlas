@@ -1118,6 +1118,12 @@ var StructureExplorer = Class.extend({
 		}).done(function(data) {
 
 			$("#circle-plot").empty();
+			$("#circle-plot").append(
+				"<a href=\"#\" target=\"_blank\" class=\"button svg\">"+
+					"<i class=\"fa fa-download\"></i> SVG"+
+				"</a>"
+			)
+
 			data = JSON.parse(data);
 
 			var nTicks = 10;
@@ -1149,6 +1155,7 @@ var StructureExplorer = Class.extend({
 			    .angle(function(d) { return d.x / 180 * Math.PI; });
 
 			var svg = d3.select("#circle-plot").append("svg")
+				.attr("id", "circle-plot-svg")
 			    .attr("width", svgDims)
 			    .attr("height", svgDims)
 			  .append("g")
@@ -1222,6 +1229,8 @@ var StructureExplorer = Class.extend({
 				.attr("class", "circleplot-tick")
 				.attr("d", "M 0 -6 L 0 6")
 
+
+
 			this.browserController.hideLoading();
 
 			// reorganise the data a bit
@@ -1262,4 +1271,39 @@ var StructureExplorer = Class.extend({
 			}
 		});
 	}
-})
+});
+
+var SvgDownloader = Class.extend({
+
+	// Connect the download link to an SVG download option
+	init: function(svgID, linkID) {
+		//get svg element.
+		var svg = document.getElementById(svgID);
+
+		//get svg source.
+		var serializer = new XMLSerializer();
+		var source = serializer.serializeToString(svg);
+
+		//add name spaces.
+		if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+		    source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+		}
+		if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)){
+		    source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+		}
+
+		//add xml declaration
+		source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+		//convert svg source to URI data scheme.
+		var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+
+		//set url value to a element's href attribute.
+		document.getElementById(linkID).href = url;
+		//you can download svg file by right click menu.
+	}
+});
+
+
+
+
