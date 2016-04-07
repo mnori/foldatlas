@@ -525,7 +525,7 @@ var BrowserController = Class.extend({
 			// Add x-axis objects to the chart.
 			var bgWidth = parseInt(panelDims.x / this.nucsPerRow) + 1;
 
-			chart.append("g")
+			var xAxisElement = chart.append("g")
 				.attr("class", "x axis")
 				.attr("transform", "translate("+
 					panelMargin.left+","+
@@ -533,8 +533,8 @@ var BrowserController = Class.extend({
 				+")")
 				.call(xAxis)
 
-				// select the X axis tick element
-				.selectAll(".tick")
+			xAxisElement
+				.selectAll(".tick") // select the X axis tick element
 
 				// aadd a rect to it, first child means it draws in the background
 				.insert("rect", ":first-child")
@@ -547,6 +547,9 @@ var BrowserController = Class.extend({
 					var nucMissing = dataSlice[i].measurement == null
 					return nucMissing ? "#bbb" : "#fff"; 
 				})
+
+			xAxisElement.selectAll("text")
+				.style("font-size", "15")
 
 			// Add y-axis objects to the chart
 			chart.append("g")
