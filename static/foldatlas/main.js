@@ -360,10 +360,10 @@ var BrowserController = Class.extend({
     	// need to add a new x axis tick for this thing.
 
 		// Add y-axis objects to the chart
-		chart.append("g")
+		var yAxisEl = chart.append("g")
 			.attr("class", "y axis")
 			.attr("transform", "translate("+panelMargin.left+","+panelMargin.top+")")
-			.call(yAxis);
+			.call(yAxis)
 
 		chart.append("g")
 			.attr("class", "x axis")
@@ -372,6 +372,16 @@ var BrowserController = Class.extend({
 				(panelMargin.top + panelDims.y)+
 			")")
 			.call(xAxis);
+
+		// Add inline style to lines and paths
+		var lineStyle = {	
+			"fill": "none",
+			"stroke": "#000",
+			"stroke-width": "1px"
+		}
+		chart.selectAll("path").style(lineStyle);
+  		chart.selectAll("line").style(lineStyle)
+  			// .style({"stroke", "#000"});
 
 		// Add y-axis label
 		// chart.append("text")

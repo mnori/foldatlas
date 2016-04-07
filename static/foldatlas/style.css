@@ -321,12 +321,12 @@ h2.bar {
 	background-color: #fff;
 }
 
-.axis path,
+/*.axis path,
 .axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
-}
+}*/
 
 .tick > text {
 	font: 16px UbuntuMonoFA, monospace;
