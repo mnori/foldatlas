@@ -1121,7 +1121,7 @@ var StructureExplorer = Class.extend({
 			$("#circle-plot").empty();
 			$("#circle-plot").append(
 				"<a href=\"#\" target=\"_blank\" id=\"circle-plot-dl-button\" class=\"button svg\" download=\"circle-plot.png\">"+
-					"<i class=\"fa fa-download\"></i> SVG"+
+					"<i class=\"fa fa-download\"></i>"+
 				"</a>"
 			)
 
