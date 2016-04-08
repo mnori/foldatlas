@@ -1054,6 +1054,7 @@ var StructureExplorer = Class.extend({
 			.attr("y", -6)
 			.style("text-anchor", "end")
 			.text("PC 1");
+			// fix x axis here?
 
 		// y-axis
 		svg.append("g")
