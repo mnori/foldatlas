@@ -1067,6 +1067,13 @@ var StructureExplorer = Class.extend({
 			.style("text-anchor", "end")
 			.text("PC 2");
 
+		var lineStyle = {
+		  "fill": "none",
+		  "stroke": "#000",
+		  "shape-rendering": "crispEdges"
+		};
+		svg.selectAll("path").style(lineStyle)
+
 		var showTooltip = function(d) {
 			tooltip.transition()
 				.duration(0)
