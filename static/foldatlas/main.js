@@ -975,7 +975,7 @@ var StructureExplorer = Class.extend({
 	drawStructurePca: function(dataIn, elementID) {
 		var svgID = elementID+"-svg";
 		var experimentID = dataIn["id"]
-		var padding = 0.05; // % margin around the PCA points
+		var padding = 0.3; // % margin around the PCA points
 		var buf = "<svg id=\""+svgID+"\" class=\"structure-pca-chart\"></svg>";
 
 		$("#"+elementID).html(buf)
