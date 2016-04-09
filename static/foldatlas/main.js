@@ -1073,6 +1073,7 @@ var StructureExplorer = Class.extend({
 		  "shape-rendering": "crispEdges"
 		};
 		svg.selectAll("path").style(lineStyle)
+		svg.selectAll("line").style(lineStyle)
 
 		var showTooltip = function(d) {
 			tooltip.transition()
