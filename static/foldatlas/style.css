@@ -22,7 +22,7 @@ a:hover, a:active {
 
 h4 {
 	margin-top: 0px;
-	margin-bottom: 5px;
+	margin-bottom: 10px;
 }
 
 #info-panel {
@@ -478,7 +478,7 @@ svg#forna-key {
 }
 
 svg#pca-key {
-	width: 120px;
+	width: 180px;
 	height: 92px;
 	min-width: 0;
 	min-height: 0;
