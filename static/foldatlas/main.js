@@ -986,7 +986,7 @@ var StructureExplorer = Class.extend({
 		dataValues = dataIn["data"];
 
 		var margin = {top: 20, right: 10, bottom: 20, left: 30};
-		var totDims = {x: 250, y: 250};
+		var totDims = {x: 180, y: 180};
 		var panelDims = {
 			x: totDims.x - margin.left - margin.right,
 			y: totDims.y - margin.left - margin.right
