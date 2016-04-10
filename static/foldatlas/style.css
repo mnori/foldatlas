@@ -20,6 +20,11 @@ a:hover, a:active {
 	color: #fff;
 }
 
+h4 {
+	margin-top: 0px;
+	margin-bottom: 5px;
+}
+
 #info-panel {
 	text-align: left;
 	/*background-color: rgba(0, 0, 0, 0.7);
@@ -447,7 +452,9 @@ table.coverage-table td.yes {
 	width: 255px;
 }
 
+/* this contains the actual chart */
 .pca-container {
+	padding-left: 20px;
 	width: 180px;
 	height: 180px;
 }
