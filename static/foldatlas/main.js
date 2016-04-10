@@ -976,6 +976,7 @@ var StructureExplorer = Class.extend({
 		var svgID = elementID+"-svg";
 		var experimentID = dataIn["id"]
 		var padding = 0.3; // % margin around the PCA points
+		var nTicks = 4;
 
 		// must add container here with button
 		var buf = "<svg id=\""+svgID+"\" class=\"structure-pca-chart\"></svg>";
@@ -1006,8 +1007,9 @@ var StructureExplorer = Class.extend({
 				maxX + padX
 			]);
 
+
 		var xMap = function(d) { return xScale(xValue(d)); };
-		var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+		var xAxis = d3.svg.axis().scale(xScale).ticks(nTicks).orient("bottom");
 
 		// setup y
 		var yValue = function(d) { return d.pc2; };
@@ -1023,7 +1025,7 @@ var StructureExplorer = Class.extend({
 			])
 
 	    var yMap = function(d) { return yScale(yValue(d));};
-	    var yAxis = d3.svg.axis().scale(yScale).orient("left");
+	    var yAxis = d3.svg.axis().scale(yScale).ticks(nTicks).orient("left");
 
 	    // Set up a colour scale. it's a bit crap since there are only 9? colours
 	    // TODO moar colours
