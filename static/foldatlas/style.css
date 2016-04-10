@@ -443,6 +443,10 @@ table.coverage-table td.yes {
 	height: 690px;
 }
 
+#pca-container {
+	width: 255px;
+}
+
 .pca-container {
 	width: 180px;
 	height: 180px;
