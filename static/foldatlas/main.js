@@ -249,7 +249,7 @@ var BrowserController = Class.extend({
 				"</h2>"+
 				"<div id=\""+overviewID+"_container\" class=\"nm-container\">"+
 					"<a href=\"#\" target=\"_blank\" id=\"nm-overview-dl-button\" class=\"button svg\" download=\"nm-overview.svg\">"+
-						"<i class=\"fa fa-download\"></i>"+
+						"<i class=\"fa fa-file-image-o\"></i>"+
 					"</a>"+
 					"<svg id=\""+overviewID+"\"></svg>"+
 				"</div>"+
@@ -263,7 +263,7 @@ var BrowserController = Class.extend({
 				"</a>"+
 				"<div id=\""+detailedContainerID+"\" style=\"display: none;\" class=\"nm-container\">"+
 					"<a href=\"#\" target=\"_blank\" id=\"nm-detailed-dl-button\" class=\"button svg\" download=\"nm-detailed.svg\">"+
-						"<i class=\"fa fa-download\"></i>"+
+						"<i class=\"fa fa-file-image-o\"></i>"+
 					"</a>"+
 					"<svg id=\""+detailedID+"\"></svg>"+
 				"</div>";
@@ -1171,7 +1171,7 @@ var StructureExplorer = Class.extend({
 			$("#circle-plot").empty();
 			$("#circle-plot").append(
 				"<a href=\"#\" target=\"_blank\" id=\"circle-plot-dl-button\" class=\"button svg\" download=\"circle-plot.svg\">"+
-					"<i class=\"fa fa-download\"></i>"+
+					"<i class=\"fa fa-file-image-o\"></i>"+
 				"</a>"
 			)
 
