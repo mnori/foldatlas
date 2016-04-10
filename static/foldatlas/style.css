@@ -493,13 +493,14 @@ svg#forna-key {
 	line-height: 40px;
 	font-size: 16px;
 	position: absolute;
-	bottom: 0px;
+	top: 35px;
 	left: 10px;
 	z-index: 2;
 }
 
 .forna-interact {
-	float: left;
+	float: right;
+	margin-left: 0px;
 	/*padding: 7px 0px 7px 7px;*/
 }
 
