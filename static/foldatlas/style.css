@@ -478,6 +478,13 @@ svg#forna-key {
 	z-index: 5;
 }
 
+svg#pca-key {
+	width: 120px;
+	height: 92px;
+	min-width: 0;
+	min-height: 0;
+}
+
 #forna-container {
 	position: absolute;
 	width: 630px;
