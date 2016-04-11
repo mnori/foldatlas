@@ -977,10 +977,10 @@ var StructureExplorer = Class.extend({
 	},
 
 	initMfeButton: function(experimentID, buttonID) {
-		$("#"+buttonID).click(function() {
-			console.log("It worked!")
-			return false;
-		});
+		$("#"+buttonID).click($.proxy(function() {
+			this.selectedStructure = this.getMfe(experimentID);
+			this.drawStructure();
+		}, this));
 	},
 
 	// Draws a PCA structure scatter plot
