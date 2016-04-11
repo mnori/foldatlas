@@ -21,13 +21,14 @@
 			<svg id="pca-key">
 
 				<!-- Legend title -->
-				<text x="110" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">lowest</text>
+				<text x="110" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">highest</text>
 
 				<!-- Reactivity gradient legend -->
 				<defs>
 					<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-						<stop offset="0%" style="stop-color:rgb(64, 255, 64);stop-opacity:1" />
-						<stop offset="100%" style="stop-color:rgb(255, 64, 64);stop-opacity:1" />
+						<stop offset="0%" style="stop-color:rgb(215, 48, 39);stop-opacity:1" />
+						<stop offset="50%" style="stop-color:rgb(254, 224, 139);stop-opacity:1" />
+						<stop offset="100%" style="stop-color:rgb(26, 152, 64)" />
 					</linearGradient>
 				</defs>
 				<rect x="30" y="50" width="100" height="20" fill="url(#grad1)" style="stroke: #000;" />
@@ -39,11 +40,12 @@
 				<line x1="130" y1="70" x2="130" y2="77" style="stroke: #000; stroke-width:1" />
 
 				<text x="0" y="40" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">Free energy kcal/mol</text>
-				<text x="10" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">highest</text>
+				<text x="10" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">lowest</text>
 
 			</svg>
 
 			<div id="pca-desc">
+				<b>PCA plots:</b>
 				Each dot is a structure. Clicking dots shows structure plots. Similar structures are plotted near to each other. The MFE button shows the minimum free energy structure.
 			</div>
 		</div>

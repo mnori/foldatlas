@@ -447,6 +447,7 @@ table.coverage-table td.yes {
 	height: 690px;
 }
 
+/* outer container */
 #pca-container {
 	width: 255px;
 }
@@ -456,6 +457,18 @@ table.coverage-table td.yes {
 	padding-left: 20px;
 	width: 180px;
 	height: 180px;
+}
+
+#pca-desc {
+	margin-top: 20px;
+}
+
+svg#pca-key {
+	margin-left: 38px;
+	width: 180px;
+	height: 92px;
+	min-width: 0;
+	min-height: 0;
 }
 
 #structure-detail {
@@ -475,13 +488,6 @@ svg#forna-key {
 	min-width: 0;
 	min-height: 0;
 	z-index: 5;
-}
-
-svg#pca-key {
-	width: 180px;
-	height: 92px;
-	min-width: 0;
-	min-height: 0;
 }
 
 #forna-container {
