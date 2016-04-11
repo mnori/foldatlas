@@ -541,6 +541,7 @@ svg#forna-key {
 
 .forna-interact {
 	float: right;
+	margin-left: 0px;
 	/*padding: 7px 0px 7px 7px;*/
 }
 
