@@ -13,10 +13,24 @@
 	<div id="structure-json" style="display: none;">{{ structure_view.data_json|safe }}</div>
 	<div id="structure-container">
 		<div id="pca-container">
-			<h4><i>In silico</i></h4>
-			<div id="pca-container-in-silico" class="pca-container"></div>
-			<h4><i>In vivo</i></h4>
-			<div id="pca-container-in-vivo" class="pca-container"></div>
+			<div class="pca-title-container">
+				<h4><i>In silico</i></h4>
+				<a id="pca-in-silico-dl" href="#" target="_blank" class="button pca-interact" download="pca.svg">
+					<i class="fa fa-file-image-o"></i>
+				</a>
+				<a id="pca-in-silico-mfe" href="#" target="_blank" class="button pca-interact">MFE</a>
+			</div>
+			<div id="pca-container-in-silico" class="pca-container"><!-- filled with SVG --></div>
+			<div class="pca-title-container">
+				<h4><i>In vivo</i></h4>
+				<div class="pca-title-container">
+				<a id="pca-in-vivo-dl" href="#" target="_blank" class="button pca-interact" download="pca.svg">
+					<i class="fa fa-file-image-o"></i>
+				</a>
+				<a id="pca-in-vivo-mfe" href="#" target="_blank" class="button pca-interact">MFE</a>
+			</div>
+			</div>
+			<div id="pca-container-in-vivo" class="pca-container"><!-- filled with SVG --></div>
 						<!-- PCA figure legend -->
 			<svg id="pca-key">
 
@@ -46,7 +60,7 @@
 
 			<div id="pca-desc">
 				<b>PCA plots:</b>
-				Each dot is a structure. Clicking dots shows structure plots. Similar structures are plotted near to each other. The MFE button shows the minimum free energy structure.
+				Each dot is a structure. Click dots to view structures. Similar structures are plotted near to each other. The MFE button shows the minimum free energy structure.
 			</div>
 		</div>
 

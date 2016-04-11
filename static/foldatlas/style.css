@@ -455,12 +455,30 @@ table.coverage-table td.yes {
 /* this contains the actual chart */
 .pca-container {
 	padding-left: 0px;
-	width: 210px;
-	height: 210px;
+	width: 200px;
+	height: 200px;
 }
 
 #pca-desc {
 	margin-top: 20px;
+}
+
+.pca-title-container {
+	position: relative;
+	height: 40px;
+}
+
+.pca-title-container > h4 {
+	position: absolute;
+	top: 7px;
+	left: 0px;
+}
+
+.pca-interact {
+	position: relative;
+	float: right;
+	margin-left: 5px;
+	margin-right: 0px;
 }
 
 svg#pca-key {
@@ -523,7 +541,6 @@ svg#forna-key {
 
 .forna-interact {
 	float: right;
-	margin-left: 0px;
 	/*padding: 7px 0px 7px 7px;*/
 }
 
