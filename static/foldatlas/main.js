@@ -1098,7 +1098,8 @@ var StructureExplorer = Class.extend({
 			.attr("r", 5)
 			.attr("cx", xMap)
 			.attr("cy", yMap)
-			.style("fill", function(d) { return heatmapColour(d.energy); }) 
+			.style("fill", function(d) { return heatmapColour(d.energy); })
+			.style("stroke", "#000") 
 			
 			.on("mousemove", showTooltip)
 			.on("mouseover", showTooltip)
