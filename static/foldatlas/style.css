@@ -454,9 +454,9 @@ table.coverage-table td.yes {
 
 /* this contains the actual chart */
 .pca-container {
-	padding-left: 20px;
-	width: 180px;
-	height: 180px;
+	padding-left: 0px;
+	width: 210px;
+	height: 210px;
 }
 
 #pca-desc {
