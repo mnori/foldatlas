@@ -968,6 +968,9 @@ var StructureExplorer = Class.extend({
 	drawStructurePcas: function() {
 		this.drawStructurePca(this.structureData[1], "pca-container-in-silico");
 		this.drawStructurePca(this.structureData[2], "pca-container-in-vivo");
+
+		new SvgDownloader("pca-container-in-silico-svg", "pca-in-silico-dl");
+		new SvgDownloader("pca-container-in-vivo-svg", "pca-in-vivo-dl");
 	},
 
 	// Draws a PCA structure scatter plot
@@ -1027,8 +1030,7 @@ var StructureExplorer = Class.extend({
 	    var yMap = function(d) { return yScale(yValue(d));};
 	    var yAxis = d3.svg.axis().scale(yScale).ticks(nTicks).orient("left");
 
-	    // Set up a colour scale. it's a bit crap since there are only 9? colours
-	    // TODO moar colours
+	    // Set up a colour scale
 		var numColors = 9;
 		var heatmapColour = d3.scale.quantize()
 		  	.domain([
@@ -1331,7 +1333,7 @@ var StructureExplorer = Class.extend({
 	}
 });
 
-// Downloader for SVG images
+// Binds a button to SVG download
 // see https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an
 var SvgDownloader = Class.extend({
 
