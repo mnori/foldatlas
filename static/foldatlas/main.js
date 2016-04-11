@@ -947,11 +947,10 @@ var StructureExplorer = Class.extend({
 		return measurements;
 	},
 
-	// Get the MFE structure.
-	getMfe: function() {
-		var inVivoExperimentID = 2;
+	// Get the MFE structure for given experimentID
+	getMfe: function(experimentID) {
 		var lowestEntry = null;
-		var structureData = this.structureData[inVivoExperimentID].data
+		var structureData = this.structureData[experimentID].data
 
 		// Find the in vivo structure with the MFE	
 		for (var j = 0; j < structureData.length; j++) {
@@ -971,6 +970,17 @@ var StructureExplorer = Class.extend({
 
 		new SvgDownloader("pca-container-in-silico-svg", "pca-in-silico-dl");
 		new SvgDownloader("pca-container-in-vivo-svg", "pca-in-vivo-dl");
+
+		// attach event handlers to the MFE download buttons
+		this.initMfeButton(1, "pca-in-silico-mfe")
+		this.initMfeButton(2, "pca-in-vivo-mfe")
+	},
+
+	initMfeButton: function(experimentID, buttonID) {
+		$("#"+buttonID).click(function() {
+			console.log("It worked!")
+			return false;
+		});
 	},
 
 	// Draws a PCA structure scatter plot
@@ -1112,17 +1122,11 @@ var StructureExplorer = Class.extend({
 				this.selectedStructure = d;
 				this.drawStructure();
 			}, this));
-
-		// add the tooltip area to the webpage (whocares.jpeg)
-		// var tooltip = d3.select("body").append("div")
-		//     .attr("class", "tooltip")
-		//     .style("opacity", 0);
-
 	},
 
 	drawStructure: function() {
 		if (this.selectedStructure == null) {
-			this.selectedStructure = this.getMfe();
+			this.selectedStructure = this.getMfe(2);
 		}
 
 		$("#forna-energy").html(this.selectedStructure["energy"]);
