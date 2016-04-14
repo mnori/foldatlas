@@ -1346,31 +1346,41 @@ var StructureExplorer = Class.extend({
 var SvgDownloader = Class.extend({
 
 	// Connect the download link to an SVG download option
-	init: function(svgID, linkID) {
-		//get svg element.
-		var svg = document.getElementById(svgID);
+	init: function(svgID, linkID) { // add filename
+		$("#"+linkID).click($.proxy(function() {
 
-		//get svg source.
-		var serializer = new XMLSerializer();
-		var source = serializer.serializeToString(svg);
+			//get svg element.
+			var svg = document.getElementById(svgID);
 
-		//add name spaces.
-		if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
-		    source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-		}
-		if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)){
-		    source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
-		}
+			//get svg source.
+			var serializer = new XMLSerializer();
+			var source = serializer.serializeToString(svg);
 
-		//add xml declaration
-		source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+			//add name spaces.
+			if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+			    source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+			}
+			if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)){
+			    source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+			}
 
-		//convert svg source to URI data scheme.
-		var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+			//add xml declaration
+			source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+			//convert svg source to URI data scheme.
+			// var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+
+
+			var blob = new Blob([source], {type: "image/svg+xml"});
+		    saveAs(blob, "image.svg");
+
+			// var blob = new Blob([source], {type: "text/plain;charset=utf-8"});
+			// saveAs(source, )
+		}, this));
 
 		//set url value to a element's href attribute.
-		document.getElementById(linkID).href = url;
+		// document.getElementById(linkID).href = url;
 		//you can download svg file by right click menu.
+
 	}
 });
 

@@ -96,9 +96,6 @@
 	},
 
 	draw: function() {
-
-		console.log("draw() invoked");
-
 		// Draw canvas and its resize bar
 		var buf = 	
 			"<div id=\"d3nome-canvas-container\" style=\"width: "+this.totSvgDims.x+"px;\">"+
@@ -263,8 +260,6 @@
 	},
 
 	setSvgDims: function() {
-		console.log("setSvgDims() invoked");
-
 		// grab the elements
 		var canvasContainer = d3.select("#d3nome-canvas-container")
 		var svg = d3.select("#d3nome-canvas")
