@@ -872,7 +872,6 @@ var StructureExplorer = Class.extend({
 			this.fornaContainer.setPseudoknotStrength(0);
 			this.fornaContainer.stopAnimation();
 			this.addDmsColours();
-			new SvgDownloader("plotting-area", "fornac-dl-button");
 		}
 
 		$("#forna-interact-enable").click($.proxy(function(ev) {
@@ -1164,6 +1163,10 @@ var StructureExplorer = Class.extend({
 		    this.fornaContainer.clearNodes();// remove the previous diagram
 			this.fornaContainer.addRNAJSON(g, true); // generate new diagram
 			this.browserController.hideLoading();
+
+			// must link after drawing
+			console.log("Plotting area linked")
+			new SvgDownloader("plotting-area", "fornac-dl-button");
 		});
 	},
 
