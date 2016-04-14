@@ -248,7 +248,7 @@ var BrowserController = Class.extend({
 					"</a>"+
 				"</h2>"+
 				"<div id=\""+overviewID+"_container\" class=\"nm-container\">"+
-					"<a href=\"#\" target=\"_blank\" id=\"nm-overview-dl-button\" class=\"button svg\" download=\"nm-overview.svg\">"+
+					"<a href=\"javascript:void(0)\" id=\"nm-overview-dl-button\" class=\"button svg\">"+
 						"<i class=\"fa fa-file-image-o\"></i>"+
 					"</a>"+
 					"<svg id=\""+overviewID+"\"></svg>"+
@@ -262,7 +262,7 @@ var BrowserController = Class.extend({
 					"Less detail"+
 				"</a>"+
 				"<div id=\""+detailedContainerID+"\" style=\"display: none;\" class=\"nm-container\">"+
-					"<a href=\"#\" target=\"_blank\" id=\"nm-detailed-dl-button\" class=\"button svg\" download=\"nm-detailed.svg\">"+
+					"<a href=\"javascript:void(0)\" id=\"nm-detailed-dl-button\" class=\"button svg\">"+
 						"<i class=\"fa fa-file-image-o\"></i>"+
 					"</a>"+
 					"<svg id=\""+detailedID+"\"></svg>"+
@@ -289,8 +289,8 @@ var BrowserController = Class.extend({
 			this.drawNucleotideMeasurementsOverview(overviewID, experimentData);
 			this.drawNucleotideMeasurementsDetailed(detailedID, experimentData);
 
-			new SvgDownloader(overviewID, "nm-overview-dl-button");
-			new SvgDownloader(detailedID, "nm-detailed-dl-button");
+			new SvgDownloader(overviewID, "nm-overview-dl-button", "nm-overview.svg");
+			new SvgDownloader(detailedID, "nm-detailed-dl-button", "nm-detailed.svg");
 		}
 	},
 
@@ -967,8 +967,8 @@ var StructureExplorer = Class.extend({
 		this.drawStructurePca(this.structureData[1], "pca-container-in-silico");
 		this.drawStructurePca(this.structureData[2], "pca-container-in-vivo");
 
-		new SvgDownloader("pca-container-in-silico-svg", "pca-in-silico-dl");
-		new SvgDownloader("pca-container-in-vivo-svg", "pca-in-vivo-dl");
+		new SvgDownloader("pca-container-in-silico-svg", "pca-in-silico-dl", "pca-in-silico.svg");
+		new SvgDownloader("pca-container-in-vivo-svg", "pca-in-vivo-dl", "pca-in-vivo.svg");
 
 		// attach event handlers to the MFE download buttons
 		this.initMfeButton(1, "pca-in-silico-mfe")
@@ -1166,7 +1166,7 @@ var StructureExplorer = Class.extend({
 
 			// must link after drawing
 			console.log("Plotting area linked")
-			new SvgDownloader("plotting-area", "fornac-dl-button");
+			new SvgDownloader("plotting-area", "fornac-dl-button", "structure-diagram.svg");
 		});
 	},
 
@@ -1182,7 +1182,7 @@ var StructureExplorer = Class.extend({
 
 			$("#circle-plot").empty();
 			$("#circle-plot").append(
-				"<a href=\"#\" target=\"_blank\" id=\"circle-plot-dl-button\" class=\"button svg\" download=\"circle-plot.svg\">"+
+				"<a href=\"javascript:void(0)\" id=\"circle-plot-dl-button\" class=\"button svg\">"+
 					"<i class=\"fa fa-file-image-o\"></i>"+
 				"</a>"
 			)
@@ -1299,7 +1299,7 @@ var StructureExplorer = Class.extend({
 				.attr("d", "M 0 -6 L 0 6")
 
 			this.browserController.hideLoading();
-			new SvgDownloader("circle-plot-svg", "circle-plot-dl-button");
+			new SvgDownloader("circle-plot-svg", "circle-plot-dl-button", "circle-plot.svg");
 
 			// reorganise the data a bit
 			function prepareData(rawData) {
@@ -1346,7 +1346,7 @@ var StructureExplorer = Class.extend({
 var SvgDownloader = Class.extend({
 
 	// Connect the download link to an SVG download option
-	init: function(svgID, linkID) { // add filename
+	init: function(svgID, linkID, filename) { // add filename
 		$("#"+linkID).click($.proxy(function() {
 
 			//get svg element.
@@ -1366,21 +1366,11 @@ var SvgDownloader = Class.extend({
 
 			//add xml declaration
 			source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-			//convert svg source to URI data scheme.
-			// var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
 
-
-			var blob = new Blob([source], {type: "image/svg+xml"});
-		    saveAs(blob, "image.svg");
-
-			// var blob = new Blob([source], {type: "text/plain;charset=utf-8"});
-			// saveAs(source, )
+			// download the file
+			var blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"});
+		    saveAs(blob, filename);
 		}, this));
-
-		//set url value to a element's href attribute.
-		// document.getElementById(linkID).href = url;
-		//you can download svg file by right click menu.
-
 	}
 });
 
