@@ -23,7 +23,7 @@ db_name="foldatlas"
 
 # Points to structure data folder, which contains a *lot* of files
 structure_data_folder = "/vagrant/structure_data"
-coverage_filepath = data_folder+"/db_coverages.txt"
+structure_tids_filepath = data_folder+"/structure_tids.txt"
 
 dms_reactivities_experiment = {
 	"nucleotide_measurement_run_id": 1,

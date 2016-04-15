@@ -947,6 +947,7 @@ class PcaImporter():
 
 
 # Export FoldAtlas coverages - these are plus + minus lane
+# Not currently in use
 class CoverageExporter():
     def export(self):
         measurements_data = db_session.query(NucleotideMeasurementSet).all()
@@ -957,3 +958,14 @@ class CoverageExporter():
                 f.write(tid+"\t"+str(coverage)+"\n")
         print("Coverages written to "+settings.coverage_filepath)
 
+# Make list of transcript IDs that have structures in our database
+class StructureTidsExporter():
+    def export(self):
+        sql = "SELECT DISTINCT transcript_id from structure"
+        results = engine.execute(sql)
+        n = 0
+        with open(settings.structure_tids_filepath, "w") as f:
+            for row in results:
+                n += 1
+                f.write(row["transcript_id"]+"\n")
+        print(str(n)+" structure transcript IDs written to "+settings.structure_tids_filepath)

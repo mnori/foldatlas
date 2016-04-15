@@ -7,7 +7,7 @@ from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, Cover
 import settings
 import database
 from utils import FastaExporter, FastaSplitter
-from database import db_session, CoverageExporter
+from database import db_session, StructureTidsExporter
 
 app = Flask(__name__)
 
@@ -134,8 +134,8 @@ if __name__ == "__main__":
 			# split fasta sequences into individual ones
 			FastaSplitter().split()
 
-		elif argv[1] == "export_coverage":
-			CoverageExporter().export()
+		elif argv[1] == "export_structure_tids":
+			StructureTidsExporter().export()
 
 		else:
 			print("Invalid command")
