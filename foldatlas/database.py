@@ -1,3 +1,4 @@
+
 # Database package
 # Includes all the code needed to import plaintext files into the DB.
 # @author Matthew Norris <matthew.norris@jic.ac.uk>
@@ -944,6 +945,10 @@ class PcaImporter():
 
         return out
 
+
+class CoverageExporter():
+    def export(self):
+        print("CoverageExporter.export() invoked")
 
 
 

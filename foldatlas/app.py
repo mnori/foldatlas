@@ -7,7 +7,7 @@ from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, Cover
 import settings
 import database
 from utils import FastaExporter, FastaSplitter
-from database import db_session
+from database import db_session, CoverageExporter
 
 app = Flask(__name__)
 
@@ -133,6 +133,9 @@ if __name__ == "__main__":
 		elif argv[1] == "splitfasta":
 			# split fasta sequences into individual ones
 			FastaSplitter().split()
+
+		elif argv[1] == "export_coverage":
+			CoverageExporter().export()
 
 		else:
 			print("Invalid command")
