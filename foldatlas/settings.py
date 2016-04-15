@@ -23,6 +23,7 @@ db_name="foldatlas"
 
 # Points to structure data folder, which contains a *lot* of files
 structure_data_folder = "/vagrant/structure_data"
+coverage_filepath = data_folder+"/db_coverages.txt"
 
 dms_reactivities_experiment = {
 	"nucleotide_measurement_run_id": 1,
@@ -35,7 +36,6 @@ ribosome_profile_experiment = {
 	"nucleotide_measurement_run_id": 2,
 	"strain_id": "Col_0",
 	"nucleotides_filepath": data_folder+"/p_site_counts_all.txt",
-	# "coverage_filepath": data_folder+"/riboseq_coverage.txt", # just get coverage from summed counts
 	"description": "Ribosome occupancies",
 }
 

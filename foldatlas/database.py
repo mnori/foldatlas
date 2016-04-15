@@ -946,12 +946,14 @@ class PcaImporter():
         return out
 
 
+# Export FoldAtlas coverages - these are plus + minus lane
 class CoverageExporter():
     def export(self):
-        print("CoverageExporter.export() invoked")
-
-
-
-
-
+        measurements_data = db_session.query(NucleotideMeasurementSet).all()
+        with open(settings.coverage_filepath, "w") as f:
+            for measurement_set in measurements_data:
+                tid = measurement_set.transcript_id
+                coverage = measurement_set.coverage
+                f.write(tid+"\t"+str(coverage)+"\n")
+        print("Coverages written to "+settings.coverage_filepath)
 
