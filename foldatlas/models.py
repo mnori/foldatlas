@@ -272,6 +272,7 @@ class StructurePredictionRun(Base):
         return "<StructurePredictionRun %r>" % (self.id)
 
 # Represents plus and minus counts for calculating reactivities. Before normalisation.
+# Not actually reactivities, these are counts
 class RawReactivities(Base):
 
     __tablename__ = "raw_reactivities"
@@ -296,6 +297,12 @@ class RawReactivities(Base):
 
     def __repr__(self):
         return "<RawReactivities %r>" % (self.id)
+
+# def RawReplicateCounts(Base):
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     nucleotide_measurement_run_id = Column(Integer, ForeignKey("nucleotide_measurement_run.id"))
+#     transcript_id = Column(String(256), ForeignKey("transcript.id"))
+#     values = Column(Text, nullable=False)
 
 # Represents nucleotide specific measurements for a single transcript
 # Generated from mappping

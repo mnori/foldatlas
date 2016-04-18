@@ -93,6 +93,25 @@ def import_db(level):
 
 def import_l2():
     print("Level 2 activated")
+    db_session.execute("USE "+settings.db_name)
+    db_session.commit()
+
+    # from models import etc.
+
+    # then something like 
+
+
+    # engine = create_engine('sqlite:///:memory:')
+
+    # meta = MetaData()
+
+    # employees = Table('employees', meta,
+    #     Column('employee_id', Integer, primary_key=True),
+    #     Column('employee_name', String(60), nullable=False, key='name'),
+    #     Column('employee_dept', Integer, ForeignKey("departments.department_id"))
+    # )
+    # SQLemployees.create(engine)
+
 
 # Parses genome sequence .fa and annotation .gff3 files into the database.
 class SequenceImporter():
