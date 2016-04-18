@@ -31,34 +31,39 @@ from models import Strain, Gene, Transcript, Feature, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, NucleotideMeasurementSet, \
     Structure, RawReactivities
 
-def import_db():
+def import_db(level):
     try:
 
         print("Rebuilding schema...")
 
-        # # # # Delete the whole DB and recreate again, much more reliable than using ORM
-        # db_session.execute("DROP DATABASE "+settings.db_name)
-        # db_session.execute("CREATE DATABASE "+settings.db_name)
-        # db_session.execute("USE "+settings.db_name)
-        # db_session.commit()
+        if level == 1:
 
-        # # # Create all the tables.
-        # Base.metadata.create_all(bind=engine)
+            # # # # Delete the whole DB and recreate again, much more reliable than using ORM
+            db_session.execute("DROP DATABASE "+settings.db_name)
+            db_session.execute("CREATE DATABASE "+settings.db_name)
+            db_session.execute("USE "+settings.db_name)
+            db_session.commit()
 
-        # # # # Add the annotations
-        # SequenceImporter().execute() 
+            # # # Create all the tables.
+            Base.metadata.create_all(bind=engine)
 
-        # # # Add DMS reactivities. This should be raw reactivities from plus and minus first
-        # # # Includes adding coverage and normalisation
-        ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
+            # # # # Add the annotations
+            SequenceImporter().execute() 
 
-        # # # Import all available RNA structures
-        # StructureImporter().execute(settings.structures_in_silico)
-        # StructureImporter().execute(settings.structures_in_vivo)
+            # # # Add DMS reactivities. This should be raw reactivities from plus and minus first
+            # # # Includes adding coverage and normalisation
+            ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
 
-        # Do PCA analysis on the structures
-        # PcaImporter().execute(settings.structures_in_silico)
-        # PcaImporter().execute(settings.structures_in_vivo)
+            # # # Import all available RNA structures
+            StructureImporter().execute(settings.structures_in_silico)
+            StructureImporter().execute(settings.structures_in_vivo)
+
+            # Do PCA analysis on the structures
+            PcaImporter().execute(settings.structures_in_silico)
+            PcaImporter().execute(settings.structures_in_vivo)
+
+        elif level == 2:
+            print("Level 2 motherfucker")
 
 
 
