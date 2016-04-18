@@ -63,10 +63,7 @@ def import_db(level):
             PcaImporter().execute(settings.structures_in_vivo)
 
         elif level == 2:
-            print("Level 2 motherfucker")
-
-
-
+            import_l2()
 
         # DISABLED STUFF 
 
@@ -93,6 +90,9 @@ def import_db(level):
     except Exception as e: # catch the exception so we can display a nicely formatted error message
         print(str(e).replace("\\n", "\n").replace("\\t", "\t"))
         raise e
+
+def import_l2():
+    print("Level 2 activated")
 
 # Parses genome sequence .fa and annotation .gff3 files into the database.
 class SequenceImporter():
