@@ -5,27 +5,28 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
 from sys import argv
-from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, CoverageSearcher, \
-	StructureDiagramView, StructureCirclePlotView, StructureDownloader, \
-	NucleotideMeasurementDownloader
+from flask_sqlalchemy import SQLAlchemy
 
 import settings
-import database
 from utils import FastaExporter, FastaSplitter
-from database import db_session, StructureTidsExporter
 
 app = Flask(__name__)
+
+# these commands enable migrations, see https://flask-migrate.readthedocs.org/en/latest/
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.database_uri
-
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-
+sqla = SQLAlchemy(app)
+migrate = Migrate(app, sqla)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
+
+# from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, CoverageSearcher, \
+# 	StructureDiagramView, StructureCirclePlotView, StructureDownloader, \
+# 	NucleotideMeasurementDownloader
 
 # db_session
 @app.teardown_appcontext
 def close_db(error):
+	from database import db_session
 	db_session.close()
 
 @app.route('/static/<path:path>/<filename>')
@@ -57,6 +58,7 @@ def help():
 # Also show the transcript's details
 @app.route("/transcript/<transcript_id>")
 def view_transcript(transcript_id):
+	from controllers import GenomeBrowser
 	return render_template("index.html", 
 		settings=settings, 
 		genome_browser=GenomeBrowser(), 
@@ -65,6 +67,7 @@ def view_transcript(transcript_id):
 
 @app.route("/ajax/genome-browser/genes")
 def get_genes_ajax():
+	from controllers import GenomeBrowser
 	return GenomeBrowser().get_genes(request)
 
 @app.route("/ajax/help")
@@ -73,10 +76,12 @@ def get_help_ajax():
 
 @app.route("/ajax/genome-browser/transcripts")
 def get_transcripts_ajax():
+	from controllers import GenomeBrowser
 	return GenomeBrowser().get_transcripts(request)
 
 @app.route("/ajax/search-transcript/<search_string>")
 def search_transcripts_ajax(search_string):
+	from controllers import TranscriptSearcher
 	return TranscriptSearcher().search(search_string)
 
 @app.route("/ajax/search-coverage/<page_num>")
@@ -88,10 +93,12 @@ def search_coverage_ajax(page_num):
 
 @app.route("/ajax/get-coverage-page-count")
 def get_coverage_page_count():
+	from controllers import CoverageSearcher
 	return str(CoverageSearcher().fetch_page_count())
 
 @app.route("/ajax/transcript/<transcript_id>")
 def view_transcript_ajax(transcript_id):
+	from controllers import TranscriptView
 	return render_template("transcript-view.html", transcript_view=TranscriptView(transcript_id))
 
 @app.route("/ajax/structure-diagram/<structure_id>")
@@ -100,6 +107,7 @@ def structure_diagram_ajax(structure_id):
 
 @app.route("/ajax/structure-circle-plot/<structure_id>")
 def structure_circle_plot_ajax(structure_id):
+	from controllers import StructureCirclePlotView
 	return StructureCirclePlotView(structure_id).data_json
 
 # strain ID .. should really be experiment ID
@@ -107,16 +115,19 @@ def structure_circle_plot_ajax(structure_id):
 # can then just use experiment IDs for everything.
 @app.route("/download/structure/<transcript_id>")
 def download_structure(transcript_id):
+	from controllers import StructureDownloader
 	buf = StructureDownloader([1, 2], transcript_id).generate()
 	return Response(buf, mimetype='text/plain')
 
 @app.route("/download/measurements/<experiment_id>/<transcript_id>")
 def download_measurements(experiment_id, transcript_id):
+	from controllers import NucleotideMeasurementDownloader
 	buf = NucleotideMeasurementDownloader(experiment_id, transcript_id).get_normalised()
 	return Response(buf, mimetype='text/plain')
 
 @app.route("/download/raw_measurements/<experiment_id>/<transcript_id>")
 def download_raw_measurements(experiment_id, transcript_id):
+	from controllers import NucleotideMeasurementDownloader
 	buf = NucleotideMeasurementDownloader(experiment_id, transcript_id).get_raw()
 	return Response(buf, mimetype='text/plain')
 
@@ -136,6 +147,7 @@ if __name__ == "__main__":
 
 		elif argv[1] == "hydratedb":
 			# reset the database
+			import database
 			database.import_db(2)
 
 		elif argv[1] == "exportfasta":
@@ -147,9 +159,11 @@ if __name__ == "__main__":
 			FastaSplitter().split()
 
 		elif argv[1] == "export_structure_tids":
+			from importers import StructureTidsExporter
 			StructureTidsExporter().export()
 
 		else: # some other command
+			from models import *
 			manager.run()
 	
 	else:
