@@ -2,7 +2,7 @@ import settings
 import models
 from models import Strain, Gene, Transcript, Feature, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, NucleotideMeasurementSet, \
-    Structure, RawReactivities
+    Structure, RawReactivities, RawReplicateCounts
 
 def import_db(level):
     try:
@@ -56,6 +56,8 @@ def import_raw_replicate_counts():
     print("Importing raw replicate counts...")
     db_session.execute("USE "+settings.db_name)
 
+
+
     for lane_type in settings.raw_replicate_counts_keys:
         entries = settings.raw_replicate_counts_keys
         for bio_rep_ind in range(0, len(entries[lane_type])):
@@ -65,26 +67,39 @@ def import_raw_replicate_counts():
 
                 input_filepath = settings.data_folder+"/reps/"+tech_key+"/results.dist.txt"
                 import_raw_replicate_counts_file(
-                    lane_type, bio_rep_ind + 1, tech_rep_ind + 1, input_filepath)
+                    db_session, lane_type, bio_rep_ind + 1, tech_rep_ind + 1, input_filepath)
+
+                print("Committing...")
+                db_session.commit()
+                print("Done.")
 
     # walk through replicates
 
-    db_session.commit()
+def import_raw_replicate_counts_file(
+        db_session, lane_type, bio_rep_id, tech_rep_id, input_filepath):
 
-def import_raw_replicate_counts_file(lane_type, bio_rep_id, tech_rep_id, input_filepath):
+    n = 0
+
     with open(input_filepath, "r") as i:
         for line in i:
+            if n % 1000 == 0:
+                print(".", end="", flush=True)
+            n += 1
+
             bits = line.strip().split("\t")
             tid = bits[0]
             reacts = bits[1:]
             reacts_str = "\t".join(reacts)
 
-            # now insert into the db
-            print(tid)
-            print(reacts_str)
-            exit()
-
-    print(input_filepath)
+            counts = RawReplicateCounts(
+                nucleotide_measurement_run_id=1,
+                transcript_id=tid,
+                minusplus_id=lane_type,
+                bio_replicate_id=bio_rep_id,
+                tech_replicate_id=tech_rep_id,
+                values=reacts_str
+            )
+            db_session.add(counts)
 
 # Parses genome sequence .fa and annotation .gff3 files into the database.
 class SequenceImporter():
