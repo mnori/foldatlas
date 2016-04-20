@@ -11,9 +11,11 @@ down_revision = '1740de11ccfe'
 
 from alembic import op
 import sqlalchemy as sa
-
+from database import db_session
 
 def upgrade():
+    # we need drop if exists so that script fails don't break the schema
+    db_session.execute("DROP TABLE IF EXISTS raw_replicate_counts")
     op.create_table('raw_replicate_counts',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('nucleotide_measurement_run_id', sa.Integer(), nullable=True),

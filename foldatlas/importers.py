@@ -59,18 +59,32 @@ def import_raw_replicate_counts():
     for lane_type in settings.raw_replicate_counts_keys:
         entries = settings.raw_replicate_counts_keys
         for bio_rep_ind in range(0, len(entries[lane_type])):
-            for tech_key in entries[lane_type][bio_rep_ind]:
+            for tech_rep_ind in range(0, len(entries[lane_type][bio_rep_ind])):
+                tech_key = entries[lane_type][bio_rep_ind][tech_rep_ind]
                 # load the counts from the tech key
 
                 input_filepath = settings.data_folder+"/reps/"+tech_key+"/results.dist.txt"
-                print(input_filepath)
+                import_raw_replicate_counts_file(
+                    lane_type, bio_rep_ind + 1, tech_rep_ind + 1, input_filepath)
 
     # walk through replicates
 
     db_session.commit()
 
-# def load_raw_counts(input_filepath):
+def import_raw_replicate_counts_file(lane_type, bio_rep_id, tech_rep_id, input_filepath):
+    with open(input_filepath, "r") as i:
+        for line in i:
+            bits = line.strip().split("\t")
+            tid = bits[0]
+            reacts = bits[1:]
+            reacts_str = "\t".join(reacts)
 
+            # now insert into the db
+            print(tid)
+            print(reacts_str)
+            exit()
+
+    print(input_filepath)
 
 # Parses genome sequence .fa and annotation .gff3 files into the database.
 class SequenceImporter():
