@@ -2,10 +2,9 @@
 # @author Matthew Norris <matthew.norris@jic.ac.uk
 
 from sqlalchemy import Column, Integer, String, Text, Enum, Float, ForeignKey, ForeignKeyConstraint
-from database import Base
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-
+from app import db
 import database
 import settings
 
@@ -33,7 +32,7 @@ def values_str_unpack_float(str_in):
 
 # A Gene describes a locus identifier for a gene, plus any metadata associated with the locus.
 # Genes are generic - they can be associated with multiple strains.
-class Gene(Base):
+class Gene(db.Model):
     __tablename__ = "gene"
 
     id = Column(String(256), primary_key=True) # TAIR locus ID (e.g. AT1G01225)
@@ -46,7 +45,7 @@ class Gene(Base):
 
 # A Transcript is effectively an RNA sequence identifier, which can be shared amongst multiple strains.
 # Sequences are mapped to Transcripts via the Feature entity.
-class Transcript(Base):
+class Transcript(db.Model):
     __tablename__ = "transcript"
 
     id = Column(String(256), primary_key=True) # TAIR transcript ID (e.g. AT1G01225.1)
@@ -137,7 +136,7 @@ class Transcript(Base):
         return str(self.get_sequence(strain_id).seq)
 
 # Describes a strain.
-class Strain(Base):
+class Strain(db.Model):
     __tablename__ = "strain"
     id = Column(String(256), nullable=False, primary_key=True)
     description = Column(Text, nullable=False)
@@ -151,7 +150,7 @@ class Strain(Base):
 
 # Describes the sequence of a chromosome for a particular strain. This is the only place
 # where nucleotide sequence data is stored.
-class Chromosome(Base):
+class Chromosome(db.Model):
     __tablename__ = "chromosome"
 
     strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
@@ -170,7 +169,7 @@ class Chromosome(Base):
 
 # TranscriptSequenceFeatures annotations of the ChromosomeSequence. This is the main destination of 
 # all the *.gff3 data.
-class Feature(Base):
+class Feature(db.Model):
     __tablename__ = "feature"
 
     # This constraint maps the Feature to a unique Chromosome entry.
@@ -212,7 +211,7 @@ class Feature(Base):
 
 # GeneLocation describes the location of a gene for a particular strain. This table is redundant
 # since everything needed is already in the Feature table. But it is cached here for speed.
-class GeneLocation(Base):
+class GeneLocation(db.Model):
     __tablename__ = "gene_location"
 
     # This constraint maps the GeneLocation to a unique Chromosome entry.
@@ -241,7 +240,7 @@ class GeneLocation(Base):
     def __repr__(self):
         return "<GeneLocation "+self.gene_id+", "+self.strain_id+">";
 
-class NucleotideMeasurementRun(Base):
+class NucleotideMeasurementRun(db.Model):
     __tablename__ = "nucleotide_measurement_run"
 
     id = Column(Integer, primary_key=True, autoincrement=False)
@@ -256,7 +255,7 @@ class NucleotideMeasurementRun(Base):
     def __repr__(self):
         return "<NucleotideMeasurementRun %r>" % (self.id)
 
-class StructurePredictionRun(Base):
+class StructurePredictionRun(db.Model):
     __tablename__ = "structure_prediction_run"
 
     id = Column(Integer, primary_key=True, autoincrement=False)
@@ -273,7 +272,7 @@ class StructurePredictionRun(Base):
 
 # Represents plus and minus counts for calculating reactivities. Before normalisation.
 # Not actually reactivities, these are counts
-class RawReactivities(Base):
+class RawReactivities(db.Model):
 
     __tablename__ = "raw_reactivities"
 
@@ -298,7 +297,7 @@ class RawReactivities(Base):
     def __repr__(self):
         return "<RawReactivities %r>" % (self.id)
 
-# def RawReplicateCounts(Base):
+# def RawReplicateCounts(db.Model):
 #     id = Column(Integer, primary_key=True, autoincrement=True)
 #     nucleotide_measurement_run_id = Column(Integer, ForeignKey("nucleotide_measurement_run.id"))
 #     transcript_id = Column(String(256), ForeignKey("transcript.id"))
@@ -307,7 +306,7 @@ class RawReactivities(Base):
 # Represents nucleotide specific measurements for a single transcript
 # Generated from mappping
 # Can represent normalised reactivities or alternatively ribosome profiling counts.
-class NucleotideMeasurementSet(Base):
+class NucleotideMeasurementSet(db.Model):
     __tablename__ = "nucleotide_measurement_set"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -334,7 +333,7 @@ class NucleotideMeasurementSet(Base):
         return "<NucleotideMeasurementSet %r>" % (self.id)
 
 # # Represents one measurement, at a particular nucleotide position.
-# class NucleotideMeasurement(Base):
+# class NucleotideMeasurement(db.Model):
 #     __tablename__ = "nucleotide_measurement"
 
 #     nucleotide_measurement_set_id = Column(Integer, 
@@ -355,7 +354,7 @@ class NucleotideMeasurementSet(Base):
 #         )
 
 # Represents a structure prediction for a single RNA sequence
-class Structure(Base):
+class Structure(db.Model):
 
     __tablename__ = "structure"
 

@@ -14,10 +14,13 @@ app = Flask(__name__)
 
 # these commands enable migrations, see https://flask-migrate.readthedocs.org/en/latest/
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.database_uri
-sqla = SQLAlchemy(app)
-migrate = Migrate(app, sqla)
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
+
+from models import * # must do this here to grab the models
 
 # from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, CoverageSearcher, \
 # 	StructureDiagramView, StructureCirclePlotView, StructureDownloader, \
