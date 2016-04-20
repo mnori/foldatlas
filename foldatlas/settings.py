@@ -25,6 +25,19 @@ db_name="foldatlas"
 structure_data_folder = "/vagrant/structure_data"
 structure_tids_filepath = data_folder+"/structure_tids.txt"
 
+raw_replicate_counts_keys = {
+	"minus": [
+		["mDMS_1_ATCACG_L001_R1"],
+		["mDMS_2_TAGCTT_L001_R1"],
+		["mDMS_3_CGATGT_L001_R1"]
+	],
+	"plus": [
+		["pDMS_1_ACAGTG_L001_R1"],
+		["pDMS_2_CTTGTA_L001_R1"],
+		["pDMS_3_TTAGGC_L001_R1"]
+	]
+}
+
 dms_reactivities_experiment = {
 	"nucleotide_measurement_run_id": 1,
 	"strain_id": "Col_0",

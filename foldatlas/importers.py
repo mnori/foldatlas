@@ -55,6 +55,9 @@ def import_raw_replicate_counts():
 
     print("Importing raw replicate counts...")
     db_session.execute("USE "+settings.db_name)
+
+    # walk through replicates
+
     db_session.commit()
 
 # Parses genome sequence .fa and annotation .gff3 files into the database.
