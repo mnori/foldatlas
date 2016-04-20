@@ -282,6 +282,7 @@ class StructurePredictionRun(db.Model):
 
 # Represents plus and minus counts for calculating reactivities. Before normalisation.
 # Not actually reactivities, these are counts
+# TODO rename to counts
 class RawReactivities(db.Model):
 
     __tablename__ = "raw_reactivities"
@@ -307,11 +308,38 @@ class RawReactivities(db.Model):
     def __repr__(self):
         return "<RawReactivities %r>" % (self.id)
 
-# def RawReplicateCounts(db.Model):
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     nucleotide_measurement_run_id = Column(Integer, ForeignKey("nucleotide_measurement_run.id"))
-#     transcript_id = Column(String(256), ForeignKey("transcript.id"))
-#     values = Column(Text, nullable=False)
+# Table that represents raw counts from each lane
+# Lanes are identified by biological and technical replicate IDs
+class RawReplicateCounts(db.Model):
+
+    __tablename__ = "raw_replicate_counts"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nucleotide_measurement_run_id = Column(Integer, ForeignKey("nucleotide_measurement_run.id"))
+    transcript_id = Column(String(256), ForeignKey("transcript.id"))
+    minusplus_id = Column(String(256), nullable=False)
+    bio_replicate_id = Column(Integer, nullable=False)
+    tech_replicate_id = Column(Integer, nullable=False)
+    values = Column(Text, nullable=False)
+
+    def __init__(
+            self,
+            nucleotide_measurement_run_id,
+            transcript_id,
+            minusplus_id,
+            bio_replicate_id,
+            tech_replicate_id,
+            values):
+
+        self.nucleotide_measurement_run_id = nucleotide_measurement_run_id
+        self.transcript_id = transcript_id
+        self.minusplus_id = minusplus_id
+        self.bio_replicate_id = bio_replicate_id
+        self.tech_replicate_id = tech_replicate_id
+        self.values = values
+        
+    def __repr__(self):
+        return "<RawReactivities %r>" % (self.id)    
 
 # Represents nucleotide specific measurements for a single transcript
 # Generated from mappping
