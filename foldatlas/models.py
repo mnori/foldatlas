@@ -12,11 +12,10 @@ print("Importing DB...")
 import database
 import settings
 
+# gotta put the migrate stuff here so it can see the models
 from app import app
-
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.database_uri
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
 # Add a single position to the structure. The value points to another place that this 
 # particular position pairs with.
@@ -421,5 +420,7 @@ class Structure(db.Model):
     def __repr__(self):
         return "<Structure %r>" % (self.id)
 
+# gotta put the migrate stuff here so it can see the models
+migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)

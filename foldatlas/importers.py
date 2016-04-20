@@ -1,3 +1,4 @@
+import settings
 import models
 from models import Strain, Gene, Transcript, Feature, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, NucleotideMeasurementSet, \
@@ -5,85 +6,56 @@ from models import Strain, Gene, Transcript, Feature, \
 
 def import_db(level):
     try:
+        import_scratch()
 
-        print("Rebuilding schema...")
+        # print("Rebuilding schema...")
 
-        if level == 1:
+        # if level == 1:
 
-            # # # # Delete the whole DB and recreate again, much more reliable than using ORM
-            db_session.execute("DROP DATABASE "+settings.db_name)
-            db_session.execute("CREATE DATABASE "+settings.db_name)
-            db_session.execute("USE "+settings.db_name)
-            db_session.commit()
+        # elif level == 2:
+        #     import_l2()
 
-            # # # Create all the tables.
-            Base.metadata.create_all(bind=engine)
-
-            # # # # Add the annotations
-            SequenceImporter().execute() 
-
-            # # # Add DMS reactivities. This should be raw reactivities from plus and minus first
-            # # # Includes adding coverage and normalisation
-            ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
-
-            # # # Import all available RNA structures
-            StructureImporter().execute(settings.structures_in_silico)
-            StructureImporter().execute(settings.structures_in_vivo)
-
-            # Do PCA analysis on the structures
-            PcaImporter().execute(settings.structures_in_silico)
-            PcaImporter().execute(settings.structures_in_vivo)
-
-        elif level == 2:
-            import_l2()
-
-        # DISABLED STUFF 
-
-        #########################################################
-        # Do alignments so we can see polymorphism
-        # Disabled - for now...
-        # TranscriptAligner().align() 
-
-        # Quick way of emptying out reactivities for testing purposes.
-        # db_session.execute("TRUNCATE TABLE raw_reactivities")
-        # db_session.execute("TRUNCATE TABLE nucleotide_measurement_set")
-        # db_session.execute("DELETE FROM nucleotide_measurement_run")
-        # db_session.commit()
-
-        # CoverageImporter().execute(settings.dms_reactivities_experiment)
-        # Add ribosome profiling (Disabled for now...)
-        # ReactivitiesImporter().execute(settings.ribosome_profile_experiment)
-        # CoverageImporter().execute(settings.ribosome_profile_experiment)
-
-        ##########################################################
-
-        print("Import Complete.")
+        # print("Import Complete.")
 
     except Exception as e: # catch the exception so we can display a nicely formatted error message
         print(str(e).replace("\\n", "\n").replace("\\t", "\t"))
         raise e
 
-def import_l2():
-    print("Level 2 activated")
+# Import database from scratch using the raw text files
+def import_scratch():
+    from database import db_session
+
+    # # # # Delete the whole DB and recreate again, much more reliable than using ORM
+    db_session.execute("DROP DATABASE "+settings.db_name)
+    db_session.execute("CREATE DATABASE "+settings.db_name)
     db_session.execute("USE "+settings.db_name)
     db_session.commit()
 
-    # from models import etc.
+    # # # Create all the tables.
+    Base.metadata.create_all(bind=engine)
 
-    # then something like 
+    # # # # Add the annotations
+    SequenceImporter().execute() 
 
+    # # # Add DMS reactivities. This should be raw reactivities from plus and minus first
+    # # # Includes adding coverage and normalisation
+    ReactivitiesImporter().execute(settings.dms_reactivities_experiment)
 
-    # engine = create_engine('sqlite:///:memory:')
+    # # # Import all available RNA structures
+    StructureImporter().execute(settings.structures_in_silico)
+    StructureImporter().execute(settings.structures_in_vivo)
 
-    # meta = MetaData()
+    # Do PCA analysis on the structures
+    PcaImporter().execute(settings.structures_in_silico)
+    PcaImporter().execute(settings.structures_in_vivo)
 
-    # employees = Table('employees', meta,
-    #     Column('employee_id', Integer, primary_key=True),
-    #     Column('employee_name', String(60), nullable=False, key='name'),
-    #     Column('employee_dept', Integer, ForeignKey("departments.department_id"))
-    # )
-    # SQLemployees.create(engine)
+# Imports raw technical replicate data into the raw_replicate_counts table
+def import_raw_replicate_counts():
+    from database import db_session
 
+    print("Importing raw replicate counts...")
+    db_session.execute("USE "+settings.db_name)
+    db_session.commit()
 
 # Parses genome sequence .fa and annotation .gff3 files into the database.
 class SequenceImporter():
