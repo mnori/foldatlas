@@ -74,6 +74,7 @@ function install() {
 	pretty_print "Installing misc python dependencies"
 	pip3 install biopython
 	pip3 install Flask
+	pip3 install Flask-Migrate
 
 	# echo https://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.1.3.tar.gz >> requirements.txt
 	# sudo -H pip3 install -r ./requirements.txt
