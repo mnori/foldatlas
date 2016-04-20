@@ -39,22 +39,24 @@ def after_request(response):
 # Maybe also some introductory text.
 @app.route("/")
 def index():
+	from controllers import GenomeBrowser
 	return render_template("index.html", settings=settings, genome_browser=GenomeBrowser(), page="home")
 
 @app.route("/search")
 def search():
+	from controllers import GenomeBrowser
 	return render_template("index.html", settings=settings, genome_browser=GenomeBrowser(), page="search")
 
 @app.route("/help")
 def help():
-	# TODO get rid of genome browser dependency
+	from controllers import GenomeBrowser
 	return render_template("index.html", settings=settings, genome_browser=GenomeBrowser(), page="help")
 
 # Transcript - initialise the genome browser with custom parameters to center on the gene of interest.
 # Also show the transcript's details
 @app.route("/transcript/<transcript_id>")
 def view_transcript(transcript_id):
-	from controllers import GenomeBrowser
+	from controllers import GenomeBrowser, TranscriptView
 	return render_template("index.html", 
 		settings=settings, 
 		genome_browser=GenomeBrowser(), 
@@ -82,6 +84,7 @@ def search_transcripts_ajax(search_string):
 
 @app.route("/ajax/search-coverage/<page_num>")
 def search_coverage_ajax(page_num):
+	from controllers import CoverageSearcher
 	return render_template(
 		"coverage-search.html", 
 		transcript_data=CoverageSearcher().fetch_transcript_data(page_num)
@@ -99,6 +102,7 @@ def view_transcript_ajax(transcript_id):
 
 @app.route("/ajax/structure-diagram/<structure_id>")
 def structure_diagram_ajax(structure_id):
+	from controllers import StructureDiagramView
 	return StructureDiagramView(structure_id).data_json
 
 @app.route("/ajax/structure-circle-plot/<structure_id>")

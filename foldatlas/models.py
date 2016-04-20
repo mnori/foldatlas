@@ -9,7 +9,7 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 
 print("Importing DB...")
-# import database
+import database
 import settings
 
 from app import app
