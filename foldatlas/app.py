@@ -1,4 +1,9 @@
 from flask import Flask, render_template, request, Response, send_from_directory
+
+from flask_sqlalchemy import SQLAlchemy
+from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
+
 from sys import argv
 from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, CoverageSearcher, \
 	StructureDiagramView, StructureCirclePlotView, StructureDownloader, \
@@ -10,6 +15,13 @@ from utils import FastaExporter, FastaSplitter
 from database import db_session, StructureTidsExporter
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.database_uri
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 # db_session
 @app.teardown_appcontext
@@ -114,12 +126,12 @@ def download_all():
 
 if __name__ == "__main__": 
 	# if we're in here, we're using `python3 app.py [blah...]`
-	if len(argv) > 1:
+	if len(argv) > 1:  
 		cmd = argv[1]
 
+		# custom commands
 		if argv[1] == "grabstructures":
 			import utils
-			# reset the database
 			utils.grab_structures()
 
 		elif argv[1] == "hydratedb":
@@ -137,9 +149,8 @@ if __name__ == "__main__":
 		elif argv[1] == "export_structure_tids":
 			StructureTidsExporter().export()
 
-		else:
-			print("Invalid command")
-			exit()
+		else: # some other command
+			manager.run()
 	
 	else:
 		# dev server: get the party started
