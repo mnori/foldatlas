@@ -55,9 +55,6 @@ def import_raw_replicate_counts():
 
     print("Importing raw replicate counts...")
     db_session.execute("USE "+settings.db_name)
-
-
-
     for lane_type in settings.raw_replicate_counts_keys:
         entries = settings.raw_replicate_counts_keys
         for bio_rep_ind in range(0, len(entries[lane_type])):
@@ -66,6 +63,9 @@ def import_raw_replicate_counts():
                 # load the counts from the tech key
 
                 input_filepath = settings.data_folder+"/reps/"+tech_key+"/results.dist.txt"
+
+                print("Importing "+input_filepath)
+
                 import_raw_replicate_counts_file(
                     db_session, lane_type, bio_rep_ind + 1, tech_rep_ind + 1, input_filepath)
 
