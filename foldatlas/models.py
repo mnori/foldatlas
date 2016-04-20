@@ -4,9 +4,19 @@
 from sqlalchemy import Column, Integer, String, Text, Enum, Float, ForeignKey, ForeignKeyConstraint
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from app import db
-import database
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate, MigrateCommand
+from flask_script import Manager
+
+print("Importing DB...")
+# import database
 import settings
+
+from app import app
+
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.database_uri
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Add a single position to the structure. The value points to another place that this 
 # particular position pairs with.
@@ -382,3 +392,6 @@ class Structure(db.Model):
 
     def __repr__(self):
         return "<Structure %r>" % (self.id)
+
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)

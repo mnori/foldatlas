@@ -1,26 +1,19 @@
 from flask import Flask, render_template, request, Response, send_from_directory
 
 from flask_sqlalchemy import SQLAlchemy
-from flask_script import Manager
-from flask_migrate import Migrate, MigrateCommand
-
 from sys import argv
-from flask_sqlalchemy import SQLAlchemy
-
 import settings
 from utils import FastaExporter, FastaSplitter
 
 app = Flask(__name__)
 
 # these commands enable migrations, see https://flask-migrate.readthedocs.org/en/latest/
-app.config['SQLALCHEMY_DATABASE_URI'] = settings.database_uri
+# print("Creating db object")
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-manager = Manager(app)
-manager.add_command('db', MigrateCommand)
 
-from models import * # must do this here to grab the models
+# def load_models():
+# 	from models import Gene
+# 	print("Models loaded")
 
 # from controllers import GenomeBrowser, TranscriptView, TranscriptSearcher, CoverageSearcher, \
 # 	StructureDiagramView, StructureCirclePlotView, StructureDownloader, \
@@ -166,7 +159,7 @@ if __name__ == "__main__":
 			StructureTidsExporter().export()
 
 		else: # some other command
-			from models import *
+			from models import manager
 			manager.run()
 	
 	else:
