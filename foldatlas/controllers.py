@@ -5,7 +5,7 @@ import settings
 import os
 from models import Feature, Transcript, NucleotideMeasurementSet, Structure, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, \
-    values_str_unpack_float, values_str_unpack_int, RawReactivities
+    values_str_unpack_float, values_str_unpack_int, RawReactivities, RawReplicateCounts
 
 from utils import ensure_dir, insert_newlines, build_dot_bracket
 
@@ -750,6 +750,24 @@ class NucleotideMeasurementDownloader():
         # Get the raw read counts out
         minus_unpacked = values_str_unpack_int(measurement_set.minus_values)
         plus_unpacked = values_str_unpack_int(measurement_set.plus_values)
+
+        # Grab the raw replicate lanes data
+        results = db_session \
+            .query(RawReplicateCounts) \
+            .filter(
+                RawReplicateCounts.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
+                RawReplicateCounts.transcript_id==self.transcript_id
+            ) \
+            .order_by(
+                RawReplicateCounts.minusplus_id,
+                RawReplicateCounts.bio_replicate_id, 
+                RawReplicateCounts.tech_replicate_id
+            ) \
+            .all()
+
+        for counts in results:
+            print("B"+str(counts.bio_replicate_id)+", T"+str(counts.tech_replicate_id))
+            print(counts)
 
         # Build and return the output
         buf = ""
