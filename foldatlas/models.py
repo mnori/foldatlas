@@ -370,6 +370,7 @@ class NucleotideMeasurementSet(db.Model):
         return "<NucleotideMeasurementSet %r>" % (self.id)
 
 # Represents a structure prediction for a single RNA sequence
+# The structure has base pairs and base pair probabilities stored in text fields
 class Structure(db.Model):
 
     __tablename__ = "structure"
@@ -402,6 +403,7 @@ class Structure(db.Model):
 # Represents a base pair probability matrix. One per transcript at the moment
 # In the future we might allow constrained BPPMs, which will be one per run ID or something
 # Bppm is stored as a big text field
+# This table is used when downloading the entire BPPM matrix
 class Bppm(db.Model):
     __tablename__ = "bppm"
 
