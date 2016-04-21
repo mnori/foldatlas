@@ -1051,10 +1051,35 @@ class MinusPlusCompiler():
             # set the plus or minus counts
             if lane.minusplus_id not in counts[lane.transcript_id]:
                 counts[lane.transcript_id][lane.minusplus_id] = lane_values
+
             else: # add to existing plus or minus counts
                 for pos in range(0, len(lane_values)):
                     counts[lane.transcript_id][lane.minusplus_id][pos] += lane_values[pos]
 
         # insert the counts into the DB
+        for transcript_id in counts:
+            transcript_counts = counts[transcript_id]
+
+            # gotta handle the missing data gracefully
+            if "minus" not in transcript_counts:
+                minus_counts = [0] * len(transcript_counts["plus"])
+            else:
+                minus_counts = transcript_counts["minus"]
+
+            if "plus" not in transcript_counts:
+                plus_counts = [0] * len(transcript_counts["minus"])
+            else:
+                plus_counts = transcript_counts["plus"]
+
+            measurement_set = RawReactivities(
+                nucleotide_measurement_run_id=self.nucleotide_measurement_run_id,
+                transcript_id=transcript_id,
+                minus_values="\t".join(list(map(str, minus_counts))),
+                plus_values="\t".join(list(map(str, plus_counts)))
+            )
+            db_session.add(measurement_set)
+        db_session.commit()
+
+
 
 
