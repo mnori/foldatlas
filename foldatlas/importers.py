@@ -5,8 +5,8 @@ from models import Strain, Gene, Transcript, Feature, \
     Structure, RawReactivities, RawReplicateCounts, values_str_unpack_float, Bppm
 
 from utils import Timeline
-
 from database import engine, db_session
+import zlib, base64
 
 def import_db(level):
     try:
@@ -1174,6 +1174,8 @@ class BppmImporter():
                         bppm_data[pos_a] = {}
                     bppm_data[pos_a][pos_b] = bpp
             
+            bppm_text = base64.b64encode(zlib.compress(bppm_text.encode("ascii")))
+
             # save text in bppm table
             measurement_set = Bppm(transcript_id=tid, data=bppm_text)
             db_session.add(measurement_set)
