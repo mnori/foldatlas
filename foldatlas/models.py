@@ -414,7 +414,7 @@ class Bppm(db.Model):
 
     def __init__(self, transcript_id, data):
         self.transcript_id = transcript_id
-        self.data = data
+        self.data = data # probabilities are log10 transformed
 
     def __repr__(self):
         return "<Bppm %r>" % (self.id)

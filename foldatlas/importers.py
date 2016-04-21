@@ -1151,13 +1151,15 @@ class BppmImporter():
                     # add the text for the bppm table
                     if "Probability" in line: # skip header lines
                         continue
-                    bppm_text += line
 
                     # extract the data, this will be used for structure BPPMs
                     bits = line.strip().split("\t")
-                    pos_a = bits[0]
-                    pos_b = bits[1]
-                    bpp = bits[2]
+                    pos_a = int(bits[0])
+                    pos_b = int(bits[1])
+                    bpp = -float(bits[2])
+
+                    bppm_text += str(pos_a)+"\t"+str(pos_b)+"\t"+str(bpp)+"\n"
+
                     if pos_a not in bppm_data:
                         bppm_data[pos_a] = {}
                     bppm_data[pos_a][pos_b] = bpp
@@ -1165,7 +1167,6 @@ class BppmImporter():
             # save text in bppm table
             measurement_set = Bppm(transcript_id=tid, data=bppm_text)
             db_session.add(measurement_set)
-        
 
             # grab all the structures matching the tid
             # results = db_session \
@@ -1173,11 +1174,8 @@ class BppmImporter():
             #     .filter(Structure.transcript_id==tid) \
             #     .all()
 
-            
-
             # for each structure, generate the probability text
             # save probability text into the database
-
 
             db_session.commit()
 
