@@ -1096,15 +1096,11 @@ class BppmImporter():
         import os 
 
         print("Importing BPPMs...")
-        filenames = os.listdir(settings.data_folder+"/bppms")
-        print(filenames)
-
-
-        exit()
-
+        bppms_folder = settings.data_folder+"/bppms"
+        filenames = os.listdir(bppms_folder)
         tids = []
-        for row in results:
-            tids.append(row["id"])  
+        for filename in filenames:
+            tids.append(".".join(filename.split(".")[:-1]))
         n_tids = len(tids)
 
         print(str(n_tids)+" transcript IDs fetched")
@@ -1121,7 +1117,7 @@ class BppmImporter():
                 tids_chunk.append(tids[i])
 
             # grab all the raw lanes for the transcript IDs in the chunk
-            self.fetch_raw_replicate_counts(tids_chunk)
+            self.process_tids(tids_chunk)
             print(".", end="", flush=True)
 
             chunk_start += self.chunk_size
@@ -1133,6 +1129,12 @@ class BppmImporter():
                 break
 
         print(str(n_tids)+" transcripts processed")
+
+    def process_tids(self, tids_chunk):
+        # this is where the magic will happen
+
+        print("Chunk:")
+        print(tids_chunk)
 
 
 
