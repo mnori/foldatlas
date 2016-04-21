@@ -17,7 +17,9 @@ from importers import BppmImporter
 # This script inserts the BPPM data. Takes a long time!
 
 def upgrade():
+	print("upgrade() invoked")
 	BppmImporter().run()
+	exit() # don't forget to remove this!
 
 def downgrade():
 	print("Nothing to do for BPPM downgrade")

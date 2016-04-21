@@ -1131,10 +1131,18 @@ class BppmImporter():
         print(str(n_tids)+" transcripts processed")
 
     def process_tids(self, tids_chunk):
-        # this is where the magic will happen
+        bppms_folder = settings.data_folder+"/bppms"
 
-        print("Chunk:")
-        print(tids_chunk)
+        for tid in tids_chunk:
+            print("Processing "+tid)
+
+            # grab the text from file, trim off the first line
+            # save text in bppm table
+            # parse the bppm text into data structure
+
+            # grab all the structures matching the tid
+            # for each structure, generate the probability text
+            # save probability text into the database
 
 
 
