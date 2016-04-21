@@ -19,5 +19,6 @@ def upgrade():
 	MinusPlusCompiler().run()
 
 def downgrade():
+	# not implemented, since we won't ever need to revert to the old counts
 	print("WARNING: Undoing minus plus counts is not implemented.")
-    # not implemented
+	

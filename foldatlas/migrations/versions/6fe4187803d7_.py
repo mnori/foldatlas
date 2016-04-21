@@ -14,7 +14,7 @@ import sqlalchemy as sa
 from database import db_session
 
 def upgrade():
-    # we need drop if exists so that script fails don't break the schema
+    # we need drop if exists so that script fails don't break the import
     db_session.execute("DROP TABLE IF EXISTS raw_replicate_counts")
     op.create_table('raw_replicate_counts',
         sa.Column('id', sa.Integer(), nullable=False),
