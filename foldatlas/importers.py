@@ -4,6 +4,8 @@ from models import Strain, Gene, Transcript, Feature, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, NucleotideMeasurementSet, \
     Structure, RawReactivities, RawReplicateCounts, values_str_unpack_float, Bppm
 
+from utils import Timeline
+
 from database import engine, db_session
 
 def import_db(level):
@@ -1108,6 +1110,10 @@ class BppmImporter():
         print("Inserting...")
 
         chunk_start = 0
+
+        tl = Timeline()
+        tl.log("start")
+
         while(True): # loop through chunks
             # gather transcript IDs
 
@@ -1129,7 +1135,11 @@ class BppmImporter():
             if chunk_start >= n_tids:
                 break
 
+        tl.log("end")
+        tl.dump()
+
         print("\n"+str(n_tids)+" transcripts processed")
+        
 
     def process_tids(self, tids_chunk):
         bppms_folder = settings.data_folder+"/bppms"
@@ -1169,15 +1179,33 @@ class BppmImporter():
             db_session.add(measurement_set)
 
             # grab all the structures matching the tid
-            # results = db_session \
-            #     .query(Structure) \
-            #     .filter(Structure.transcript_id==tid) \
-            #     .all()
+            structures = db_session \
+                .query(Structure) \
+                .filter(Structure.transcript_id==tid) \
+                .all()
 
-            # for each structure, generate the probability text
-            # save probability text into the database
+            # insert the bpps data for each structure
+            for structure in structures:
+                bits = structure.structure.split("\t")
+                bpps = []
+                for pos_ind in range(0, len(bits)):
 
-            db_session.commit()
+                    # positions always start at 1. zero means not paired
+                    pos_a = pos_ind + 1
+                    pos_b = int(bits[pos_ind])
+
+                    if pos_b == 0 or pos_a not in bppm_data or pos_b not in bppm_data[pos_a]:
+                        # not base paired, or zero probability
+                        bpps.append("NA")
+                    else:
+                        # base paired
+                        bpps.append(str(bppm_data[pos_a][pos_b]))
+
+                bpps_str = "\t".join(bpps)
+                structure.bpps = bpps_str
+                db_session.add(structure)
+
+        db_session.commit()
 
 
 
