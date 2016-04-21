@@ -1096,8 +1096,8 @@ class BppmImporter():
         import os 
 
         print("Importing BPPMs...")
-        bppms_folder = settings.data_folder+"/bppms"
-        filenames = os.listdir(bppms_folder)
+        engine.execute("TRUNCATE TABLE bppm") # empty the table
+        filenames = os.listdir(settings.data_folder+"/bppms")
         tids = []
         for filename in filenames:
             tids.append(".".join(filename.split(".")[:-1]))
@@ -1132,7 +1132,6 @@ class BppmImporter():
 
     def process_tids(self, tids_chunk):
         bppms_folder = settings.data_folder+"/bppms"
-
         for tid in tids_chunk:
             print("Processing "+tid)
 
