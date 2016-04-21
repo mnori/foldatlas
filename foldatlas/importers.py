@@ -1174,6 +1174,7 @@ class BppmImporter():
                         bppm_data[pos_a] = {}
                     bppm_data[pos_a][pos_b] = bpp
             
+            # compress the BPPM string before saving to table
             bppm_text = base64.b64encode(zlib.compress(bppm_text.encode("ascii")))
 
             # save text in bppm table
