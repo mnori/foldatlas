@@ -736,7 +736,7 @@ class NucleotideMeasurementDownloader():
 
         seq_str = Transcript(self.transcript_id).get_sequence_str()
 
-        # Use the ORM to grab raw data
+        # Use the ORM to grab compiled counts
         results = db_session \
             .query(RawReactivities) \
             .filter(
@@ -746,13 +746,16 @@ class NucleotideMeasurementDownloader():
             .all()
         
         measurement_set = results[0]
-
-        # Get the raw read counts out
-        minus_unpacked = values_str_unpack_int(measurement_set.minus_values)
-        plus_unpacked = values_str_unpack_int(measurement_set.plus_values)
+        # minus_unpacked = 
+        # plus_unpacked = values_str_unpack_int(measurement_set.plus_values)
+        
+        cols = [
+            values_str_unpack_int(measurement_set.minus_values), 
+            values_str_unpack_int(measurement_set.plus_values)
+        ]
 
         # Grab the raw replicate lanes data
-        results = db_session \
+        lanes = db_session \
             .query(RawReplicateCounts) \
             .filter(
                 RawReplicateCounts.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
@@ -765,17 +768,33 @@ class NucleotideMeasurementDownloader():
             ) \
             .all()
 
-        for counts in results:
-            print("B"+str(counts.bio_replicate_id)+", T"+str(counts.tech_replicate_id))
-            print(counts)
+        # gather the data
+        tech_rep_ids = set()
+        for lane in lanes:
+            cols.append(values_str_unpack_int(lane.values))
+            tech_rep_ids.add(lane.tech_replicate_id)
+
+        # make headers
+        headers = []
+        for lane in lanes:
+            # tech replicate notation only added for experiments with > 1 tech replicate
+            tech_str = "" if len(tech_rep_ids) == 1 else "_T"+str(lane.tech_replicate_id)
+            headers.append(str(lane.minusplus_id)+"_B"+str(lane.bio_replicate_id)+tech_str)
 
         # Build and return the output
-        buf = ""
-        for n in range(0, len(minus_unpacked)):
-            buf +=  str(n + 1)+"\t"+ \
-                    seq_str[n]+"\t"+ \
-                    str(minus_unpacked[n])+"\t"+ \
-                    str(plus_unpacked[n])+"\n"
+        buf = "position\tsequence\tsum_minus\tsum_plus\t"+"\t".join(headers)+"\n"
+        for n in range(0, len(cols[0])):
+            # add position and seq letter
+            buf += str(n + 1)+"\t"+seq_str[n]
+
+            # add the dynamic columns
+            for col in cols:
+                buf += "\t"+str(col[n])
+
+            buf += "\n"
+                    # + \
+                    # str(minus_unpacked[n])+"\t"+ \
+                    # str(plus_unpacked[n])+"\n"
 
         return buf
 
