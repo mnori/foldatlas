@@ -725,6 +725,7 @@ class StructureDownloader():
         return buf
 
 # Generates plain text nucleotide measurements for user download
+# Includes raw and normalised
 class NucleotideMeasurementDownloader():
     def __init__(self, nucleotide_measurement_run_id, transcript_id):
         self.nucleotide_measurement_run_id = nucleotide_measurement_run_id
@@ -786,16 +787,9 @@ class NucleotideMeasurementDownloader():
         for n in range(0, len(cols[0])):
             # add position and seq letter
             buf += str(n + 1)+"\t"+seq_str[n]
-
-            # add the dynamic columns
-            for col in cols:
+            for col in cols: # add the dynamic columns
                 buf += "\t"+str(col[n])
-
             buf += "\n"
-                    # + \
-                    # str(minus_unpacked[n])+"\t"+ \
-                    # str(plus_unpacked[n])+"\n"
-
         return buf
 
     # Retrieves normalised reactivities and outputs as text

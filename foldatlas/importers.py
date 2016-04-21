@@ -973,7 +973,7 @@ class CoverageExporter():
 # Make list of transcript IDs that have structures in our database
 class StructureTidsExporter():
     def export(self):
-        sql = "SELECT DISTINCT transcript_id from structure"
+        sql = "SELECT DISTINCT transcript_id FROM structure"
         results = engine.execute(sql)
         n = 0
         with open(settings.structure_tids_filepath, "w") as f:
@@ -981,5 +981,72 @@ class StructureTidsExporter():
                 n += 1
                 f.write(row["transcript_id"]+"\n")
         print(str(n)+" structure transcript IDs written to "+settings.structure_tids_filepath)
+
+# adds the raw lane counts into the raw_reactivities table
+class MinusPlusCompiler():
+
+    def __init__(self):
+        self.nucleotide_measurement_run_id = 1
+        self.chunk_size = 10
+
+    def run(self):
+        from database import engine
+        print("Compiling counts from raw lanes data...")
+        sql = "SELECT DISTINCT id FROM transcript ORDER BY id"
+        results = engine.execute(sql)
+        tids = []
+        for row in results:
+            tids.append(row["id"])  
+        n_tids = len(tids)
+
+        print(str(n_tids)+" transcript IDs fetched")
+
+        chunk_start = 0
+        while(True): # loop through chunbks
+            # gather transcript IDs
+
+            tids_chunk = []
+            for i in range(chunk_start, chunk_start + self.chunk_size):
+                if i >= n_tids:
+                    break
+                tids_chunk.append(tids[i])
+
+            # grab all the raw lanes for the transcript IDs in the chunk
+            self.fetch_raw_replicate_counts(tids_chunk)
+
+            exit()
+            chunk_start += self.chunk_size
+            if chunk_start >= n_tids:
+                break
+
+        print("len: "+str(len(tids)))
+
+
+    def fetch_raw_replicate_counts(self, tids):
+        from database import db_session
+
+        # fetch raw replicate lanes data
+        lanes = db_session \
+            .query(RawReplicateCounts) \
+            .filter(
+                RawReplicateCounts.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
+                RawReplicateCounts.transcript_id.in_(tids)
+            ) \
+            .order_by(
+                RawReplicateCounts.minusplus_id,
+                RawReplicateCounts.bio_replicate_id, 
+                RawReplicateCounts.tech_replicate_id
+            ) \
+            .all()
+
+        print("c")
+
+        # compile into counts
+        for lane in lanes:
+            print(lane)
+
+        print("d")
+
+        # insert the counts into the DB
 
 
