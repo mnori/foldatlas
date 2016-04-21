@@ -2,7 +2,9 @@ import settings
 import models
 from models import Strain, Gene, Transcript, Feature, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, NucleotideMeasurementSet, \
-    Structure, RawReactivities, RawReplicateCounts
+    Structure, RawReactivities, RawReplicateCounts, values_str_unpack_float
+
+from database import engine, db_session
 
 def import_db(level):
     try:
@@ -23,8 +25,7 @@ def import_db(level):
 
 # Import database from scratch using the raw text files
 def import_scratch():
-    from database import db_session
-
+    
     # # # # Delete the whole DB and recreate again, much more reliable than using ORM
     db_session.execute("DROP DATABASE "+settings.db_name)
     db_session.execute("CREATE DATABASE "+settings.db_name)
@@ -51,8 +52,7 @@ def import_scratch():
 
 # Imports raw technical replicate data into the raw_replicate_counts table
 def import_raw_replicate_counts():
-    from database import db_session
-
+    
     print("Importing raw replicate counts...")
     db_session.execute("USE "+settings.db_name)
     for lane_type in settings.raw_replicate_counts_keys:
@@ -990,7 +990,7 @@ class MinusPlusCompiler():
         self.chunk_size = 10
 
     def run(self):
-        from database import engine
+        
         print("Compiling counts from raw lanes data...")
         sql = "SELECT DISTINCT id FROM transcript ORDER BY id"
         results = engine.execute(sql)
@@ -1023,8 +1023,7 @@ class MinusPlusCompiler():
 
 
     def fetch_raw_replicate_counts(self, tids):
-        from database import db_session
-
+        
         # fetch raw replicate lanes data
         lanes = db_session \
             .query(RawReplicateCounts) \
@@ -1033,19 +1032,28 @@ class MinusPlusCompiler():
                 RawReplicateCounts.transcript_id.in_(tids)
             ) \
             .order_by(
+                RawReplicateCounts.transcript_id,
                 RawReplicateCounts.minusplus_id,
                 RawReplicateCounts.bio_replicate_id, 
                 RawReplicateCounts.tech_replicate_id
             ) \
             .all()
 
-        print("c")
-
         # compile into counts
+        counts = {} # transcript_id => {minus_counts: ... , plus_counts: ... }
         for lane in lanes:
-            print(lane)
+            lane_values = values_str_unpack_float(lane.values)
 
-        print("d")
+            # initialise this transcript
+            if lane.transcript_id not in counts: 
+                counts[lane.transcript_id] = {}
+
+            # set the plus or minus counts
+            if lane.minusplus_id not in counts[lane.transcript_id]:
+                counts[lane.transcript_id][lane.minusplus_id] = lane_values
+            else: # add to existing plus or minus counts
+                for pos in range(0, len(lane_values)):
+                    counts[lane.transcript_id][lane.minusplus_id][pos] += lane_values[pos]
 
         # insert the counts into the DB
 
