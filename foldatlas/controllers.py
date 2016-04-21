@@ -9,14 +9,15 @@ from models import Feature, Transcript, NucleotideMeasurementSet, Structure, \
 
 from utils import ensure_dir, insert_newlines, build_dot_bracket
 
+import database
+from database import db_session
+
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
 
 class GenomeBrowser():
 
     def get_transcripts(self, request):
-        import database
-
         chromosome_id = "Chr"+str(int(request.args.get('chr'))) # SQL-injection safe
         start = int(request.args.get('start'))
         end = int(request.args.get('end'))
@@ -84,9 +85,7 @@ class GenomeBrowser():
         return json.dumps(out)
 
     def get_genes(self, request):
-        
         from utils import Timeline
-        import database
 
         chromosome_id = "Chr"+str(int(request.args.get('chr'))) # SQL-injection safe
         start = int(request.args.get('start'))
@@ -116,8 +115,6 @@ class GenomeBrowser():
 
     # Fetch chromosome IDs and their lengths. Used for chromosome menu and also initialising the genome browser.
     def get_chromosomes(self):
-        import database
-
         sql = ( "SELECT chromosome_id, CHAR_LENGTH(sequence) length FROM chromosome "
                 "WHERE strain_id = '"+settings.reference_strain_id+"' "
                 "ORDER BY chromosome_id ASC")
@@ -137,8 +134,6 @@ class GenomeBrowser():
 class TranscriptView():
 
     def __init__(self, transcript_id):
-        from database import db_session
-
         self.transcript_id = transcript_id
 
         # Get the coords of the associated gene
@@ -177,9 +172,7 @@ class NucleotideMeasurementView():
         self.build_entries([1])
 
     def build_entries(self, experiment_ids):
-
         from models import NucleotideMeasurementRun
-        from database import db_session
 
         # Load experiments
         experiments = db_session \
@@ -253,8 +246,6 @@ class AlignmentView():
         self.build_alignment_entries()
 
     def build_alignment_entries(self):
-        from database import db_session
-
         self.alignment_rows = []
 
         # fetch the alignment rows from the DB, using the ORM
@@ -325,7 +316,6 @@ class AlignmentView():
 class TranscriptSearcher():
     def search(self, search_string):
         from flask import abort
-        from database import db_session
 
         transcripts = db_session \
             .query(Transcript) \
@@ -355,7 +345,6 @@ class CoverageSearcher():
         # better to do the imports closer to where they are needed
         from sqlalchemy import func
         from math import ceil
-        from database import db_session
 
         transcript_count = db_session \
             .query(func.count('*')) \
@@ -370,7 +359,6 @@ class CoverageSearcher():
         from utils import Timeline
         from sqlalchemy import func, and_
         from models import Structure, GeneLocation
-        import database
 
         offset = (int(page_num) - 1) * self.page_size
         limit = self.page_size
@@ -483,7 +471,6 @@ class StructureView():
     def build_entries(self, structure_prediction_run_ids):
 
         from models import Structure, StructurePredictionRun
-        from database import db_session
 
         # Load experiments
         runs = db_session \
@@ -547,8 +534,6 @@ class StructureDiagramView():
         self.data_json = json.dumps(data)
 
     def build_dot_bracket(self):
-        from database import db_session
-
         # get all the positions
         results = db_session \
             .query(Structure, Transcript) \
@@ -611,12 +596,6 @@ class StructureCirclePlotView():
         self.get_values()
 
     def get_values(self):
-
-        from database import db_session
-
-        # convert entities to dot bracket string
-        out = [];
-
         # get all the positions
         results = db_session \
             .query(Structure) \
@@ -627,6 +606,7 @@ class StructureCirclePlotView():
 
         # build the output. backward facing links are left blank
         # results must be shifted back to array indexes, since they start at 1 in the DB.
+        out = [];
         for curr_position in range(1, len(positions) + 1):
             paired_to_position = positions[curr_position - 1]
 
@@ -651,8 +631,6 @@ class StructureDownloader():
         self.transcript_id = transcript_id
 
     def generate(self):
-        from database import db_session
-
         # Fetch the data
         results = db_session \
             .query(Structure, StructurePredictionRun, Transcript) \
@@ -733,8 +711,6 @@ class NucleotideMeasurementDownloader():
 
     # Retrieves raw reactivity values and outputs as text
     def get_raw(self):
-        from database import db_session
-
         seq_str = Transcript(self.transcript_id).get_sequence_str()
 
         # Use the ORM to grab compiled counts
@@ -794,9 +770,6 @@ class NucleotideMeasurementDownloader():
 
     # Retrieves normalised reactivities and outputs as text
     def get_normalised(self):
-
-        from database import db_session
-
         # Grab sequence string
         seq_str = Transcript(self.transcript_id).get_sequence_str()
 
