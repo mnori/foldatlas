@@ -412,6 +412,10 @@ class Bppm(db.Model):
     transcript_id = Column(String(256), ForeignKey("transcript.id"), nullable=False)
     data = Column(Text, nullable=False)
 
+    def __init__(self, transcript_id, data):
+        self.transcript_id = transcript_id
+        self.data = data
+
     def __repr__(self):
         return "<Bppm %r>" % (self.id)
 

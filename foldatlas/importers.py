@@ -2,7 +2,7 @@ import settings
 import models
 from models import Strain, Gene, Transcript, Feature, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, NucleotideMeasurementSet, \
-    Structure, RawReactivities, RawReplicateCounts, values_str_unpack_float
+    Structure, RawReactivities, RawReplicateCounts, values_str_unpack_float, Bppm
 
 from database import engine, db_session
 
@@ -1089,8 +1089,9 @@ class MinusPlusCompiler():
 class BppmImporter():
 
     def __init__(self):
-        self.chunk_size = 100
-        self.boundary = 1000
+        self.spr_id = 1
+        self.chunk_size = 10
+        self.boundary = 100
 
     def run(self):
         import os 
@@ -1128,20 +1129,57 @@ class BppmImporter():
             if chunk_start >= n_tids:
                 break
 
-        print(str(n_tids)+" transcripts processed")
+        print("\n"+str(n_tids)+" transcripts processed")
 
     def process_tids(self, tids_chunk):
         bppms_folder = settings.data_folder+"/bppms"
         for tid in tids_chunk:
-            print("Processing "+tid)
+            # print("Processing "+tid)
+
+            bppm_data = {}
+            bppm_text = ""
 
             # grab the text from file, trim off the first line
+            # also parse the bppm text into data structure
+            with open(bppms_folder+"/"+tid+".bppm", "r") as f:
+                first = True
+                for line in f:
+                    if first:
+                        first = False
+                        continue
+
+                    # add the text for the bppm table
+                    if "Probability" in line: # skip header lines
+                        continue
+                    bppm_text += line
+
+                    # extract the data, this will be used for structure BPPMs
+                    bits = line.strip().split("\t")
+                    pos_a = bits[0]
+                    pos_b = bits[1]
+                    bpp = bits[2]
+                    if pos_a not in bppm_data:
+                        bppm_data[pos_a] = {}
+                    bppm_data[pos_a][pos_b] = bpp
+            
             # save text in bppm table
-            # parse the bppm text into data structure
+            measurement_set = Bppm(transcript_id=tid, data=bppm_text)
+            db_session.add(measurement_set)
+        
 
             # grab all the structures matching the tid
+            # results = db_session \
+            #     .query(Structure) \
+            #     .filter(Structure.transcript_id==tid) \
+            #     .all()
+
+            
+
             # for each structure, generate the probability text
             # save probability text into the database
+
+
+            db_session.commit()
 
 
 
