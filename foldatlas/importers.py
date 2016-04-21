@@ -987,11 +987,12 @@ class MinusPlusCompiler():
 
     def __init__(self):
         self.nucleotide_measurement_run_id = 1
-        self.chunk_size = 10
+        self.chunk_size = 100
+        self.boundary = 1000
 
     def run(self):
-        
         print("Compiling counts from raw lanes data...")
+        engine.execute("TRUNCATE TABLE raw_reactivities") # empty the table
         sql = "SELECT DISTINCT id FROM transcript ORDER BY id"
         results = engine.execute(sql)
         tids = []
@@ -1000,6 +1001,7 @@ class MinusPlusCompiler():
         n_tids = len(tids)
 
         print(str(n_tids)+" transcript IDs fetched")
+        print("Inserting...")
 
         chunk_start = 0
         while(True): # loop through chunbks
@@ -1013,14 +1015,17 @@ class MinusPlusCompiler():
 
             # grab all the raw lanes for the transcript IDs in the chunk
             self.fetch_raw_replicate_counts(tids_chunk)
+            print(".", end="", flush=True)
 
-            exit()
             chunk_start += self.chunk_size
+
+            if chunk_start % 1000 == 0:
+                print(chunk_start)
+
             if chunk_start >= n_tids:
                 break
 
-        print("len: "+str(len(tids)))
-
+        print(str(n_tids)+" transcripts processed")
 
     def fetch_raw_replicate_counts(self, tids):
         
