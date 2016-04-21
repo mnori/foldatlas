@@ -369,27 +369,6 @@ class NucleotideMeasurementSet(db.Model):
     def __repr__(self):
         return "<NucleotideMeasurementSet %r>" % (self.id)
 
-# # Represents one measurement, at a particular nucleotide position.
-# class NucleotideMeasurement(db.Model):
-#     __tablename__ = "nucleotide_measurement"
-
-#     nucleotide_measurement_set_id = Column(Integer, 
-#         ForeignKey("nucleotide_measurement_set.id"), primary_key=True, autoincrement=True)
-
-#     # if there's no measurement at a position, there is no corresponding row.
-#     position = Column(Integer, autoincrement=False, primary_key=True) 
-#     measurement = Column(Float, nullable=False) 
-
-#     def __init__(self, nucleotide_measurement_set_id=None, position=None, measurement=None):
-#         self.nucleotide_measurement_set_id = nucleotide_measurement_set_id
-#         self.position = position
-#         self.measurement = measurement
-
-#     def __repr__(self):
-#         return "<NucleotideMeasurement %r-%r-%r-%r>" % (
-#             self.nucleotide_measurement_set_id, self.position, self.measurement
-#         )
-
 # Represents a structure prediction for a single RNA sequence
 class Structure(db.Model):
 
@@ -419,6 +398,19 @@ class Structure(db.Model):
 
     def __repr__(self):
         return "<Structure %r>" % (self.id)
+
+# Represents a base pair probability matrix. One per transcript at the moment
+# In the future we might allow constrained BPPMs, which will be one per run ID or something
+# Bppm is stored as a big text field
+class Bppm(db.Model):
+    __tablename__ = "bppm"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    transcript_id = Column(String(256), ForeignKey("transcript.id"), nullable=False)
+    data = Column(Text, nullable=False)
+
+    def __repr__(self):
+        return "<Bppm %r>" % (self.id)
 
 # gotta put the migrate stuff here so it can see the models
 migrate = Migrate(app, db)

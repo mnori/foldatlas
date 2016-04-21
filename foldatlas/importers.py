@@ -1086,5 +1086,14 @@ class MinusPlusCompiler():
         db_session.commit()
 
 
+class BppmImporter():
+
+    def __init__(self):
+        self.chunk_size = 100
+        self.boundary = 1000
+
+    def run(self):
+        print("BppmImporter invoked")
+
 
 
