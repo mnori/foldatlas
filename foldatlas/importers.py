@@ -1097,6 +1097,11 @@ class BppmImporter():
 
         print("Importing BPPMs...")
         filenames = os.listdir(settings.data_folder+"/bppms")
+        print(filenames)
+
+
+        exit()
+
         tids = []
         for row in results:
             tids.append(row["id"])  
