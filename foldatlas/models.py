@@ -382,6 +382,7 @@ class Structure(db.Model):
     pc1 = Column(Float, nullable=False, default=0)
     pc2 = Column(Float, nullable=False, default=0)
     structure = Column(Text, nullable=False)
+    bpps = Column(Text, nullable=True)
 
     def __init__(self, structure_prediction_run_id, transcript_id, energy, structure="", pc1=0, pc2=0):
         self.structure_prediction_run_id = structure_prediction_run_id
@@ -403,7 +404,7 @@ class Structure(db.Model):
 # Represents a base pair probability matrix. One per transcript at the moment
 # In the future we might allow constrained BPPMs, which will be one per run ID or something
 # Bppm is stored as a big text field
-# This table is used when downloading the entire BPPM matrix
+# This table is used when downloading the entire BPPM matrix as text
 class Bppm(db.Model):
     __tablename__ = "bppm"
 

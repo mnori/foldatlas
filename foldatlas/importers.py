@@ -1004,7 +1004,7 @@ class MinusPlusCompiler():
         print("Inserting...")
 
         chunk_start = 0
-        while(True): # loop through chunbks
+        while(True): # loop through chunks
             # gather transcript IDs
 
             tids_chunk = []
@@ -1093,7 +1093,43 @@ class BppmImporter():
         self.boundary = 1000
 
     def run(self):
-        print("BppmImporter invoked")
+        import os 
+
+        print("Importing BPPMs...")
+        filenames = os.listdir(settings.data_folder+"/bppms")
+        tids = []
+        for row in results:
+            tids.append(row["id"])  
+        n_tids = len(tids)
+
+        print(str(n_tids)+" transcript IDs fetched")
+        print("Inserting...")
+
+        chunk_start = 0
+        while(True): # loop through chunks
+            # gather transcript IDs
+
+            tids_chunk = []
+            for i in range(chunk_start, chunk_start + self.chunk_size):
+                if i >= n_tids:
+                    break
+                tids_chunk.append(tids[i])
+
+            # grab all the raw lanes for the transcript IDs in the chunk
+            self.fetch_raw_replicate_counts(tids_chunk)
+            print(".", end="", flush=True)
+
+            chunk_start += self.chunk_size
+
+            if chunk_start % 1000 == 0:
+                print(chunk_start)
+
+            if chunk_start >= n_tids:
+                break
+
+        print(str(n_tids)+" transcripts processed")
+
+
 
 
 
