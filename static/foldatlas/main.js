@@ -1186,15 +1186,29 @@ var StructureExplorer = Class.extend({
 					"<i class=\"fa fa-file-image-o\"></i>"+
 				"</a>"
 			)
-
 			data = JSON.parse(data);
+
+			// find min and max bpp values
+			var min_bpp = null;
+			var max_bpp = null;
+			for (var i = 0; i < data.length; i++) {
+				var bpp = data[i].bpp
+				if (max_bpp == null) max_bpp = bpp;
+				if (min_bpp == null) min_bpp = bpp;
+				if (bpp > max_bpp) max_bpp = bpp;
+				if (bpp < min_bpp) min_bpp = bpp;
+			}		
 
 			var nTicks = 10;
 			var nNucs = data.length;
 			var getColour = function(position) {
+				var diff = max_bpp - min_bpp;
+				var bpp = data[position].bpp;
+				var intensity = (bpp - min_bpp) / diff
+
 				// see docs: https://github.com/mbostock/d3/wiki/Colors
-				var hue = (position / nNucs) * 360;
-				return d3.hsl(hue, 1, 0.35);
+				var hue =  intensity * 90; // 360;
+				return d3.hsl(hue, 1, 0.3);
 			}
 
 			var svgDims = 630,
