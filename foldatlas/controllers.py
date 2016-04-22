@@ -617,10 +617,15 @@ class StructureCirclePlotView():
             else:
                 link = paired_to_position - 1
 
+            if link != None:
+                link = int(link)
+
             out.append({
-                "name": str(curr_position - 1),
+                "name": curr_position - 1,
                 "link": link
             })
+
+        print(json.dumps(out))
 
         self.data_json = json.dumps(out)
 
