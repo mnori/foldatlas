@@ -1202,8 +1202,11 @@ var StructureExplorer = Class.extend({
 			var nTicks = 10;
 			var nNucs = data.length;
 			var getColour = function(position) {
-				var diff = max_bpp - min_bpp;
 				var bpp = data[position].bpp;
+				if (bpp == null) {
+					return d3.hsl(hue, 0, 0.5);
+				}
+				var diff = max_bpp - min_bpp;
 				var intensity = (bpp - min_bpp) / diff
 
 				// see docs: https://github.com/mbostock/d3/wiki/Colors
