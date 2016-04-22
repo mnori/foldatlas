@@ -1207,8 +1207,8 @@ var StructureExplorer = Class.extend({
 				var intensity = (bpp - min_bpp) / diff
 
 				// see docs: https://github.com/mbostock/d3/wiki/Colors
-				var hue =  intensity * 90; // 360;
-				return d3.hsl(hue, 0.8, 0.4);
+				var hue =  intensity * 135; // 360;
+				return d3.hsl(hue, 1, 0.35);
 			}
 
 			var svgDims = 630,
