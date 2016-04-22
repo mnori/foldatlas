@@ -602,7 +602,9 @@ class StructureCirclePlotView():
             .filter(Structure.id==self.structure_id) \
             .all()
 
-        positions = results[0].get_values()
+        result = results[0]
+        positions = result.get_values()
+        bpps = result.get_bpp_values()
 
         # build the output. backward facing links are left blank
         # results must be shifted back to array indexes, since they start at 1 in the DB.
@@ -622,10 +624,9 @@ class StructureCirclePlotView():
 
             out.append({
                 "name": curr_position - 1,
-                "link": link
+                "link": link,
+                "bpp": bpps[curr_position - 1],
             })
-
-        print(json.dumps(out))
 
         self.data_json = json.dumps(out)
 

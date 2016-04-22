@@ -398,6 +398,16 @@ class Structure(db.Model):
     def get_values(self):
         return values_str_unpack_int(self.structure)
 
+    def get_bpp_values(self):
+        values = self.bpps.split("\t")
+        out = []
+        for value in values:
+            if value == "NA":
+                out.append(None)
+            else:
+                out.append(float(value))
+        return out
+
     def __repr__(self):
         return "<Structure %r>" % (self.id)
 
