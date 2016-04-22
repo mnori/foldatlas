@@ -625,7 +625,7 @@ class StructureCirclePlotView():
             out.append({
                 "name": curr_position - 1,
                 "link": link,
-                "bpp": bpps[curr_position - 1],
+                "bpp": None if bpps == None else bpps[curr_position - 1]
             })
 
         self.data_json = json.dumps(out)

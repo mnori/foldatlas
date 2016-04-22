@@ -399,6 +399,9 @@ class Structure(db.Model):
         return values_str_unpack_int(self.structure)
 
     def get_bpp_values(self):
+        if self.bpps == None:
+            return None
+
         values = self.bpps.split("\t")
         out = []
         for value in values:
