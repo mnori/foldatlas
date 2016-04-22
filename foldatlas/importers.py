@@ -1098,12 +1098,15 @@ class BppmImporter():
     def run(self):
         import os 
 
-        print("Importing BPPMs...")
+        print("Gathering transcript IDs...")
         engine.execute("TRUNCATE TABLE bppm") # empty the table
         filenames = os.listdir(settings.data_folder+"/bppms")
         tids = []
         for filename in filenames:
-            tids.append(".".join(filename.split(".")[:-1]))
+            tid = ".".join(filename.split(".")[:-1])
+            if tid == "":
+                print("Warning: cannot process "+filename)
+            tids.append(tid)
         n_tids = len(tids)
 
         print(str(n_tids)+" transcript IDs fetched")
@@ -1129,7 +1132,7 @@ class BppmImporter():
 
             chunk_start += self.chunk_size
 
-            if chunk_start % 1000 == 0:
+            if chunk_start % self.boundary == 0:
                 print(chunk_start)
 
             if chunk_start >= n_tids:
