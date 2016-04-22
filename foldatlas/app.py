@@ -119,6 +119,11 @@ def download_structure(transcript_id):
 	buf = StructureDownloader([1, 2], transcript_id).generate()
 	return Response(buf, mimetype='text/plain')
 
+@app.route("/download/bppm/<transcript_id>")
+def download_bppm(transcript_id):
+	from controllers import BppmDownloader
+	return Response(BppmDownloader().fetch(transcript_id), mimetype='text/plain')
+
 @app.route("/download/measurements/<experiment_id>/<transcript_id>")
 def download_measurements(experiment_id, transcript_id):
 	from controllers import NucleotideMeasurementDownloader

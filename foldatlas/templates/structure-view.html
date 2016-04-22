@@ -1,8 +1,11 @@
 <h2 class="bar">
 	Structure
 	{% if not structure_view.empty %}
-		<a href="/download/structure/{{ structure_view.transcript_id }}" target="_blank" class="button download r">
-			<i class="fa fa-download"></i> Download
+		<a href="/download/bppm/{{ structure_view.transcript_id }}" target="_blank" class="button download r">
+			<i class="fa fa-download"></i> Download BPPM
+		</a>
+		<a href="/download/structure/{{ structure_view.transcript_id }}" target="_blank" class="button download">
+			<i class="fa fa-download"></i> Download structures
 		</a>
 	{% endif %}
 </h2>
@@ -106,7 +109,7 @@
 						<a class="forna-interact button" id="fornac-dl-button" href="javascript:void(0)" download="structure-diagram.svg">
 							<i class="fa fa-file-image-o"></i>
 						</a>
-						<a id="forna-interact-enable" class="forna-interact button" href="#">Enable Interaction</a>
+						<a id="forna-interact-enable" class="forna-interact button" href="#">Enable interaction</a>
 						<a id="forna-interact-disable" class="forna-interact button" href="#" style="display: none;">Disable Interaction</a>
 
 						<!-- Ribosome profiling is temporarily removed -->

@@ -812,3 +812,8 @@ class NucleotideMeasurementDownloader():
 
         return buf
 
+class BppmDownloader():
+    def fetch(self, transcript_id):
+        return "Hai "+transcript_id
+        # grab the BPPM for this transcript_id
+    
