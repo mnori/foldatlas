@@ -1208,7 +1208,7 @@ var StructureExplorer = Class.extend({
 
 				// see docs: https://github.com/mbostock/d3/wiki/Colors
 				var hue =  intensity * 90; // 360;
-				return d3.hsl(hue, 1, 0.3);
+				return d3.hsl(hue, 0.8, 0.4);
 			}
 
 			var svgDims = 630,
@@ -1261,7 +1261,8 @@ var StructureExplorer = Class.extend({
 				.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
 				.attr("class", "circleplot-link")
 				.attr("stroke", "#000")
-				.attr("stroke-opacity", ".4")
+				// .attr("stroke-opacity", ".8")
+
 				.attr("fill", "none")
 				.attr("d", line)
 				.style("stroke", function(d) {
