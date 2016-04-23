@@ -822,17 +822,11 @@ class BppmDownloader():
             .query(Bppm) \
             .filter(Bppm.transcript_id==transcript_id) \
             .all()
-
         bppm = results[0]
 
-        # the problem - strings are truncated in the database
-        decoded = base64.b64decode(bppm.data+"=") # this breaks
+        # decode and return the BPPM
+        decoded = base64.b64decode(bppm.data)
         data_txt = zlib.decompress(decoded)
-
-        # it gets compressed using this:
-        # bppm_text = base64.b64encode(zlib.compress(bppm_text.encode("ascii")))
-
         return data_txt
-        # return the string
         
     

@@ -15,13 +15,14 @@ down_revision = 'c28390c05b73'
 from alembic import op
 from importers import BppmImporter
 import sqlalchemy as sa
+from sqlalchemy.dialects import mysql
 
 
 def upgrade():
     op.create_table('bppm',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('transcript_id', sa.String(length=256), nullable=False),
-        sa.Column('data', sa.Text(), nullable=False),
+        sa.Column('data', mysql.LONGTEXT(), nullable=False),
         sa.ForeignKeyConstraint(['transcript_id'], ['transcript.id'], ),
         sa.PrimaryKeyConstraint('id')
     )

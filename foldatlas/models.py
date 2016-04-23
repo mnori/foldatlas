@@ -7,6 +7,7 @@ from Bio.SeqRecord import SeqRecord
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
+from sqlalchemy.dialects import mysql
 
 import database, settings
 
@@ -421,7 +422,7 @@ class Bppm(db.Model):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     transcript_id = Column(String(256), ForeignKey("transcript.id"), nullable=False)
-    data = Column(Text, nullable=False)
+    data = Column(mysql.LONGTEXT, nullable=False)
 
     def __init__(self, transcript_id, data):
         self.transcript_id = transcript_id
