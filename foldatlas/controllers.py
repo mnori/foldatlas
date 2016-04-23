@@ -815,15 +815,24 @@ class NucleotideMeasurementDownloader():
 # Retrieves the BPPM for this transcript_id
 class BppmDownloader():
     def fetch(self, transcript_id):
+        import zlib, base64
+
         # fetch from database
         results = db_session \
             .query(Bppm) \
             .filter(Bppm.transcript_id==transcript_id) \
             .all()
 
-        # unpack
-        print(results)
+        bppm = results[0]
 
+        # the problem - strings are truncated in the database
+        decoded = base64.b64decode(bppm.data+"=") # this breaks
+        data_txt = zlib.decompress(decoded)
+
+        # it gets compressed using this:
+        # bppm_text = base64.b64encode(zlib.compress(bppm_text.encode("ascii")))
+
+        return data_txt
         # return the string
         
     

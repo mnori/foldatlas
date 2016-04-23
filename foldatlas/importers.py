@@ -1088,6 +1088,8 @@ class MinusPlusCompiler():
         db_session.commit()
 
 
+# Imports base pair probability matrixes generated using RNAstructure
+# It took about 3.8 hours for this to import around 11,000 transcript BPPMs for Ath DMS data.
 class BppmImporter():
 
     def __init__(self):
@@ -1177,10 +1179,8 @@ class BppmImporter():
                         bppm_data[pos_a] = {}
                     bppm_data[pos_a][pos_b] = bpp
             
-            # compress the BPPM string before saving to table
+            # compress the BPPM string before saving to bppm table
             bppm_text = base64.b64encode(zlib.compress(bppm_text.encode("ascii")))
-
-            # save text in bppm table
             measurement_set = Bppm(transcript_id=tid, data=bppm_text)
             db_session.add(measurement_set)
 
