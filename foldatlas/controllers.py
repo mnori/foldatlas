@@ -5,7 +5,7 @@ import settings
 import os
 from models import Feature, Transcript, NucleotideMeasurementSet, Structure, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, \
-    values_str_unpack_float, values_str_unpack_int, RawReactivities, RawReplicateCounts
+    values_str_unpack_float, values_str_unpack_int, RawReactivities, RawReplicateCounts, Bppm
 
 from utils import ensure_dir, insert_newlines, build_dot_bracket
 
@@ -812,8 +812,18 @@ class NucleotideMeasurementDownloader():
 
         return buf
 
+# Retrieves the BPPM for this transcript_id
 class BppmDownloader():
     def fetch(self, transcript_id):
-        return "Hai "+transcript_id
-        # grab the BPPM for this transcript_id
+        # fetch from database
+        results = db_session \
+            .query(Bppm) \
+            .filter(Bppm.transcript_id==transcript_id) \
+            .all()
+
+        # unpack
+        print(results)
+
+        # return the string
+        
     

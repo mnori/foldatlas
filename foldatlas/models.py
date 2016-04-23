@@ -8,9 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 
-print("Importing DB...")
-import database
-import settings
+import database, settings
 
 # gotta put the migrate stuff here so it can see the models
 from app import app
