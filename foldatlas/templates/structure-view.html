@@ -37,7 +37,9 @@
 			<svg id="pca-key">
 
 				<!-- Legend title -->
+				<text x="10" y="20" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">Free energy, kcal/mol</text>
 				<text x="110" y="70" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">highest</text>
+				<text x="10" y="70" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">lowest</text>
 
 				<!-- Reactivity gradient legend -->
 				<defs>
@@ -54,9 +56,6 @@
 				<line x1="30" y1="50" x2="30" y2="57" style="stroke: #000; stroke-width:1" />
 				<line x1="80" y1="50" x2="80" y2="57" style="stroke: #000; stroke-width:1" />
 				<line x1="130" y1="50" x2="130" y2="57" style="stroke: #000; stroke-width:1" />
-
-				<text x="10" y="20" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">Free energy, kcal/mol</text>
-				<text x="10" y="70" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">lowest</text>
 
 			</svg>
 
@@ -83,25 +82,24 @@
 				<svg id="forna-key">
 
 					<!-- Legend title -->
+					<text x="0" y="40" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">Reactivity</text>
+					<text x="0" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">0.0</text>
 					<text x="100" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">1.0</text>
 
 					<!-- Reactivity gradient legend -->
 					<defs>
-						<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+						<linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
 							<stop offset="0%" style="stop-color:rgb(64, 255, 64);stop-opacity:1" />
 							<stop offset="100%" style="stop-color:rgb(255, 64, 64);stop-opacity:1" />
 						</linearGradient>
 					</defs>
-					<rect x="10" y="50" width="100" height="20" fill="url(#grad1)" style="stroke: #000;" />
+					<rect x="10" y="50" width="100" height="20" fill="url(#grad2)" style="stroke: #000;" />
 
 					<!-- Axis labels for legend -->
 
 					<line x1="10" y1="70" x2="10" y2="77" style="stroke: #000; stroke-width:1" />
 					<line x1="60" y1="70" x2="60" y2="77" style="stroke: #000; stroke-width:1" />
 					<line x1="110" y1="70" x2="110" y2="77" style="stroke: #000; stroke-width:1" />
-
-					<text x="0" y="40" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">Reactivity</text>
-					<text x="0" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">0.0</text>
 
 				</svg>
 				<div id="forna-container">
@@ -124,6 +122,32 @@
 			<div id="circle-plot">
 				<!-- filled with circle plot SVG -->
 			</div>
+
+			<svg id="circle-plot-legend">
+
+				<!-- Legend title -->
+				<text x="0" y="40" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">log10 BPP</text>
+
+				<!-- Reactivity gradient legend -->
+				<defs>
+					<linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
+						<stop offset="0%" style="stop-color:rgb(220, 64, 64);stop-opacity:1" />
+						<stop offset="100%" style="stop-color:rgb(64, 220, 64);stop-opacity:1" />
+					</linearGradient>
+				</defs>
+				<rect x="15" y="50" width="100" height="20" fill="url(#grad3)" style="stroke: #000;" />
+
+				<!-- Axis labels for legend -->
+
+				<line x1="15" y1="70" x2="15" y2="77" style="stroke: #000; stroke-width:1" />
+				<line x1="65" y1="70" x2="65" y2="77" style="stroke: #000; stroke-width:1" />
+				<line x1="115" y1="70" x2="115" y2="77" style="stroke: #000; stroke-width:1" />
+
+				<!-- Tick labels -->
+				<text id="bpp_low" x="0" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">low</text>
+				<text id="bpp_high" x="100" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">high</text>
+
+			</svg>
 		</div>
 	</div>
 {% endif %}

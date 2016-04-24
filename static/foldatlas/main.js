@@ -1195,9 +1195,14 @@ var StructureExplorer = Class.extend({
 				var bpp = data[i].bpp
 				if (max_bpp == null) max_bpp = bpp;
 				if (min_bpp == null) min_bpp = bpp;
+				if (bpp == null) continue;
 				if (bpp > max_bpp) max_bpp = bpp;
 				if (bpp < min_bpp) min_bpp = bpp;
-			}		
+			}
+
+			// now add the circle plot legend
+			$("#bpp_low").html(Math.round(min_bpp * 10) / 10)
+			$("#bpp_high").html(max_bpp)
 
 			var nTicks = 10;
 			var nNucs = data.length;
@@ -1318,6 +1323,11 @@ var StructureExplorer = Class.extend({
 
 			this.browserController.hideLoading();
 			new SvgDownloader("circle-plot-svg", "circle-plot-dl-button", "circle-plot.svg");
+
+			function updateCirclePlotLegend(min_bpp, max_bpp) {
+				console.log("min: "+min_bpp)
+				console.log("max: "+max_bpp)
+			}
 
 			// reorganise the data a bit
 			function prepareData(rawData) {

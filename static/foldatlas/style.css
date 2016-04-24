@@ -95,6 +95,12 @@ h4 {
 	position: relative;
 }
 
+#circle-plot-legend {
+	position: absolute;
+	top: 570px;
+	left: 500px;
+}
+
 .button.svg {
 	position: absolute;
 	margin: 0;
