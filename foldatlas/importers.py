@@ -1101,7 +1101,7 @@ class BppmImporter():
         import os 
 
         print("Gathering transcript IDs...")
-        engine.execute("TRUNCATE TABLE bppm") # empty the table
+        # engine.execute("TRUNCATE TABLE bppm") # empty the table
         filenames = os.listdir(settings.data_folder+"/bppms")
         tids = []
         for filename in filenames:
@@ -1152,7 +1152,7 @@ class BppmImporter():
             # print("Processing "+tid)
 
             bppm_data = {}
-            bppm_text = ""
+            # bppm_text = ""
 
             # grab the text from file, trim off the first line
             # also parse the bppm text into data structure
@@ -1173,16 +1173,16 @@ class BppmImporter():
                     pos_b = int(bits[1])
                     bpp = -float(bits[2])
 
-                    bppm_text += str(pos_a)+"\t"+str(pos_b)+"\t"+str(bpp)+"\n"
+                    # bppm_text += str(pos_a)+"\t"+str(pos_b)+"\t"+str(bpp)+"\n"
 
                     if pos_a not in bppm_data:
                         bppm_data[pos_a] = {}
                     bppm_data[pos_a][pos_b] = bpp
             
             # compress the BPPM string before saving to bppm table
-            bppm_text = base64.b64encode(zlib.compress(bppm_text.encode("ascii")))
-            measurement_set = Bppm(transcript_id=tid, data=bppm_text)
-            db_session.add(measurement_set)
+            # bppm_text = base64.b64encode(zlib.compress(bppm_text.encode("ascii")))
+            # measurement_set = Bppm(transcript_id=tid, data=bppm_text)
+            # db_session.add(measurement_set)
 
             # grab all the structures matching the tid
             structures = db_session \
