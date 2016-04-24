@@ -770,7 +770,7 @@ class NucleotideMeasurementDownloader():
             # add position and seq letter
             buf += str(n + 1)+"\t"+seq_str[n]
             for col in cols: # add the dynamic columns
-                buf += "\t"+str(col[n])
+                buf += "\t"+str(int(col[n]))
             buf += "\n"
         return buf
 

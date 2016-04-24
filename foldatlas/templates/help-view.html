@@ -222,7 +222,7 @@ GAAAAUUCAUAAUUUUUAUAAAAUCAGGUAUUCUC
 
 <h3 id="contents_reactivity-chart">Reactivity charts</h3>
 <p>
-    The chart area includes an overview mode, which displays reactivities for the entire transcript on a single line. This can be seen at the top of the image below. Underneath the overview is a <b>More detail</b> button, which shows the transcript on multiple lines, with 80 nucleotides per line. In this detailed view, G and U nucleotide labels are coloured grey to indicate that they do not react with DMS.
+    The chart area includes an overview mode, which displays reactivities for the entire transcript on a single line. This can be seen at the top of the image below. Underneath the overview is a <b>More detail</b> button, which shows the transcript on multiple lines, with 80 nucleotides per line. In this detailed view, G and U nucleotide labels are coloured grey to indicate that they do not react with DMS. The <i class="fa fa-file-image-o"></i> button downloads the reactivity chart as an SVG file.
 </p>
 <img class="help-example-image" src="{{ settings.static_base_url }}/assets/help/measurements-chart.png" />
 
@@ -257,22 +257,21 @@ GAAAAUUCAUAAUUUUUAUAAAAUCAGGUAUUCUC
 </p>
 
 <p>
-   <b>Download Raw</b> can be used to obtain a text file containing raw adduct counts for DMS and control lanes. This snippet illustrates 11 bases from the AT1G01620.1 transcript:
+   <b>Download Raw</b> can be used to obtain a text file containing raw adduct counts for DMS and control lanes, including raw counts for each biological replicate. This snippet illustrates 10 bases from the AT1G29930.1 transcript:
 </p>
 
 <pre class="help-pre">
-<u>1   2   3    4    </u>
-75  U   145  176
-76  G   80   0
-77  U   292  2
-78  A   125  447
-79  G   148  157
-80  A   92   704
-81  A   78   1195
-82  A   50   182
-83  A   66   0
-84  G   192  499
-85  A   16   262
+<u>1   2   3     4     5     6     7     8     9     10</u>
+1   A   3525  3179  1227  1288  1010  1192  906   1081
+2   C   4894  2620  2258  1419  1217  875   901   844
+3   C   2673  1664  1117  561   995   673   504   487
+4   C   7644  3555  2609  2570  2465  1343  1425  787
+5   A   508   402   207   181   120   124   156   122
+6   U   1981  1046  673   769   539   291   357   398
+7   U   1740  965   565   838   337   331   394   240
+8   U   1045  203   307   559   179   102   68    33
+9   C   1177  438   387   526   264   161   105   172
+10  U   288   211   84    177   27    85    82    44
 </pre>
 
 <p>
@@ -280,8 +279,9 @@ GAAAAUUCAUAAUUUUUAUAAAAUCAGGUAUUCUC
     <ol>
         <li>The nucleotide position. Numbers start from 1.</li>
         <li>The base type letter.</li>
-        <li>Adduct count from the control lane.</li>
-        <li>Adduct count from the DMS lane.</li>
+        <li>Total count from the control lane.</li>
+        <li>Total count from the DMS lane</li>
+        <li>Remaining rows are biological replicate lanes. The column titles describe whether the lane is control (minus) or DMS (plus), and also which biological replicate it is (e.g. B2 for biological replicate 2).</li>
     </ol>
 </p>
 
