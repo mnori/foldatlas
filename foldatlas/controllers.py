@@ -815,18 +815,31 @@ class NucleotideMeasurementDownloader():
 # Retrieves the BPPM for this transcript_id
 class BppmDownloader():
     def fetch(self, transcript_id):
-        import zlib, base64
+        import os
 
-        # fetch from database
-        results = db_session \
-            .query(Bppm) \
-            .filter(Bppm.transcript_id==transcript_id) \
-            .all()
-        bppm = results[0]
+        sauce_filepath = settings.bppms_folder+"/"+transcript_id+".bppm"
 
-        # decode and return the BPPM
-        decoded = base64.b64decode(bppm.data)
-        data_txt = zlib.decompress(decoded)
-        return data_txt
+        if not os.path.isfile(sauce_filepath):
+            return "No BPPM data available for "+transcript_id
+
+        buf = ""
+        with open(sauce_filepath, "r") as f:
+            for line in f:
+                buf += line
+        return buf
+
+        # OLD method - storing in the database actually is shit
+        # import zlib, base64
+        # # fetch from database
+        # results = db_session \
+        #     .query(Bppm) \
+        #     .filter(Bppm.transcript_id==transcript_id) \
+        #     .all()
+        # bppm = results[0]
+
+        # # decode and return the BPPM
+        # decoded = base64.b64decode(bppm.data)
+        # data_txt = zlib.decompress(decoded)
+        # return data_txt
         
     
