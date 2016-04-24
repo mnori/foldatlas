@@ -823,9 +823,25 @@ class BppmDownloader():
             return "No BPPM data available for "+transcript_id
 
         buf = ""
+        # Open the raw BPPM and convert to our simpler format
         with open(sauce_filepath, "r") as f:
+            first = True
             for line in f:
-                buf += line
+                if first: # skip the first line, which shows the length
+                    first = False
+                    continue
+
+                # add the text for the bppm table
+                if "Probability" in line: # skip header lines
+                    continue
+
+                # extract the data, this will be used for structure BPPMs
+                bits = line.strip().split("\t")
+                pos_a = int(bits[0])
+                pos_b = int(bits[1])
+                bpp = -float(bits[2])
+
+                buf += str(pos_a)+"\t"+str(pos_b)+"\t"+str(bpp)+"\n"
         return buf
 
         # OLD method - storing in the database actually is shit
