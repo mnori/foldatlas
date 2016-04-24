@@ -1132,8 +1132,10 @@ var StructureExplorer = Class.extend({
 
 		if (this.tabController.selectedTabID == "structure-tab-diagram") {
 			this.drawStructureDiagram();
+			$("#circle-plot-legend").hide()
 		} else {
 			this.drawCirclePlot();
+			$("#circle-plot-legend").show()
 		}
 	},
 
@@ -1190,19 +1192,17 @@ var StructureExplorer = Class.extend({
 
 			// find min and max bpp values
 			var min_bpp = null;
-			var max_bpp = null;
 			for (var i = 0; i < data.length; i++) {
 				var bpp = data[i].bpp
-				if (max_bpp == null) max_bpp = bpp;
 				if (min_bpp == null) min_bpp = bpp;
 				if (bpp == null) continue;
-				if (bpp > max_bpp) max_bpp = bpp;
 				if (bpp < min_bpp) min_bpp = bpp;
 			}
+			var max_bpp = 0
 
 			// now add the circle plot legend
 			$("#bpp_low").html(Math.round(min_bpp * 10) / 10)
-			$("#bpp_high").html(max_bpp)
+			$("#bpp_high").html("0.0")
 
 			var nTicks = 10;
 			var nNucs = data.length;
