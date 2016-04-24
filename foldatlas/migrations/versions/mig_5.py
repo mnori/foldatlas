@@ -19,7 +19,7 @@ from importers import BppmImporter
 def upgrade():
 	print("upgrade() invoked")
 	BppmImporter().run()
-	exit() # don't forget to remove this!
+	# exit() # don't forget to remove this!
 
 def downgrade():
 	print("Nothing to do for BPPM import downgrade")
