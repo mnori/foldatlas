@@ -135,7 +135,7 @@
 <h3 id="contents_structure-circle">Circle plots for base pairing visualisation</h3>
 <img class="help-example-image-small" src="{{ settings.static_base_url }}/assets/help/circle.png" />
 <p>
-    The circle plot can be used to intuitively visualise base pairing in a predicted RNA structure. Bases are arranged in a circle according to their sequence position, and lines drawn between bases indicate pairing. The colour of each line indicates the log10 base pair probability (BPP), calculated using the <i>RNAstructure</i> package. The free energy estimate is also shown. Use the <i class="fa fa-file-image-o"></i> button to download the image as an SVG file.
+    The circle plot can be used to intuitively visualise base pairing in a predicted RNA structure. Bases are arranged in a circle according to their sequence position, and lines drawn between bases indicate pairing. The colour of each line indicates the log10 base pair probability (BPP), calculated using the <i>RNAstructure</i> package. The free energy estimate is also shown. The <i class="fa fa-file-image-o"></i> button can be used to download the image as an SVG file.
 </p>
 
 <h3 id="contents_structure-diagrams">Structure diagrams for fold visualisation</h3>
@@ -261,27 +261,34 @@ GAAAAUUCAUAAUUUUUAUAAAAUCAGGUAUUCUC
 </p>
 
 <pre class="help-pre">
-<u>1   2   3     4     5     6     7     8     9     10</u>
-1   A   3525  3179  1227  1288  1010  1192  906   1081
-2   C   4894  2620  2258  1419  1217  875   901   844
-3   C   2673  1664  1117  561   995   673   504   487
-4   C   7644  3555  2609  2570  2465  1343  1425  787
-5   A   508   402   207   181   120   124   156   122
-6   U   1981  1046  673   769   539   291   357   398
-7   U   1740  965   565   838   337   331   394   240
-8   U   1045  203   307   559   179   102   68    33
-9   C   1177  438   387   526   264   161   105   172
-10  U   288   211   84    177   27    85    82    44
+<u>
+position  sequence  sum_minus  sum_plus  minus_B1  minus_B2  minus_B3  plus_B1  plus_B2  plus_B3</u>
+1         A         3525       3179      1227      1288      1010      1192     906      1081
+2         C         4894       2620      2258      1419      1217      875      901      844
+3         C         2673       1664      1117      561       995       673      504      487
+4         C         7644       3555      2609      2570      2465      1343     1425     787
+5         A         508        402       207       181       120       124      156      122
+6         U         1981       1046      673       769       539       291      357      398
+7         U         1740       965       565       838       337       331      394      240
+8         U         1045       203       307       559       179       102      68       33
+9         C         1177       438       387       526       264       161      105      172
+10        U         288        211       84        177       27        85       82       44
 </pre>
 
 <p>
     The columns include, from left to right:
     <ol>
-        <li>The nucleotide position. Numbers start from 1.</li>
-        <li>The base type letter.</li>
-        <li>Total count from the control lane.</li>
-        <li>Total count from the DMS lane</li>
-        <li>Remaining rows are biological replicate lanes. The column titles describe whether the lane is control (minus) or DMS (plus), and also which biological replicate it is (e.g. B2 for biological replicate 2).</li>
+        <li><b>position</b> - the nucleotide position. Numbers start from 1.</li>
+        <li><b>sequence</b> - the base type letter.</li>
+        <li><b>sum_minus</b> - total count from the (-)DMS control lanes.</li>
+        <li><b>sum_plus</b> - total count from the (+)DMS lanes</li>
+
+        <li><b>minus_B1</b> - (-)DMS lane, biological replicate 1</li>
+        <li><b>minus_B2</b> - (-)DMS lane, biological replicate 2</li>
+        <li><b>minus_B3</b> - (-)DMS lane, biological replicate 3</li>
+        <li><b>plus_B1</b> - (+)DMS lane, biological replicate 1</li>
+        <li><b>plus_B2</b> - (+)DMS lane, biological replicate 2</li>
+        <li><b>plus_B3</b> - (+)DMS lane, biological replicate 3</li>
     </ol>
 </p>
 
@@ -309,16 +316,20 @@ The following Entity-Relationship (ER) diagram describes the FoldAtlas database:
             method.
         </li><li>
             <b>Structure:</b>
-            Represents a single structure that has been predicted as part of a structure prediction run. This is generated from a single transcript sequence. Includes a free energy estimate, data for PCA plots, and a string containing tab delimited pairing data.
+            Represents a single structure that has been predicted as part of a structure prediction run. This is generated from a single transcript sequence. Includes a free energy estimate, data for PCA plots, and a strings containing tab delimited pairing data. Another string stores base pair probabilities that correspond to the structure.
         </li><li>
             <b>Nucleotide Measurement Run:</b>
             Represents a genome-scale experiment that involves taking measurements at specific nucleotide positions. At present this is used to represent DMS reactivity data. In the future, data from SHAPE and ribosome profiling experiments will also be represented by this entity.
+        </li>
+        <li>
+            <b>Raw Replicate Counts:</b>
+            This represents raw adduct counts for a single (-)DMS or (+)DMS lane, generated from mapping reads in an RNA structure-seq experiment. A text field contains the tab delimited adduct counts.
         </li><li>
             <b>Raw Reactivities:</b>
-            This represents raw adduct counts, generated from mapping reads in an RNA structure-seq experiment. Includes a text field containing the tab delimited adduct counts.
+            This contains the summed adduct counts across all replicates for (-)DMS and (+)DMS lanes.
         </li><li>
             <b>Nucleotide Measurement Set:</b>
-            Represents normalised reactivities, generated from raw reactivities. Includes a property to store a per-nucleotide coverage value for the entire transcript, and a string containing the individual measurements.
+            Represents normalised reactivities, generated from summed adduct counts. Includes a property to store a per-nucleotide coverage value for the entire transcript, and a string containing the individual measurements.
         </li>
     </ul>
 </p>
