@@ -296,8 +296,10 @@ var BrowserController = Class.extend({
 			this.drawNucleotideMeasurementsOverview(overviewID, experimentData);
 			this.drawNucleotideMeasurementsDetailed(detailedID, experimentData);
 
-			new SvgDownloader(overviewID, "nm-overview-dl-button", "nm-overview.svg");
-			new SvgDownloader(detailedID, "nm-detailed-dl-button", "nm-detailed.svg");
+			var dlID = window.faGlobals.selectedTid+"-"+window.faGlobals.selectedSid;
+
+			new SvgDownloader(overviewID, "nm-overview-dl-button", "reacts_"+dlID+".svg");
+			new SvgDownloader(detailedID, "nm-detailed-dl-button", "reacts_detailed_"+dlID+".svg");
 		}
 	},
 
