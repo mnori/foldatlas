@@ -844,7 +844,7 @@ class BppmDownloader():
                 buf += str(pos_a)+"\t"+str(pos_b)+"\t"+str(bpp)+"\n"
         return buf
 
-        # OLD method - storing in the database actually is shit
+        # OLD method - storing in the database is not a good way to do it
         # import zlib, base64
         # # fetch from database
         # results = db_session \
