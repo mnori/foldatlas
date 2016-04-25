@@ -3,6 +3,11 @@
  * @author Matthew Norris <matthew.norris@jic.ac.uk> 2015
  */
 
+ window.faGlobals = {
+	selectedTid: null,
+	selectedSid: null
+}
+
 // Create the browser controller class
 var BrowserController = Class.extend({
 
@@ -166,6 +171,7 @@ var BrowserController = Class.extend({
 
 	// Jump to a specific transcript page
 	selectTranscript: function(transcriptID) {
+		window.faGlobals.selectedTid = transcriptID;
 		this.showLoading();
 		// this.changeUrl("/transcript/"+transcriptID, transcriptID)
 		$.ajax({
@@ -222,6 +228,7 @@ var BrowserController = Class.extend({
 	// this should be a seperate class.
 	drawNucleotideMeasurements: function(experimentData, transcriptID) {
 		var detailedID = "nucleotide-measurements-overview_"+experimentData["id"];
+		var detailedContainerID = detailedID+"_container"
 		var overviewID = "nucleotide-measurements-detailed_"+experimentData["id"];
 
 		var moreDetailID = "more-detail_"+experimentData["id"];
@@ -240,13 +247,18 @@ var BrowserController = Class.extend({
 				"<h2 class=\"bar\">"+
 					experimentData["description"]+
 					"<a href=\"/download/raw_measurements/"+experimentData["id"]+"/"+this.getTranscriptID()+"\" target=\"_blank\" class=\"button download r\">"+
-						"<i class=\"fa fa-download\"></i> Download Raw"+
+						"<i class=\"fa fa-download\"></i> Download raw"+
 					"</a>"+
 					"<a href=\"/download/measurements/"+experimentData["id"]+"/"+this.getTranscriptID()+"\" target=\"_blank\" class=\"button download\">"+
-						"<i class=\"fa fa-download\"></i> Download Normalised"+
+						"<i class=\"fa fa-download\"></i> Download normalised"+
 					"</a>"+
 				"</h2>"+
-				"<div id=\""+overviewID+"_container\"><svg id=\""+overviewID+"\"></svg></div>"+
+				"<div id=\""+overviewID+"_container\" class=\"nm-container\">"+
+					"<a href=\"javascript:void(0)\" id=\"nm-overview-dl-button\" class=\"button svg\">"+
+						"<i class=\"fa fa-file-image-o\"></i>"+
+					"</a>"+
+					"<svg id=\""+overviewID+"\"></svg>"+
+				"</div>"+
 				"<a href=\"#\" id=\""+moreDetailID+"\" class=\"nucleotide-detail button\">"+
 					"<i class=\"fa fa-arrow-circle-down\"></i>&nbsp;"+
 					"More detail"+
@@ -255,21 +267,26 @@ var BrowserController = Class.extend({
 				"<i class=\"fa fa-arrow-circle-up\"></i>&nbsp;"+
 					"Less detail"+
 				"</a>"+
-				"<svg style=\"display: none;\" id=\""+detailedID+"\"></svg>";
+				"<div id=\""+detailedContainerID+"\" style=\"display: none;\" class=\"nm-container\">"+
+					"<a href=\"javascript:void(0)\" id=\"nm-detailed-dl-button\" class=\"button svg\">"+
+						"<i class=\"fa fa-file-image-o\"></i>"+
+					"</a>"+
+					"<svg id=\""+detailedID+"\"></svg>"+
+				"</div>";
 			
 			$("#nucleotide-measurement-charts").append(buf)
 
 			// Add button event handlers
 			$("#"+moreDetailID).click($.proxy(function(ev) {
 				ev.preventDefault();
-				$("#"+detailedID).show();
+				$("#"+detailedContainerID).show();
 				$("#"+moreDetailID).hide();
 				$("#"+lessDetailID).show();
 			}, this))
 
 			$("#"+lessDetailID).click($.proxy(function(ev) {
 				ev.preventDefault();
-				$("#"+detailedID).hide();
+				$("#"+detailedContainerID).hide();
 				$("#"+moreDetailID).show();
 				$("#"+lessDetailID).hide();
 			}, this))
@@ -277,6 +294,11 @@ var BrowserController = Class.extend({
 			// Draw the charts
 			this.drawNucleotideMeasurementsOverview(overviewID, experimentData);
 			this.drawNucleotideMeasurementsDetailed(detailedID, experimentData);
+
+			var dlID = window.faGlobals.selectedTid;
+
+			new SvgDownloader(overviewID, "nm-overview-dl-button", "reacts_"+dlID+".svg");
+			new SvgDownloader(detailedID, "nm-detailed-dl-button", "reacts-detailed_"+dlID+".svg");
 		}
 	},
 
@@ -346,10 +368,10 @@ var BrowserController = Class.extend({
     	// need to add a new x axis tick for this thing.
 
 		// Add y-axis objects to the chart
-		chart.append("g")
+		var yAxisEl = chart.append("g")
 			.attr("class", "y axis")
 			.attr("transform", "translate("+panelMargin.left+","+panelMargin.top+")")
-			.call(yAxis);
+			.call(yAxis)
 
 		chart.append("g")
 			.attr("class", "x axis")
@@ -358,6 +380,16 @@ var BrowserController = Class.extend({
 				(panelMargin.top + panelDims.y)+
 			")")
 			.call(xAxis);
+
+		// Add inline style to lines and paths
+		var lineStyle = {	
+			"fill": "none",
+			"stroke": "#000",
+			"stroke-width": "1px"
+		}
+		chart.selectAll("path").style(lineStyle);
+  		chart.selectAll("line").style(lineStyle)
+  			// .style({"stroke", "#000"});
 
 		// Add y-axis label
 		// chart.append("text")
@@ -398,7 +430,8 @@ var BrowserController = Class.extend({
 			.attr("height", function(d) { 
 				return yScale(maxY - d.measurement);
 			})
-			.attr("width", barWidth);
+			.attr("width", barWidth)
+			.style("fill", "#c33");
 	},
 
 	// Visualises the measurement data.
@@ -500,7 +533,7 @@ var BrowserController = Class.extend({
 			// Add x-axis objects to the chart.
 			var bgWidth = parseInt(panelDims.x / this.nucsPerRow) + 1;
 
-			chart.append("g")
+			var xAxisElement = chart.append("g")
 				.attr("class", "x axis")
 				.attr("transform", "translate("+
 					panelMargin.left+","+
@@ -508,8 +541,8 @@ var BrowserController = Class.extend({
 				+")")
 				.call(xAxis)
 
-				// select the X axis tick element
-				.selectAll(".tick")
+			xAxisElement
+				.selectAll(".tick") // select the X axis tick element
 
 				// aadd a rect to it, first child means it draws in the background
 				.insert("rect", ":first-child")
@@ -518,12 +551,13 @@ var BrowserController = Class.extend({
 				.attr("transform", "translate("+(-bgWidth / 2)+", "+10+")")
 				.attr("width", bgWidth)
 				.attr("height", 10)
-
-				// highlight nucleotides with missing reactivities
-				.attr("class", function(n, i) {
-					return (dataSlice[i].measurement == null) ? 
-						"missing-bg" : "not-missing-bg";
+				.style("fill", function(n, i) { 
+					var nucMissing = dataSlice[i].measurement == null
+					return nucMissing ? "#bbb" : "#fff"; 
 				})
+
+			xAxisElement.selectAll("text")
+				.style("font-size", "15")
 
 			// Add y-axis objects to the chart
 			chart.append("g")
@@ -576,11 +610,25 @@ var BrowserController = Class.extend({
 					")";
 				});
 
+			// Draw the rects for the bars
 			bar.append("rect")
 				.attr("height", function(d) { 
 					return yScale(maxY - d.measurement);
 				})
-				.attr("width", barWidth);
+				.attr("width", barWidth)
+				.style("fill", "#c33");
+
+			// APPLY STYLES
+			var lineStyle = {	
+				"fill": "none",
+				"stroke": "#000",
+				"stroke-width": "1px"
+			}
+			chart.selectAll("path").style(lineStyle);
+	  		chart.selectAll("line").style(lineStyle)
+
+
+
 
 		} // End looping through chart rows
 	}
@@ -906,11 +954,10 @@ var StructureExplorer = Class.extend({
 		return measurements;
 	},
 
-	// Get the MFE structure.
-	getMfe: function() {
-		var inVivoExperimentID = 2;
+	// Get the MFE structure for given experimentID
+	getMfe: function(experimentID) {
 		var lowestEntry = null;
-		var structureData = this.structureData[inVivoExperimentID].data
+		var structureData = this.structureData[experimentID].data
 
 		// Find the in vivo structure with the MFE	
 		for (var j = 0; j < structureData.length; j++) {
@@ -927,6 +974,24 @@ var StructureExplorer = Class.extend({
 	drawStructurePcas: function() {
 		this.drawStructurePca(this.structureData[1], "pca-container-in-silico");
 		this.drawStructurePca(this.structureData[2], "pca-container-in-vivo");
+
+		var dlID = window.faGlobals.selectedTid
+
+		new SvgDownloader(
+			"pca-container-in-silico-svg", "pca-in-silico-dl", "pca-in-silico_"+dlID+".svg");
+		new SvgDownloader(
+			"pca-container-in-vivo-svg", "pca-in-vivo-dl", "pca-in-vivo_"+dlID+".svg");
+
+		// attach event handlers to the MFE download buttons
+		this.initMfeButton(1, "pca-in-silico-mfe")
+		this.initMfeButton(2, "pca-in-vivo-mfe")
+	},
+
+	initMfeButton: function(experimentID, buttonID) {
+		$("#"+buttonID).click($.proxy(function() {
+			this.selectedStructure = this.getMfe(experimentID);
+			this.drawStructure();
+		}, this));
 	},
 
 	// Draws a PCA structure scatter plot
@@ -934,15 +999,18 @@ var StructureExplorer = Class.extend({
 	drawStructurePca: function(dataIn, elementID) {
 		var svgID = elementID+"-svg";
 		var experimentID = dataIn["id"]
-		var padding = 0.05; // % margin around the PCA points
+		var padding = 0.3; // % margin around the PCA points
+		var nTicks = 4;
+
+		// must add container here with button
 		var buf = "<svg id=\""+svgID+"\" class=\"structure-pca-chart\"></svg>";
 
 		$("#"+elementID).html(buf)
 
 		dataValues = dataIn["data"];
 
-		var margin = {top: 20, right: 10, bottom: 20, left: 30};
-		var totDims = {x: 250, y: 250};
+		var margin = {top: 5, right: 5, bottom: 30, left: 30};
+		var totDims = {x: 200, y: 200};
 		var panelDims = {
 			x: totDims.x - margin.left - margin.right,
 			y: totDims.y - margin.left - margin.right
@@ -963,8 +1031,9 @@ var StructureExplorer = Class.extend({
 				maxX + padX
 			]);
 
+
 		var xMap = function(d) { return xScale(xValue(d)); };
-		var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+		var xAxis = d3.svg.axis().scale(xScale).ticks(nTicks).orient("bottom");
 
 		// setup y
 		var yValue = function(d) { return d.pc2; };
@@ -980,10 +1049,9 @@ var StructureExplorer = Class.extend({
 			])
 
 	    var yMap = function(d) { return yScale(yValue(d));};
-	    var yAxis = d3.svg.axis().scale(yScale).orient("left");
+	    var yAxis = d3.svg.axis().scale(yScale).ticks(nTicks).orient("left");
 
-	    // Set up a colour scale. it's a bit crap since there are only 9? colours
-	    // TODO moar colours
+	    // Set up a colour scale
 		var numColors = 9;
 		var heatmapColour = d3.scale.quantize()
 		  	.domain([
@@ -1026,6 +1094,14 @@ var StructureExplorer = Class.extend({
 			.style("text-anchor", "end")
 			.text("PC 2");
 
+		var lineStyle = {
+		  "fill": "none",
+		  "stroke": "#000",
+		  "shape-rendering": "crispEdges"
+		};
+		svg.selectAll("path").style(lineStyle)
+		svg.selectAll("line").style(lineStyle)
+
 		var showTooltip = function(d) {
 			tooltip.transition()
 				.duration(0)
@@ -1043,7 +1119,8 @@ var StructureExplorer = Class.extend({
 			.attr("r", 5)
 			.attr("cx", xMap)
 			.attr("cy", yMap)
-			.style("fill", function(d) { return heatmapColour(d.energy); }) 
+			.style("fill", function(d) { return heatmapColour(d.energy); })
+			.style("stroke", "#000") 
 			
 			.on("mousemove", showTooltip)
 			.on("mouseover", showTooltip)
@@ -1056,25 +1133,35 @@ var StructureExplorer = Class.extend({
 				this.selectedStructure = d;
 				this.drawStructure();
 			}, this));
-
-		// add the tooltip area to the webpage (whocares.jpeg)
-		// var tooltip = d3.select("body").append("div")
-		//     .attr("class", "tooltip")
-		//     .style("opacity", 0);
-
 	},
 
 	drawStructure: function() {
+
+		var in_silico_mfe = this.getMfe(1)
+		var in_vivo_mfe = this.getMfe(2)
+
 		if (this.selectedStructure == null) {
-			this.selectedStructure = this.getMfe();
+			this.selectedStructure = in_vivo_mfe;
+		}
+		window.faGlobals.selectedSid = this.selectedStructure["id"]
+		var mfe_txt
+		if (this.selectedStructure["id"] == in_vivo_mfe["id"]) {
+			mfe_txt = ", <i>in vivo</i> MFE"
+		} else if (this.selectedStructure["id"] == in_silico_mfe["id"]) {
+			mfe_txt = ", <i>in silico</i> MFE"
+		} else {
+			mfe_txt = ""
 		}
 
-		$("#forna-energy").html(this.selectedStructure["energy"]);
+
+		$("#forna-energy").html(this.selectedStructure["energy"]+" kcal/mol"+mfe_txt);
 
 		if (this.tabController.selectedTabID == "structure-tab-diagram") {
 			this.drawStructureDiagram();
+			$("#circle-plot-legend").hide()
 		} else {
 			this.drawCirclePlot();
+			$("#circle-plot-legend").show()
 		}
 	},
 
@@ -1104,6 +1191,8 @@ var StructureExplorer = Class.extend({
 		    this.fornaContainer.clearNodes();// remove the previous diagram
 			this.fornaContainer.addRNAJSON(g, true); // generate new diagram
 			this.browserController.hideLoading();
+			var dlID = window.faGlobals.selectedTid+"-"+window.faGlobals.selectedSid;
+			new SvgDownloader("plotting-area", "fornac-dl-button", "structure-diagram_"+dlID+".svg");
 		});
 	},
 
@@ -1118,14 +1207,40 @@ var StructureExplorer = Class.extend({
 		}).done(function(data) {
 
 			$("#circle-plot").empty();
+			$("#circle-plot").append(
+				"<a href=\"javascript:void(0)\" id=\"circle-plot-dl-button\" class=\"button svg\">"+
+					"<i class=\"fa fa-file-image-o\"></i>"+
+				"</a>"
+			)
 			data = JSON.parse(data);
+
+			// find min and max bpp values
+			var min_bpp = null;
+			for (var i = 0; i < data.length; i++) {
+				var bpp = data[i].bpp
+				if (min_bpp == null) min_bpp = bpp;
+				if (bpp == null) continue;
+				if (bpp < min_bpp) min_bpp = bpp;
+			}
+			var max_bpp = 0
+
+			// now add the circle plot legend
+			$("#bpp_low").html(Math.round(min_bpp * 10) / 10)
+			$("#bpp_high").html("0.0")
 
 			var nTicks = 10;
 			var nNucs = data.length;
 			var getColour = function(position) {
+				var bpp = data[position].bpp;
+				if (bpp == null) {
+					return d3.hsl(hue, 0, 0.5);
+				}
+				var diff = max_bpp - min_bpp;
+				var intensity = (bpp - min_bpp) / diff
+
 				// see docs: https://github.com/mbostock/d3/wiki/Colors
-				var hue = (position / nNucs) * 360;
-				return d3.hsl(hue, 1, 0.35);
+				var hue =  intensity * 135; // 360;
+				return d3.hsl(hue, 0.8, 0.35);
 			}
 
 			var svgDims = 630,
@@ -1149,6 +1264,7 @@ var StructureExplorer = Class.extend({
 			    .angle(function(d) { return d.x / 180 * Math.PI; });
 
 			var svg = d3.select("#circle-plot").append("svg")
+				.attr("id", "circle-plot-svg")
 			    .attr("width", svgDims)
 			    .attr("height", svgDims)
 			  .append("g")
@@ -1160,6 +1276,8 @@ var StructureExplorer = Class.extend({
 
 			svg.append("circle")
 				.attr("class", "circleplot-circle")
+				.attr("stroke", "#000")
+				.attr("fill", "#fff")
     			.attr("r", innerRadius);
 
 			var link = svg.append("g").selectAll(".circleplot-link"),
@@ -1174,6 +1292,10 @@ var StructureExplorer = Class.extend({
 				.enter().append("path")
 				.each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
 				.attr("class", "circleplot-link")
+				.attr("stroke", "#000")
+				// .attr("stroke-opacity", ".8")
+
+				.attr("fill", "none")
 				.attr("d", line)
 				.style("stroke", function(d) {
 					return getColour(d[0].key);
@@ -1220,9 +1342,13 @@ var StructureExplorer = Class.extend({
 			// Attach a tick line to each tick node
 			ticks.append("path")
 				.attr("class", "circleplot-tick")
+				.attr("stroke", "#000")
 				.attr("d", "M 0 -6 L 0 6")
 
 			this.browserController.hideLoading();
+
+			var dlID = window.faGlobals.selectedTid+"-"+window.faGlobals.selectedSid;
+			new SvgDownloader("circle-plot-svg", "circle-plot-dl-button", "circle-plot_"+dlID+".svg");
 
 			// reorganise the data a bit
 			function prepareData(rawData) {
@@ -1262,4 +1388,41 @@ var StructureExplorer = Class.extend({
 			}
 		});
 	}
-})
+});
+
+// Binds a button to SVG download
+// see https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an
+var SvgDownloader = Class.extend({
+
+	// Connect the download link to an SVG download option
+	init: function(svgID, linkID, filename) { // add filename
+		$("#"+linkID).click($.proxy(function() {
+
+			//get svg element.
+			var svg = document.getElementById(svgID);
+
+			//get svg source.
+			var serializer = new XMLSerializer();
+			var source = serializer.serializeToString(svg);
+
+			//add name spaces.
+			if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+			    source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+			}
+			if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)){
+			    source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+			}
+
+			//add xml declaration
+			source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+			// download the file
+			var blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"});
+		    saveAs(blob, filename);
+		}, this));
+	}
+});
+
+
+
+

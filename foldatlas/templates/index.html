@@ -6,7 +6,7 @@
     _/                                       
     /)                                       
 
-(C) 2015 | Matthew Norris | Ding Lab
+(C) 2015-2016 | Matthew Norris | Ding Lab
 
 -->
 <html>
@@ -26,6 +26,7 @@
     <script type="text/javascript" src="{{ settings.static_base_url }}/assets/jquery.jqpagination.js"></script>
     <script type="text/javascript" src="{{ settings.static_base_url }}/assets/colorbrewer.min.js"></script>
     <script type="text/javascript" src="{{ settings.static_base_url }}/assets/forna/htdocs/js/fornac.js"></script>
+    <script type="text/javascript" src="{{ settings.static_base_url }}/assets/FileSaver.js/FileSaver.js"></script>
     
     <!-- FoldAtlas config and js -->
     <script type="text/javascript">
@@ -113,12 +114,13 @@
     <div id="main-container">
         <div id="header">
             <span id="title">FoldAtlas</span>
+            <span id="desc">A repository for genome-scale RNA structure probing data</span>
             <a id="help-button" href="{{ settings.app_base_url }}/help" class="button" id="documentation-button">
                 <i class="fa fa-question-circle"></i>&nbsp;Help
             </a>
-            <!--<a href="{{ settings.static_base_url }}/downloads/foldatlas.sql.tar.gz" class="button">
-                <i class="fa fa-download"></i>&nbsp;Download All
-            </a>-->
+            <a href="{{ settings.static_base_url }}/downloads/foldatlas.sql.tar.gz" class="button">
+                <i class="fa fa-download"></i>&nbsp;Download all
+            </a>
             <a id="search-button" href="#" class="button"><i class="fa fa-search"></i>&nbsp;Search</a>
         </div>
 
@@ -163,6 +165,7 @@
     <div id="info-panel">
         Version 1.0
         (C) 2015 <a href="https://www.jic.ac.uk/directory/yiliang-ding">Ding lab</a>.
+        <a href="https://www.github.com/mnori/foldatlas"> Github page</a>.
         General comments or questions: <a href="email:matthew.norris@jic.ac.uk">matthew.norris@jic.ac.uk</a>.
     </div>
   </body>

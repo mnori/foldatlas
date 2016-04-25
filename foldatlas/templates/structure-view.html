@@ -1,8 +1,11 @@
 <h2 class="bar">
 	Structure
 	{% if not structure_view.empty %}
-		<a href="/download/structure/{{ structure_view.transcript_id }}" target="_blank" class="button download r">
-			<i class="fa fa-download"></i> Download
+		<a href="/download/bppm/{{ structure_view.transcript_id }}" target="_blank" class="button download r">
+			<i class="fa fa-download"></i> Download BPPM
+		</a>
+		<a href="/download/structure/{{ structure_view.transcript_id }}" target="_blank" class="button download">
+			<i class="fa fa-download"></i> Download structures
 		</a>
 	{% endif %}
 </h2>
@@ -13,10 +16,53 @@
 	<div id="structure-json" style="display: none;">{{ structure_view.data_json|safe }}</div>
 	<div id="structure-container">
 		<div id="pca-container">
-			<h3><i>In silico</i></h3>
-			<div id="pca-container-in-silico" class="pca-container"></div>
-			<h3><i>In vivo</i></h3>
-			<div id="pca-container-in-vivo" class="pca-container"></div>
+			<div class="pca-title-container">
+				<h4><i>In vivo</i></h4>
+				<a id="pca-in-vivo-dl" href="javascript:void(0)" target="_blank" class="button pca-interact" download="pca.svg">
+					<i class="fa fa-file-image-o"></i>
+				</a>
+				<a id="pca-in-vivo-mfe" href="javascript:void(0)" target="_blank" class="button pca-interact">MFE</a>
+			</div>
+			<div id="pca-container-in-vivo" class="pca-container"><!-- filled with SVG --></div>
+
+			<div class="pca-title-container">
+				<h4><i>In silico</i></h4>
+				<a id="pca-in-silico-dl" href="javascript:void(0)" target="_blank" class="button pca-interact" download="pca.svg">
+					<i class="fa fa-file-image-o"></i>
+				</a>
+				<a id="pca-in-silico-mfe" href="javascript:void(0)" target="_blank" class="button pca-interact">MFE</a>
+			</div>
+			<div id="pca-container-in-silico" class="pca-container"><!-- filled with SVG --></div>
+						<!-- PCA figure legend -->
+			<svg id="pca-key">
+
+				<!-- Legend title -->
+				<text x="10" y="20" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">Free energy, kcal/mol</text>
+				<text x="110" y="70" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">highest</text>
+				<text x="10" y="70" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">lowest</text>
+
+				<!-- Reactivity gradient legend -->
+				<defs>
+					<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+						<stop offset="0%" style="stop-color:rgb(215, 48, 39);stop-opacity:1" />
+						<stop offset="50%" style="stop-color:rgb(254, 224, 139);stop-opacity:1" />
+						<stop offset="100%" style="stop-color:rgb(26, 152, 64)" />
+					</linearGradient>
+				</defs>
+				<rect x="30" y="30" width="100" height="20" fill="url(#grad1)" style="stroke: #000;" />
+
+				<!-- Axis labels for legend -->
+
+				<line x1="30" y1="50" x2="30" y2="57" style="stroke: #000; stroke-width:1" />
+				<line x1="80" y1="50" x2="80" y2="57" style="stroke: #000; stroke-width:1" />
+				<line x1="130" y1="50" x2="130" y2="57" style="stroke: #000; stroke-width:1" />
+
+			</svg>
+
+			<div id="pca-desc">
+				<b>PCA plots:</b>
+				Similar structures are plotted near to each other. Click dots to see the corresponding structure. Click MFE button to show the minimum free energy structure. 
+			</div>
 		</div>
 
 		<div id="structure-detail">
@@ -29,23 +75,24 @@
 		    <div class="structure-energy">
 				<i class="fa fa-fire"></i>
 				<span id="forna-energy"><!-- filled with Gibbs free energy --></span>
-				kcal/mol
 			</div>
 
 			<div id="forna-outer-container" style="display: none;">
 				<svg id="forna-key">
 
 					<!-- Legend title -->
+					<text x="0" y="40" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">Reactivity</text>
+					<text x="0" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">0.0</text>
 					<text x="100" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">1.0</text>
 
 					<!-- Reactivity gradient legend -->
 					<defs>
-						<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+						<linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
 							<stop offset="0%" style="stop-color:rgb(64, 255, 64);stop-opacity:1" />
 							<stop offset="100%" style="stop-color:rgb(255, 64, 64);stop-opacity:1" />
 						</linearGradient>
 					</defs>
-					<rect x="10" y="50" width="100" height="20" fill="url(#grad1)" style="stroke: #000;" />
+					<rect x="10" y="50" width="100" height="20" fill="url(#grad2)" style="stroke: #000;" />
 
 					<!-- Axis labels for legend -->
 
@@ -53,14 +100,15 @@
 					<line x1="60" y1="70" x2="60" y2="77" style="stroke: #000; stroke-width:1" />
 					<line x1="110" y1="70" x2="110" y2="77" style="stroke: #000; stroke-width:1" />
 
-					<text x="0" y="40" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">Reactivity</text>
-					<text x="0" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">0.0</text>
-
 				</svg>
 				<div id="forna-container">
 					<div id="forna-overlay">
-						<a id="forna-interact-enable" class="forna-interact button" href="#">Enable Interaction</a>
+						<a class="forna-interact button" id="fornac-dl-button" href="javascript:void(0)" download="structure-diagram.svg">
+							<i class="fa fa-file-image-o"></i>
+						</a>
+						<a id="forna-interact-enable" class="forna-interact button" href="#">Enable interaction</a>
 						<a id="forna-interact-disable" class="forna-interact button" href="#" style="display: none;">Disable Interaction</a>
+
 						<!-- Ribosome profiling is temporarily removed -->
 						<!--
 							<a id="show-dms" class="forna-interact button" href="#">DMS Reactivity</a>
@@ -73,6 +121,32 @@
 			<div id="circle-plot">
 				<!-- filled with circle plot SVG -->
 			</div>
+
+			<svg id="circle-plot-legend">
+
+				<!-- Legend title -->
+				<text x="0" y="40" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">log10 BPP</text>
+
+				<!-- Reactivity gradient legend -->
+				<defs>
+					<linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
+						<stop offset="0%" style="stop-color:rgb(220, 64, 64);stop-opacity:1" />
+						<stop offset="100%" style="stop-color:rgb(34, 220, 34);stop-opacity:1" />
+					</linearGradient>
+				</defs>
+				<rect x="15" y="50" width="100" height="20" fill="url(#grad3)" style="stroke: #000;" />
+
+				<!-- Axis labels for legend -->
+
+				<line x1="15" y1="70" x2="15" y2="77" style="stroke: #000; stroke-width:1" />
+				<line x1="65" y1="70" x2="65" y2="77" style="stroke: #000; stroke-width:1" />
+				<line x1="115" y1="70" x2="115" y2="77" style="stroke: #000; stroke-width:1" />
+
+				<!-- Tick labels -->
+				<text id="bpp_low" x="0" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">low</text>
+				<text id="bpp_high" x="105" y="90" font-family="font-family: Ubuntu, Tahoma, Geneva, sans-serif" font-size="14px" fill="black">0.0</text>
+
+			</svg>
 		</div>
 	</div>
 {% endif %}

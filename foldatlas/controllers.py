@@ -1,12 +1,16 @@
-from database import db_session
 from sqlalchemy import and_
-
-import json, database, settings, uuid, os, subprocess
+import json
+import uuid
+import settings
+import os
 from models import Feature, Transcript, NucleotideMeasurementSet, Structure, \
     GeneLocation, NucleotideMeasurementRun, StructurePredictionRun, \
-    values_str_unpack_float, values_str_unpack_int, RawReactivities
+    values_str_unpack_float, values_str_unpack_int, RawReactivities, RawReplicateCounts, Bppm
 
-from utils import ensure_dir
+from utils import ensure_dir, insert_newlines, build_dot_bracket
+
+import database
+from database import db_session
 
 # Fetches sequence annotation data from the DB and sends it to the genome
 # browser front end as JSON.
@@ -14,7 +18,6 @@ from utils import ensure_dir
 class GenomeBrowser():
 
     def get_transcripts(self, request):
-
         chromosome_id = "Chr"+str(int(request.args.get('chr'))) # SQL-injection safe
         start = int(request.args.get('start'))
         end = int(request.args.get('end'))
@@ -82,7 +85,6 @@ class GenomeBrowser():
         return json.dumps(out)
 
     def get_genes(self, request):
-        
         from utils import Timeline
 
         chromosome_id = "Chr"+str(int(request.args.get('chr'))) # SQL-injection safe
@@ -113,7 +115,6 @@ class GenomeBrowser():
 
     # Fetch chromosome IDs and their lengths. Used for chromosome menu and also initialising the genome browser.
     def get_chromosomes(self):
-
         sql = ( "SELECT chromosome_id, CHAR_LENGTH(sequence) length FROM chromosome "
                 "WHERE strain_id = '"+settings.reference_strain_id+"' "
                 "ORDER BY chromosome_id ASC")
@@ -133,7 +134,6 @@ class GenomeBrowser():
 class TranscriptView():
 
     def __init__(self, transcript_id):
-
         self.transcript_id = transcript_id
 
         # Get the coords of the associated gene
@@ -172,7 +172,6 @@ class NucleotideMeasurementView():
         self.build_entries([1])
 
     def build_entries(self, experiment_ids):
-
         from models import NucleotideMeasurementRun
 
         # Load experiments
@@ -394,7 +393,7 @@ class CoverageSearcher():
             "GROUP BY jnms.transcript_id "
             "ORDER BY coverage DESC"
         )
-
+    
         results = database.engine.execute(sql)
 
         out = []
@@ -535,7 +534,6 @@ class StructureDiagramView():
         self.data_json = json.dumps(data)
 
     def build_dot_bracket(self):
-
         # get all the positions
         results = db_session \
             .query(Structure, Transcript) \
@@ -547,30 +545,8 @@ class StructureDiagramView():
 
         # Get position values from Structure entity
         positions = results[0][0].get_values()
-
-        # build dot bracket string
-        n_reverse = n_forward = 0
-        dot_bracket_str = ""
-
-        # Get sequence string from Transcript entity
         seq_str = results[0][1].get_sequence_str()
-
-        for curr_position in range(1, len(positions) + 1):
-            paired_to_position = positions[curr_position - 1]
-
-            # seq_str += result.letter
-            if paired_to_position == 0:
-                dot_bracket_str += "."
-            elif paired_to_position < curr_position:
-                n_reverse += 1
-                dot_bracket_str += ")"
-            elif paired_to_position > curr_position:
-                n_forward += 1
-                dot_bracket_str += "("
-            else:
-                # should never happen
-                print("Error: cannot do self pairing!");
-                dot_bracket_str += "."
+        dot_bracket_str = build_dot_bracket(positions)
 
         return {
             "sequence": seq_str.replace("T", "U"),
@@ -620,19 +596,19 @@ class StructureCirclePlotView():
         self.get_values()
 
     def get_values(self):
-        # convert entities to dot bracket string
-        out = [];
-
         # get all the positions
         results = db_session \
             .query(Structure) \
             .filter(Structure.id==self.structure_id) \
             .all()
 
-        positions = results[0].get_values()
+        result = results[0]
+        positions = result.get_values()
+        bpps = result.get_bpp_values()
 
         # build the output. backward facing links are left blank
         # results must be shifted back to array indexes, since they start at 1 in the DB.
+        out = [];
         for curr_position in range(1, len(positions) + 1):
             paired_to_position = positions[curr_position - 1]
 
@@ -643,9 +619,13 @@ class StructureCirclePlotView():
             else:
                 link = paired_to_position - 1
 
+            if link != None:
+                link = int(link)
+
             out.append({
-                "name": str(curr_position - 1),
-                "link": link
+                "name": curr_position - 1,
+                "link": link,
+                "bpp": None if bpps == None else bpps[curr_position - 1]
             })
 
         self.data_json = json.dumps(out)
@@ -656,8 +636,7 @@ class StructureDownloader():
         self.structure_prediction_run_ids = structure_prediction_run_ids
         self.transcript_id = transcript_id
 
-    def generateTxt(self):
-
+    def generate(self):
         # Fetch the data
         results = db_session \
             .query(Structure, StructurePredictionRun, Transcript) \
@@ -672,6 +651,36 @@ class StructureDownloader():
                 Structure.id
             ) \
             .all()
+
+        return self.generate_txt(results)
+
+    # Generates text using a more compact file format
+    def generate_txt(self, results):
+        # first we must extract and display the sequence, using the transcript object. output
+        # in fasta-like format
+        transcript = results[0][2]
+        buf = ">"+self.transcript_id+"\n"
+        buf += insert_newlines(transcript.get_sequence_str())+"\n"
+
+        for result in results:
+            structure = result[0]
+            run = result[1]
+            transcript = result[2]
+            positions = structure.get_values()
+
+            # generate and add the header text for this structure
+            buf += (
+                ">sid_"+str(structure.id)+"\t"+
+                "ENERGY:"+str(structure.energy)+" kcal/mol\t"+
+                run.description+"\n")
+
+            # generate and add dot bracket text
+            buf += insert_newlines(build_dot_bracket(positions))+"\n"
+            
+        return buf
+
+    # Generates the older and far more cluttered txt format for structures
+    def generate_txt_old(self, results):
 
         # Generate tab delimited text from the data
         buf = ""
@@ -700,6 +709,7 @@ class StructureDownloader():
         return buf
 
 # Generates plain text nucleotide measurements for user download
+# Includes raw and normalised
 class NucleotideMeasurementDownloader():
     def __init__(self, nucleotide_measurement_run_id, transcript_id):
         self.nucleotide_measurement_run_id = nucleotide_measurement_run_id
@@ -709,7 +719,7 @@ class NucleotideMeasurementDownloader():
     def get_raw(self):
         seq_str = Transcript(self.transcript_id).get_sequence_str()
 
-        # Use the ORM to grab raw data
+        # Use the ORM to grab compiled counts
         results = db_session \
             .query(RawReactivities) \
             .filter(
@@ -719,24 +729,53 @@ class NucleotideMeasurementDownloader():
             .all()
         
         measurement_set = results[0]
+        # minus_unpacked = 
+        # plus_unpacked = values_str_unpack_int(measurement_set.plus_values)
+        
+        cols = [
+            values_str_unpack_int(measurement_set.minus_values), 
+            values_str_unpack_int(measurement_set.plus_values)
+        ]
 
-        # Get the raw read counts out
-        minus_unpacked = values_str_unpack_int(measurement_set.minus_values)
-        plus_unpacked = values_str_unpack_int(measurement_set.plus_values)
+        # Grab the raw replicate lanes data
+        lanes = db_session \
+            .query(RawReplicateCounts) \
+            .filter(
+                RawReplicateCounts.nucleotide_measurement_run_id==self.nucleotide_measurement_run_id,
+                RawReplicateCounts.transcript_id==self.transcript_id
+            ) \
+            .order_by(
+                RawReplicateCounts.minusplus_id,
+                RawReplicateCounts.bio_replicate_id, 
+                RawReplicateCounts.tech_replicate_id
+            ) \
+            .all()
+
+        # gather the data
+        tech_rep_ids = set()
+        for lane in lanes:
+            cols.append(values_str_unpack_int(lane.values))
+            tech_rep_ids.add(lane.tech_replicate_id)
+
+        # make headers
+        headers = []
+        for lane in lanes:
+            # tech replicate notation only added for experiments with > 1 tech replicate
+            tech_str = "" if len(tech_rep_ids) == 1 else "_T"+str(lane.tech_replicate_id)
+            headers.append(str(lane.minusplus_id)+"_B"+str(lane.bio_replicate_id)+tech_str)
 
         # Build and return the output
-        buf = ""
-        for n in range(0, len(minus_unpacked)):
-            buf +=  str(n + 1)+"\t"+ \
-                    seq_str[n]+"\t"+ \
-                    str(minus_unpacked[n])+"\t"+ \
-                    str(plus_unpacked[n])+"\n"
-
+        buf = "position\tsequence\tsum_minus\tsum_plus\t"+"\t".join(headers)+"\n"
+        for n in range(0, len(cols[0])):
+            # add position and seq letter
+            buf += str(n + 1)+"\t"+seq_str[n]
+            for col in cols: # add the dynamic columns
+                buf += "\t"+str(int(col[n]))
+            buf += "\n"
         return buf
 
     # Retrieves normalised reactivities and outputs as text
     def get_normalised(self):
-
         # Grab sequence string
         seq_str = Transcript(self.transcript_id).get_sequence_str()
 
@@ -773,3 +812,50 @@ class NucleotideMeasurementDownloader():
 
         return buf
 
+# Retrieves the BPPM for this transcript_id
+class BppmDownloader():
+    def fetch(self, transcript_id):
+        import os
+
+        sauce_filepath = settings.bppms_folder+"/"+transcript_id+".bppm"
+
+        if not os.path.isfile(sauce_filepath):
+            return "No BPPM data available for "+transcript_id
+
+        buf = ""
+        # Open the raw BPPM and convert to our simpler format
+        with open(sauce_filepath, "r") as f:
+            first = True
+            for line in f:
+                if first: # skip the first line, which shows the length
+                    first = False
+                    continue
+
+                # add the text for the bppm table
+                if "Probability" in line: # skip header lines
+                    continue
+
+                # extract the data, this will be used for structure BPPMs
+                bits = line.strip().split("\t")
+                pos_a = int(bits[0])
+                pos_b = int(bits[1])
+                bpp = -float(bits[2])
+
+                buf += str(pos_a)+"\t"+str(pos_b)+"\t"+str(bpp)+"\n"
+        return buf
+
+        # OLD method - storing in the database is not a good way to do it
+        # import zlib, base64
+        # # fetch from database
+        # results = db_session \
+        #     .query(Bppm) \
+        #     .filter(Bppm.transcript_id==transcript_id) \
+        #     .all()
+        # bppm = results[0]
+
+        # # decode and return the BPPM
+        # decoded = base64.b64decode(bppm.data)
+        # data_txt = zlib.decompress(decoded)
+        # return data_txt
+        
+    

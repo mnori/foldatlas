@@ -20,6 +20,11 @@ a:hover, a:active {
 	color: #fff;
 }
 
+h4 {
+	margin-top: 0px;
+	margin-bottom: 10px;
+}
+
 #info-panel {
 	text-align: left;
 	/*background-color: rgba(0, 0, 0, 0.7);
@@ -57,10 +62,6 @@ a:hover, a:active {
 	text-shadow: none;
 }
 
-.button:hover {
-	color: #000;
-}
-
 .button:active {
 	border: 1px solid #666;
 	padding: 9px 10px 5px 10px;
@@ -69,9 +70,10 @@ a:hover, a:active {
 }
 
 .button:hover {
+	color: #000;
 	background-color: #fff;
 	border: 1px solid #666;
-	background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.15) 100%);
+	background: linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(210, 210, 210, 1) 100%);
 }
 
 /* gotta override h2 styling */
@@ -87,6 +89,24 @@ a:hover, a:active {
 
 .button.download.r {
 	margin-right: 30px;
+}
+
+#circle-plot {
+	position: relative;
+}
+
+#circle-plot-legend {
+	position: absolute;
+	top: 570px;
+	left: 500px;
+}
+
+.button.svg {
+	position: absolute;
+	margin: 0;
+	top: 5px;
+	right: 5px;
+	z-index: 10;
 }
 
 h1 .button {
@@ -142,10 +162,21 @@ h1 .button {
 	text-shadow: 0px 0px 10px #000;
 	position: absolute;
 	left: 15px;
-	bottom: 15px;
+	bottom: 35px;
 	font-size: 40px;
 	cursor: pointer;
 	line-height: 1em;
+}
+
+#desc {
+	font-weight: bold;
+	color: #fff;
+	text-shadow: 0px 0px 10px #000;
+	position: absolute;
+	left: 15px;
+	bottom: 15px;
+	font-size: 14px;
+	line-height: 1em;	
 }
 
 #title:hover {
@@ -309,12 +340,12 @@ h2.bar {
 	background-color: #fff;
 }
 
-.axis path,
+/*.axis path,
 .axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
-}
+}*/
 
 .tick > text {
 	font: 16px UbuntuMonoFA, monospace;
@@ -326,9 +357,9 @@ h2.bar {
   stroke-width: 1px;
 }
 
-.nucleotide-measurement-bar {
+/*.nucleotide-measurement-bar {
 	fill: #c33;
-}
+}*/
 
 .missing-bg {
 	fill: #bbb;
@@ -419,9 +450,46 @@ table.coverage-table td.yes {
 	height: 690px;
 }
 
+/* outer container */
+#pca-container {
+	width: 255px;
+}
+
+/* this contains the actual chart */
 .pca-container {
-	width: 250px;
-	height: 250px;
+	padding-left: 0px;
+	width: 200px;
+	height: 200px;
+}
+
+#pca-desc {
+	margin-top: 20px;
+}
+
+.pca-title-container {
+	position: relative;
+	height: 40px;
+}
+
+.pca-title-container > h4 {
+	position: absolute;
+	top: 7px;
+	left: 0px;
+}
+
+.pca-interact {
+	position: relative;
+	float: right;
+	margin-left: 5px;
+	margin-right: 0px;
+}
+
+svg#pca-key {
+	margin-left: 34px;
+	width: 180px;
+	height: 72px;
+	min-width: 0;
+	min-height: 0;
 }
 
 #structure-detail {
@@ -469,32 +537,22 @@ svg#forna-key {
 	line-height: 40px;
 	font-size: 16px;
 	position: absolute;
-	top: 38px;
-	right: 10px;
+	top: 35px;
+	left: 10px;
 	z-index: 2;
 }
 
 .forna-interact {
-	float: left;
+	float: right;
+	margin-left: 0px;
+	z-index: 20;
 	/*padding: 7px 0px 7px 7px;*/
 }
 
 /*** CIRCLE PLOT ***/
 
 .circleplot-link {
-  stroke: #000;
-  stroke-opacity: .4;
-  fill: none;
   pointer-events: none;
-}
-
-.circleplot-circle {
-	stroke: #000;
-	fill: #fff;
-}
-
-.circleplot-tick {
-	stroke: #000;
 }
 
 /*** /CIRCLE PLOT ***/
@@ -515,11 +573,10 @@ svg#forna-key {
 	pointer-events: none;
 	opacity: 0;
 	margin: 0 none;
-	z-index: 9000;
+	z-index: 10;
 }
 
 .dot {
-	stroke: #000;
 	cursor: pointer;
 }
 
@@ -840,4 +897,8 @@ svg#forna-key {
 
 .ref.highlighted {
 	background-color: #beb;
+}
+
+.nm-container {
+	position: relative;
 }

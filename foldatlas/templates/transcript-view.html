@@ -5,17 +5,21 @@
 	</a>
 </h1>
 
+<script type="text/javascript">
+	window.faGlobals.selectedTid = "{{ transcript_view.transcript_id }}";
+</script>
+
 <div id="transcript-json" style="display: none;">{{ transcript_view.transcript_data|safe }}</div>
 
 {% if transcript_view.empty %}
 	<div class="message">No data available</div>
 
 {% else %}
-	{% set structure_view = transcript_view.structure_view %}
-	{% include "structure-view.html" %}
-
 	{% set nucleotide_measurement_view = transcript_view.nucleotide_measurement_view %}
 	{% include "nucleotide-measurement-view.html" %}
+
+	{% set structure_view = transcript_view.structure_view %}
+	{% include "structure-view.html" %}
 
 	{#
 		{% set alignment_view = transcript_view.alignment_view %}

@@ -6,12 +6,14 @@ if live:
 	static_path = "/var/www/foldatlas/static"
 	dbuser = "root"
 	dbpassword = "s7Alvwh801mcZ" # don't put the real live password here. change it on server instead.
+	bppms_folder = "/vagrant/sauce_data/bppms" # this will need to be changed for live site
 else:
 	app_base_url = "http://foldatlas.dev"
 	static_base_url = "http://static.foldatlas.dev"
 	static_path = "/vagrant/static"
 	dbuser = "root"
 	dbpassword = "vagrant"
+	bppms_folder = "/vagrant/sauce_data/bppms"
 
 # This defines hostname, database name, username and password for connecting to the DB.
 database_uri = "mysql+mysqlconnector://"+dbuser+":"+dbpassword+"@127.0.0.1/foldatlas?charset=utf8&use_unicode=0"
@@ -23,6 +25,20 @@ db_name="foldatlas"
 
 # Points to structure data folder, which contains a *lot* of files
 structure_data_folder = "/vagrant/structure_data"
+structure_tids_filepath = data_folder+"/structure_tids.txt"
+
+raw_replicate_counts_keys = {
+	"minus": [
+		["mDMS_1_ATCACG_L001_R1"],
+		["mDMS_2_TAGCTT_L001_R1"],
+		["mDMS_3_CGATGT_L001_R1"]
+	],
+	"plus": [
+		["pDMS_1_ACAGTG_L001_R1"],
+		["pDMS_2_CTTGTA_L001_R1"],
+		["pDMS_3_TTAGGC_L001_R1"]
+	]
+}
 
 dms_reactivities_experiment = {
 	"nucleotide_measurement_run_id": 1,
@@ -35,7 +51,6 @@ ribosome_profile_experiment = {
 	"nucleotide_measurement_run_id": 2,
 	"strain_id": "Col_0",
 	"nucleotides_filepath": data_folder+"/p_site_counts_all.txt",
-	# "coverage_filepath": data_folder+"/riboseq_coverage.txt", # just get coverage from summed counts
 	"description": "Ribosome occupancies",
 }
 

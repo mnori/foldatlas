@@ -2,12 +2,19 @@
 # @author Matthew Norris <matthew.norris@jic.ac.uk
 
 from sqlalchemy import Column, Integer, String, Text, Enum, Float, ForeignKey, ForeignKeyConstraint
-from database import Base
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate, MigrateCommand
+from flask_script import Manager
+from sqlalchemy.dialects import mysql
 
-import database
-import settings
+import database, settings
+
+# gotta put the migrate stuff here so it can see the models
+from app import app
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.database_uri
+db = SQLAlchemy(app)
 
 # Add a single position to the structure. The value points to another place that this 
 # particular position pairs with.
@@ -33,7 +40,7 @@ def values_str_unpack_float(str_in):
 
 # A Gene describes a locus identifier for a gene, plus any metadata associated with the locus.
 # Genes are generic - they can be associated with multiple strains.
-class Gene(Base):
+class Gene(db.Model):
     __tablename__ = "gene"
 
     id = Column(String(256), primary_key=True) # TAIR locus ID (e.g. AT1G01225)
@@ -46,7 +53,7 @@ class Gene(Base):
 
 # A Transcript is effectively an RNA sequence identifier, which can be shared amongst multiple strains.
 # Sequences are mapped to Transcripts via the Feature entity.
-class Transcript(Base):
+class Transcript(db.Model):
     __tablename__ = "transcript"
 
     id = Column(String(256), primary_key=True) # TAIR transcript ID (e.g. AT1G01225.1)
@@ -137,7 +144,7 @@ class Transcript(Base):
         return str(self.get_sequence(strain_id).seq)
 
 # Describes a strain.
-class Strain(Base):
+class Strain(db.Model):
     __tablename__ = "strain"
     id = Column(String(256), nullable=False, primary_key=True)
     description = Column(Text, nullable=False)
@@ -151,7 +158,7 @@ class Strain(Base):
 
 # Describes the sequence of a chromosome for a particular strain. This is the only place
 # where nucleotide sequence data is stored.
-class Chromosome(Base):
+class Chromosome(db.Model):
     __tablename__ = "chromosome"
 
     strain_id = Column(String(256), ForeignKey("strain.id"), primary_key=True)
@@ -170,7 +177,7 @@ class Chromosome(Base):
 
 # TranscriptSequenceFeatures annotations of the ChromosomeSequence. This is the main destination of 
 # all the *.gff3 data.
-class Feature(Base):
+class Feature(db.Model):
     __tablename__ = "feature"
 
     # This constraint maps the Feature to a unique Chromosome entry.
@@ -212,7 +219,7 @@ class Feature(Base):
 
 # GeneLocation describes the location of a gene for a particular strain. This table is redundant
 # since everything needed is already in the Feature table. But it is cached here for speed.
-class GeneLocation(Base):
+class GeneLocation(db.Model):
     __tablename__ = "gene_location"
 
     # This constraint maps the GeneLocation to a unique Chromosome entry.
@@ -241,7 +248,7 @@ class GeneLocation(Base):
     def __repr__(self):
         return "<GeneLocation "+self.gene_id+", "+self.strain_id+">";
 
-class NucleotideMeasurementRun(Base):
+class NucleotideMeasurementRun(db.Model):
     __tablename__ = "nucleotide_measurement_run"
 
     id = Column(Integer, primary_key=True, autoincrement=False)
@@ -256,7 +263,7 @@ class NucleotideMeasurementRun(Base):
     def __repr__(self):
         return "<NucleotideMeasurementRun %r>" % (self.id)
 
-class StructurePredictionRun(Base):
+class StructurePredictionRun(db.Model):
     __tablename__ = "structure_prediction_run"
 
     id = Column(Integer, primary_key=True, autoincrement=False)
@@ -272,7 +279,9 @@ class StructurePredictionRun(Base):
         return "<StructurePredictionRun %r>" % (self.id)
 
 # Represents plus and minus counts for calculating reactivities. Before normalisation.
-class RawReactivities(Base):
+# Not actually reactivities, these are counts
+# TODO rename to counts
+class RawReactivities(db.Model):
 
     __tablename__ = "raw_reactivities"
 
@@ -297,10 +306,43 @@ class RawReactivities(Base):
     def __repr__(self):
         return "<RawReactivities %r>" % (self.id)
 
+# Table that represents raw counts from each lane
+# Lanes are identified by biological and technical replicate IDs
+class RawReplicateCounts(db.Model):
+
+    __tablename__ = "raw_replicate_counts"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nucleotide_measurement_run_id = Column(Integer, ForeignKey("nucleotide_measurement_run.id"))
+    transcript_id = Column(String(256), ForeignKey("transcript.id"))
+    minusplus_id = Column(String(256), nullable=False)
+    bio_replicate_id = Column(Integer, nullable=False)
+    tech_replicate_id = Column(Integer, nullable=False)
+    values = Column(Text, nullable=False)
+
+    def __init__(
+            self,
+            nucleotide_measurement_run_id,
+            transcript_id,
+            minusplus_id,
+            bio_replicate_id,
+            tech_replicate_id,
+            values):
+
+        self.nucleotide_measurement_run_id = nucleotide_measurement_run_id
+        self.transcript_id = transcript_id
+        self.minusplus_id = minusplus_id
+        self.bio_replicate_id = bio_replicate_id
+        self.tech_replicate_id = tech_replicate_id
+        self.values = values
+        
+    def __repr__(self):
+        return "<RawReactivities %r>" % (self.id)    
+
 # Represents nucleotide specific measurements for a single transcript
 # Generated from mappping
 # Can represent normalised reactivities or alternatively ribosome profiling counts.
-class NucleotideMeasurementSet(Base):
+class NucleotideMeasurementSet(db.Model):
     __tablename__ = "nucleotide_measurement_set"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -326,29 +368,9 @@ class NucleotideMeasurementSet(Base):
     def __repr__(self):
         return "<NucleotideMeasurementSet %r>" % (self.id)
 
-# # Represents one measurement, at a particular nucleotide position.
-# class NucleotideMeasurement(Base):
-#     __tablename__ = "nucleotide_measurement"
-
-#     nucleotide_measurement_set_id = Column(Integer, 
-#         ForeignKey("nucleotide_measurement_set.id"), primary_key=True, autoincrement=True)
-
-#     # if there's no measurement at a position, there is no corresponding row.
-#     position = Column(Integer, autoincrement=False, primary_key=True) 
-#     measurement = Column(Float, nullable=False) 
-
-#     def __init__(self, nucleotide_measurement_set_id=None, position=None, measurement=None):
-#         self.nucleotide_measurement_set_id = nucleotide_measurement_set_id
-#         self.position = position
-#         self.measurement = measurement
-
-#     def __repr__(self):
-#         return "<NucleotideMeasurement %r-%r-%r-%r>" % (
-#             self.nucleotide_measurement_set_id, self.position, self.measurement
-#         )
-
 # Represents a structure prediction for a single RNA sequence
-class Structure(Base):
+# The structure has base pairs and base pair probabilities stored in text fields
+class Structure(db.Model):
 
     __tablename__ = "structure"
 
@@ -359,6 +381,7 @@ class Structure(Base):
     pc1 = Column(Float, nullable=False, default=0)
     pc2 = Column(Float, nullable=False, default=0)
     structure = Column(Text, nullable=False)
+    bpps = Column(Text, nullable=True)
 
     def __init__(self, structure_prediction_run_id, transcript_id, energy, structure="", pc1=0, pc2=0):
         self.structure_prediction_run_id = structure_prediction_run_id
@@ -374,5 +397,41 @@ class Structure(Base):
     def get_values(self):
         return values_str_unpack_int(self.structure)
 
+    def get_bpp_values(self):
+        if self.bpps == None:
+            return None
+
+        values = self.bpps.split("\t")
+        out = []
+        for value in values:
+            if value == "NA":
+                out.append(None)
+            else:
+                out.append(float(value))
+        return out
+
     def __repr__(self):
         return "<Structure %r>" % (self.id)
+
+# Represents a base pair probability matrix. One per transcript at the moment
+# In the future we might allow constrained BPPMs, which will be one per run ID or something
+# Bppm is stored as a big text field
+# This table is used when downloading the entire BPPM matrix as text
+class Bppm(db.Model):
+    __tablename__ = "bppm"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    transcript_id = Column(String(256), ForeignKey("transcript.id"), nullable=False)
+    data = Column(mysql.LONGTEXT, nullable=False)
+
+    def __init__(self, transcript_id, data):
+        self.transcript_id = transcript_id
+        self.data = data # probabilities are log10 transformed
+
+    def __repr__(self):
+        return "<Bppm %r>" % (self.id)
+
+# gotta put the migrate stuff here so it can see the models
+migrate = Migrate(app, db)
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
