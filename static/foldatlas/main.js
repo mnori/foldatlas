@@ -1,3 +1,9 @@
+
+window.faGlobals = {
+	selectedTid: null,
+	selectedSid: null
+}
+
 /**
  * Front end code for FoldAtlas.
  * @author Matthew Norris <matthew.norris@jic.ac.uk> 2015
@@ -166,6 +172,7 @@ var BrowserController = Class.extend({
 
 	// Jump to a specific transcript page
 	selectTranscript: function(transcriptID) {
+		window.faGlobals.selectedTid = transcriptID;
 		this.showLoading();
 		// this.changeUrl("/transcript/"+transcriptID, transcriptID)
 		$.ajax({
@@ -1131,6 +1138,8 @@ var StructureExplorer = Class.extend({
 		if (this.selectedStructure == null) {
 			this.selectedStructure = in_vivo_mfe;
 		}
+		window.faGlobals.selectedSid = this.selectedStructure["id"]
+		console.log(window.faGlobals)
 
 		var mfe_txt
 		if (this.selectedStructure["id"] == in_vivo_mfe["id"]) {

@@ -5,6 +5,10 @@
 	</a>
 </h1>
 
+<script type="text/javascript">
+	window.faGlobals.selectedTid = "{{ transcript_view.transcript_id }}";
+</script>
+
 <div id="transcript-json" style="display: none;">{{ transcript_view.transcript_data|safe }}</div>
 
 {% if transcript_view.empty %}
