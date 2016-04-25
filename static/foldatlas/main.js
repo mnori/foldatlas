@@ -1,13 +1,12 @@
-
-window.faGlobals = {
-	selectedTid: null,
-	selectedSid: null
-}
-
 /**
  * Front end code for FoldAtlas.
  * @author Matthew Norris <matthew.norris@jic.ac.uk> 2015
  */
+
+ window.faGlobals = {
+	selectedTid: null,
+	selectedSid: null
+}
 
 // Create the browser controller class
 var BrowserController = Class.extend({
@@ -296,10 +295,10 @@ var BrowserController = Class.extend({
 			this.drawNucleotideMeasurementsOverview(overviewID, experimentData);
 			this.drawNucleotideMeasurementsDetailed(detailedID, experimentData);
 
-			var dlID = window.faGlobals.selectedTid+"-"+window.faGlobals.selectedSid;
+			var dlID = window.faGlobals.selectedTid;
 
 			new SvgDownloader(overviewID, "nm-overview-dl-button", "reacts_"+dlID+".svg");
-			new SvgDownloader(detailedID, "nm-detailed-dl-button", "reacts_detailed_"+dlID+".svg");
+			new SvgDownloader(detailedID, "nm-detailed-dl-button", "reacts-detailed_"+dlID+".svg");
 		}
 	},
 
@@ -976,8 +975,12 @@ var StructureExplorer = Class.extend({
 		this.drawStructurePca(this.structureData[1], "pca-container-in-silico");
 		this.drawStructurePca(this.structureData[2], "pca-container-in-vivo");
 
-		new SvgDownloader("pca-container-in-silico-svg", "pca-in-silico-dl", "pca-in-silico.svg");
-		new SvgDownloader("pca-container-in-vivo-svg", "pca-in-vivo-dl", "pca-in-vivo.svg");
+		var dlID = window.faGlobals.selectedTid
+
+		new SvgDownloader(
+			"pca-container-in-silico-svg", "pca-in-silico-dl", "pca-in-silico_"+dlID+".svg");
+		new SvgDownloader(
+			"pca-container-in-vivo-svg", "pca-in-vivo-dl", "pca-in-vivo_"+dlID+".svg");
 
 		// attach event handlers to the MFE download buttons
 		this.initMfeButton(1, "pca-in-silico-mfe")
@@ -1141,8 +1144,6 @@ var StructureExplorer = Class.extend({
 			this.selectedStructure = in_vivo_mfe;
 		}
 		window.faGlobals.selectedSid = this.selectedStructure["id"]
-		console.log(window.faGlobals)
-
 		var mfe_txt
 		if (this.selectedStructure["id"] == in_vivo_mfe["id"]) {
 			mfe_txt = ", <i>in vivo</i> MFE"
@@ -1190,10 +1191,8 @@ var StructureExplorer = Class.extend({
 		    this.fornaContainer.clearNodes();// remove the previous diagram
 			this.fornaContainer.addRNAJSON(g, true); // generate new diagram
 			this.browserController.hideLoading();
-
-			// must link after drawing
-			console.log("Plotting area linked")
-			new SvgDownloader("plotting-area", "fornac-dl-button", "structure-diagram.svg");
+			var dlID = window.faGlobals.selectedTid+"-"+window.faGlobals.selectedSid;
+			new SvgDownloader("plotting-area", "fornac-dl-button", "structure-diagram_"+dlID+".svg");
 		});
 	},
 
@@ -1347,12 +1346,9 @@ var StructureExplorer = Class.extend({
 				.attr("d", "M 0 -6 L 0 6")
 
 			this.browserController.hideLoading();
-			new SvgDownloader("circle-plot-svg", "circle-plot-dl-button", "circle-plot.svg");
 
-			function updateCirclePlotLegend(min_bpp, max_bpp) {
-				console.log("min: "+min_bpp)
-				console.log("max: "+max_bpp)
-			}
+			var dlID = window.faGlobals.selectedTid+"-"+window.faGlobals.selectedSid;
+			new SvgDownloader("circle-plot-svg", "circle-plot-dl-button", "circle-plot_"+dlID+".svg");
 
 			// reorganise the data a bit
 			function prepareData(rawData) {
