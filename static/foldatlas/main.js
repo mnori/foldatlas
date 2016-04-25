@@ -1124,11 +1124,25 @@ var StructureExplorer = Class.extend({
 	},
 
 	drawStructure: function() {
+
+		var in_silico_mfe = this.getMfe(1)
+		var in_vivo_mfe = this.getMfe(2)
+
 		if (this.selectedStructure == null) {
-			this.selectedStructure = this.getMfe(2);
+			this.selectedStructure = in_vivo_mfe;
 		}
 
-		$("#forna-energy").html(this.selectedStructure["energy"]);
+		var mfe_txt
+		if (this.selectedStructure["id"] == in_vivo_mfe["id"]) {
+			mfe_txt = ", <i>in vivo</i> MFE"
+		} else if (this.selectedStructure["id"] == in_silico_mfe["id"]) {
+			mfe_txt = ", <i>in silico</i> MFE"
+		} else {
+			mfe_txt = ""
+		}
+
+
+		$("#forna-energy").html(this.selectedStructure["energy"]+" kcal/mol"+mfe_txt);
 
 		if (this.tabController.selectedTabID == "structure-tab-diagram") {
 			this.drawStructureDiagram();
